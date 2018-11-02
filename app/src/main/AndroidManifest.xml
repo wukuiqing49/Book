@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
+          package="com.zia.bookdownloader">
+	
+	<uses-permission android:name="android.permission.INTERNET"/>
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+	<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+	<uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+	<uses-permission android:name="android.permission.READ_LOGS"/>
+	
+	<application
+			android:allowBackup="true"
+			android:icon="@mipmap/book"
+			android:label="@string/app_name"
+			android:name="com.zia.App"
+			android:networkSecurityConfig="@xml/network_security_config"
+			android:roundIcon="@mipmap/book"
+			android:supportsRtl="true"
+			android:theme="@style/AppTheme"
+			tools:ignore="GoogleAppIndexingWarning">
+		<!-- 配置APP ID -->
+		<meta-data
+				android:name="BUGLY_APPID"
+				android:value="a7581ce042"/>
+		<!-- 配置APP版本号 -->
+		<meta-data
+				android:name="BUGLY_APP_VERSION"
+				android:value="1"/>
+		<!-- 配置APP渠道号 -->
+		<meta-data
+				android:name="BUGLY_APP_CHANNEL"
+				android:value="release"/>
+		<!-- 配置Bugly调试模式（true或者false）-->
+		<meta-data
+				android:name="BUGLY_ENABLE_DEBUG"
+				android:value="true"/>
+		<provider
+				android:name="android.support.v4.content.FileProvider"
+				android:authorities="com.zia.book.FileProvider"
+				android:exported="false"
+				android:grantUriPermissions="true"
+				tools:replace="name,authorities,exported,grantUriPermissions">
+			<meta-data
+					android:name="android.support.FILE_PROVIDER_PATHS"
+					android:resource="@xml/file_path"
+					tools:replace="name,resource"/>
+		</provider>
+		
+		<activity
+				android:name="com.tencent.bugly.beta.ui.BetaActivity"
+				android:configChanges="keyboardHidden|orientation|screenSize|locale"
+				android:theme="@android:style/Theme.Translucent"/>
+		
+		<activity android:name="com.zia.page.main.MainActivity">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN"/>
+				
+				<category android:name="android.intent.category.LAUNCHER"/>
+			</intent-filter>
+		</activity>
+		<activity
+				android:name="com.zia.page.book.BookActivity"
+				android:theme="@style/Translucent">
+		</activity>
+		<activity android:name="com.zia.page.preview.PreviewActivity">
+		</activity>
+	</application>
+
+</manifest>
