@@ -28,7 +28,7 @@
 		<!-- 配置APP版本号 -->
 		<meta-data
 				android:name="BUGLY_APP_VERSION"
-				android:value="1"/>
+				android:value="2"/>
 		<!-- 配置APP渠道号 -->
 		<meta-data
 				android:name="BUGLY_APP_CHANNEL"
@@ -36,7 +36,7 @@
 		<!-- 配置Bugly调试模式（true或者false）-->
 		<meta-data
 				android:name="BUGLY_ENABLE_DEBUG"
-				android:value="true"/>
+				android:value="false"/>
 		<provider
 				android:name="android.support.v4.content.FileProvider"
 				android:authorities="com.zia.book.FileProvider"
