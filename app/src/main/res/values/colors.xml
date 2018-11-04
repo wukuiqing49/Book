@@ -9,4 +9,8 @@
 	<color name="downloadColor">#E68430</color>
 	<color name="addFavorite">#d93c5b</color>
 	<color name="textWhite">#ffffff</color>
+	<color name="textBlack">#e2000000</color>
+	<color name="previewShadow">#de0d0d0d</color>
+	<color name="preview_theme_dark">#0B0B0A</color>
+	<color name="preview_theme_white">#EEE6CB</color>
 </resources>

@@ -1,16 +1,15 @@
 package com.zia.page.book
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.Intent
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
-import com.tbruyelle.rxpermissions2.RxPermissions
 import com.zia.bookdownloader.R
 import com.zia.bookdownloader.lib.bean.Book
 import com.zia.bookdownloader.lib.bean.Catalog
@@ -25,9 +24,11 @@ import com.zia.event.FreshEvent
 import com.zia.page.BaseActivity
 import com.zia.page.preview.PreviewActivity
 import com.zia.toastex.ToastEx
+import com.zia.util.BookMarkUtil
 import kotlinx.android.synthetic.main.activity_book.*
 import org.greenrobot.eventbus.EventBus
 import java.io.File
+import java.util.*
 
 
 class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, EventListener {
@@ -68,8 +69,12 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
                 val site = book.site as ChapterSite
                 val html = NetUtil.getHtml(book.url, site.encodeType)
                 val catalogs = site.parseCatalog(html, book.url)
+                val history = AppDatabase.getAppDatabase().bookMarkDao().getPosition(book.bookName, site.siteName)
+                val arrayList = ArrayList<Catalog>(catalogs)
+                arrayList.reverse()
                 runOnUiThread {
-                    adapter.freshCatalogs(catalogs.asReversed() as List<Catalog>)
+                    adapter.freshCatalogs(arrayList, history)
+                    catalogRv.smoothScrollToPosition(history)
                     book_loading.visibility = View.GONE
                 }
             } catch (e: Exception) {
@@ -82,19 +87,25 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
             chooseType()
         }
 
-        book_favorite.setOnClickListener {
-            if (adapter.itemCount == 0) {
-                ToastEx.warning(this, "需要目录解析后才能添加").show()
-                return@setOnClickListener
-            }
-            Thread(Runnable {
-                val netBook = NetBook(book, adapter.itemCount)
-                AppDatabase.getAppDatabase().netBookDao().insert(netBook)
-                runOnUiThread {
-                    ToastEx.success(this@BookActivity, "添加书架成功").show()
-                    EventBus.getDefault().post(FreshEvent())
+        val canAddFav = intent.getBooleanExtra("canAddFav", true)
+        if (!canAddFav) {
+            book_favorite.setBackgroundColor(Color.GRAY)
+            book_favorite.setOnClickListener { ToastEx.info(this@BookActivity, "已经在书架了").show() }
+        } else {
+            book_favorite.setOnClickListener {
+                if (adapter.itemCount == 0) {
+                    ToastEx.warning(this, "需要目录解析后才能添加").show()
+                    return@setOnClickListener
                 }
-            }).start()
+                Thread(Runnable {
+                    val netBook = NetBook(book, adapter.itemCount)
+                    AppDatabase.getAppDatabase().netBookDao().insert(netBook)
+                    runOnUiThread {
+                        ToastEx.success(this@BookActivity, "添加书架成功").show()
+                        EventBus.getDefault().post(FreshEvent())
+                    }
+                }).start()
+            }
         }
     }
 
@@ -141,10 +152,17 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
         dialog.dismiss()
     }
 
-    override fun onCatalogSelect(itemView: View, catalog: Catalog) {
+    override fun onCatalogSelect(itemView: View, position: Int) {
         val intent = Intent(this, PreviewActivity::class.java)
-        intent.putExtra("catalog", catalog)
+        if (adapter.catalogs == null) return
+
+        BookMarkUtil.insertOrUpdate(position, book.bookName, book.site.siteName)
+        adapter.history = position
+        adapter.notifyDataSetChanged()
+
+        intent.putExtra("position", position)
         intent.putExtra("book", book)
+        intent.putParcelableArrayListExtra("catalogs", adapter.catalogs)
         startActivity(intent)
     }
 

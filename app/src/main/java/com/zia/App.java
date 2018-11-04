@@ -2,6 +2,7 @@ package com.zia;
 
 import android.app.Application;
 import android.content.Context;
+import com.facebook.stetho.Stetho;
 import com.tencent.bugly.crashreport.CrashReport;
 
 /**
@@ -16,6 +17,7 @@ public class App extends Application {
         super.onCreate();
         context = getApplicationContext();
         CrashReport.initCrashReport(getApplicationContext());
+        Stetho.initializeWithDefaults(this);
     }
 
     public static Context getContext() {

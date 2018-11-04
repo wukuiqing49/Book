@@ -2,24 +2,29 @@ package com.zia.page.book
 
 import android.annotation.SuppressLint
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.zia.bookdownloader.R
 import com.zia.bookdownloader.lib.bean.Catalog
 import kotlinx.android.synthetic.main.item_catalog.view.*
+import java.util.*
 
 
 /**
  * Created by zia on 2018/11/1.
  */
-class CatalogAdapter(val catalogSelectListener: CatalogSelectListener) :
+class CatalogAdapter(private val catalogSelectListener: CatalogSelectListener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private var catalogs: List<Catalog>? = null
+    public var catalogs: ArrayList<Catalog>? = null
+    public var history = 0
 
-    fun freshCatalogs(catalogs: List<Catalog>) {
+    fun freshCatalogs(catalogs: ArrayList<Catalog>, history: Int) {
         this.catalogs = catalogs
+        this.history = history
+        Log.e("CatalogAdapter", "history:$history")
         notifyDataSetChanged()
     }
 
@@ -41,7 +46,12 @@ class CatalogAdapter(val catalogSelectListener: CatalogSelectListener) :
             is CatalogHolder -> {
                 val catalog = catalogs!![position]
                 holder.itemView.item_catalog_name.text = catalog.chapterName
-                holder.itemView.setOnClickListener { catalogSelectListener.onCatalogSelect(holder.itemView, catalog) }
+                holder.itemView.setOnClickListener { catalogSelectListener.onCatalogSelect(holder.itemView, position) }
+                if (position == history) {
+                    holder.itemView.item_catalog_mark.visibility = View.VISIBLE
+                } else {
+                    holder.itemView.item_catalog_mark.visibility = View.INVISIBLE
+                }
             }
         }
     }
@@ -49,6 +59,6 @@ class CatalogAdapter(val catalogSelectListener: CatalogSelectListener) :
     class CatalogHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
     interface CatalogSelectListener {
-        fun onCatalogSelect(itemView: View, catalog: Catalog)
+        fun onCatalogSelect(itemView: View, position: Int)
     }
 }

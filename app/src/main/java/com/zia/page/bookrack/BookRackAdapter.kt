@@ -8,7 +8,6 @@ import android.graphics.Color
 import android.os.Build
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.util.Pair
 import android.view.LayoutInflater
 import android.view.View
@@ -126,6 +125,7 @@ class BookRackAdapter(private val recyclerView: RecyclerView) : RecyclerView.Ada
                         BookUtil.getSiteByName(book.siteName)
                     )
                     intent.putExtra("book", realBook)
+                    intent.putExtra("canAddFav", false)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         val p = arrayListOf<Pair<View, String>>(
                             Pair.create(holder.itemView.item_book_layout, "book"),

@@ -22,8 +22,10 @@
 
 #-------------------------------------------定制化区域----------------------------------------------
 #---------------------------------1.实体类---------------------------------
--keep class com.zia.database.bean.**{ *; }
--keep class com.zia.bookdownloader.**{ *;}
+-keep class com.zia.database.**
+-keep class com.zia.bookdownloader.**
+-keep class com.zia.event.**
+-keep class com.zia.util.**
 
 
 -keep public class * extends android.app.Fragment
@@ -34,6 +36,13 @@
 
 #---------------------------------2.第三方包-------------------------------
 
+-dontwarn com.fasterxml.jackson.**
+-keep class com.fasterxml.jackson.** { *; }
+-dontwarn com.mredrock.cyxbs.component.**
+-dontwarn com.mredrock.cyxbs.network.**
+-dontwarn com.mredrock.cyxbs.ui.**
+-dontwarn com.mredrock.cyxbs.util.**
+-dontwarn com.github.siyamed.shapeimageview.**
 -dontwarn org.simpleframework.xml.stream.**
 -keep class org.simpleframework.xml.** { *; }
 
@@ -45,6 +54,25 @@
 
 -keep class com.autonavi.** {*;}
 -keep class com.a.a.** {*;}
+#butterknife
+-keep class butterknife.** { *; }
+-dontwarn butterknife.internal.**
+-keep class **$$ViewBinder { *; }
+
+-keepclasseswithmembernames class * {
+    @butterknife.* <fields>;
+}
+
+-keepclasseswithmembernames class * {
+    @butterknife.* <methods>;
+}
+#glide
+-keep public class * implements com.bumptech.glide.module.GlideModule
+-keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
+  **[] $VALUES;
+  public *;
+}
+
 #-keepresourcexmlelements manifest/application/meta-data@value=GlideModule
 #okhttp with retrofit
 
@@ -79,7 +107,17 @@
 -keep interface rxpermissions.**{*;}
 
 #your package path where your gson models are stored
+#-keep class com.mredrock.cyxbs.model** { *; }
 
+#eventBus
+-keepattributes *Annotation*
+-keepclassmembers class ** {
+    @org.greenrobot.eventbus.Subscribe <methods>;
+}
+-keep enum org.greenrobot.eventbus.ThreadMode { *; }
+-keepclassmembers class * extends org.greenrobot.eventbus.util.ThrowableFailureEvent {
+    <init>(java.lang.Throwable);
+}
 #gson
 -keepattributes Signature
 -keepattributes *Annotation*
@@ -135,14 +173,33 @@
 }
 -dontwarn rx.internal.util.unsafe.**
 
-# eventBus
+#ucrop
+-dontwarn com.yalantis.ucrop**
+-keep class com.yalantis.ucrop** { *; }
+-keep interface com.yalantis.ucrop** { *; }
+
+#nineoldandroids
+-keep class com.nineoldandroids.** { *; }
+
+#RxCache
+-dontwarn io.rx_cache.internal.**
+-keepclassmembers enum io.rx_cache.Source { *; }
+
+#workManager
+-keepclassmembers class * extends androidx.work.Worker {
+    public <init>(android.content.Context,androidx.work.WorkerParameters);
+}
+
+#eventBus
 -keepclassmembers class * {
     @org.greenrobot.eventbus.Subscribe <methods>;
 }
 -keep enum org.greenrobot.eventbus.ThreadMode { *; }
 
-#nineoldandroids
--keep class com.nineoldandroids.** { *; }
+# Only required if you use AsyncExecutor
+-keepclassmembers class * extends org.greenrobot.eventbus.util.ThrowableFailureEvent {
+    <init>(java.lang.Throwable);
+}
 
 ##---------------End: proguard configuration for Gson  ----------
 

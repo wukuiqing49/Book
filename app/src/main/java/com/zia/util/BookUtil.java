@@ -1,5 +1,6 @@
 package com.zia.util;
 
+import com.zia.bookdownloader.lib.bean.Catalog;
 import com.zia.bookdownloader.lib.engine.ChapterSite;
 import com.zia.bookdownloader.lib.engine.ISite;
 import com.zia.bookdownloader.lib.util.NetUtil;
@@ -10,30 +11,49 @@ import com.zia.database.bean.NetBookDao;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by zia on 2018/11/2.
  */
 public class BookUtil {
     public static int updateNetBook() {
+        ExecutorService service = Executors.newFixedThreadPool(10);
         NetBookDao netBookDao = AppDatabase.getAppDatabase().netBookDao();
         List<NetBook> netBooks = netBookDao.getNetBooks();
-        int c = 0;
+        CountDownLatch bookCountDown = new CountDownLatch(netBooks.size());
+        CountDownLatch sizeCountDown = new CountDownLatch(netBooks.size());
         for (NetBook netBook : netBooks) {
-            ChapterSite site = getSiteByName(netBook.getSiteName());
-            try {
-                String html = NetUtil.getHtml(netBook.getUrl(), site.getEncodeType());
-                int size = site.parseCatalog(html, netBook.getUrl()).size();
-                if (netBook.getLastCheckCount() < size) {
-                    netBook.setCurrentCheckCount(size);
-                    netBookDao.update(netBook);
-                    c++;
+            service.execute(() -> {
+                ChapterSite site = getSiteByName(netBook.getSiteName());
+                try {
+                    String html = NetUtil.getHtml(netBook.getUrl(), site.getEncodeType());
+                    List<Catalog> catalogs = site.parseCatalog(html, netBook.getUrl());
+                    if (netBook.getLastCheckCount() < catalogs.size()) {
+                        netBook.setCurrentCheckCount(catalogs.size());
+                        netBook.setLastChapterName(catalogs.get(catalogs.size() - 1).getChapterName());
+                        netBookDao.update(netBook);
+                        sizeCountDown.countDown();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    bookCountDown.countDown();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            });
         }
-        return c;
+        try {
+            bookCountDown.await();
+            service.shutdown();
+            return (int) (netBooks.size() - sizeCountDown.getCount());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }finally {
+            service.shutdown();
+        }
+        return 0;
     }
 
     public static ChapterSite getSiteByName(String siteName) {

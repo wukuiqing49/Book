@@ -54,7 +54,8 @@
 				android:configChanges="keyboardHidden|orientation|screenSize|locale"
 				android:theme="@android:style/Theme.Translucent"/>
 		
-		<activity android:name="com.zia.page.main.MainActivity">
+		<activity android:name="com.zia.page.main.MainActivity"
+		          android:screenOrientation="portrait">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN"/>
 				
@@ -63,9 +64,12 @@
 		</activity>
 		<activity
 				android:name="com.zia.page.book.BookActivity"
-				android:theme="@style/Translucent">
+				android:theme="@style/Translucent"
+				android:screenOrientation="portrait">
 		</activity>
-		<activity android:name="com.zia.page.preview.PreviewActivity">
+		<activity android:name="com.zia.page.preview.PreviewActivity"
+		          android:theme="@style/FullScreen"
+		          android:configChanges="orientation|keyboardHidden">
 		</activity>
 	</application>
 
