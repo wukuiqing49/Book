@@ -29,17 +29,23 @@ class BookRackFragment : BaseFragment() {
         return inflater.inflate(R.layout.fragment_book_rack, container, false)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-    }
-
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
         bookRackAdapter = BookRackAdapter(bookRack_rv)
         bookRack_rv.layoutManager = LinearLayoutManager(context)
         bookRack_rv.adapter = bookRackAdapter
+
+        bookRack_sl.setOnRefreshListener {
+            Thread(Runnable {
+                val updateCount = BookUtil.updateNetBook()
+                activity?.runOnUiThread {
+                    ToastEx.success(context!!, "${updateCount}章小说有更新").show()
+                    bookRackAdapter?.fresh()
+                    bookRack_sl.isRefreshing = false
+                }
+            }).start()
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
