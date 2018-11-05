@@ -107,6 +107,7 @@ class BookRackAdapter(private val recyclerView: RecyclerView) : RecyclerView.Ada
                 holder.itemView.item_book_site.text = book.siteName
                 holder.itemView.item_book_lastUpdateTime.text = "更新：${book.lastUpdateTime}"
                 holder.itemView.setOnClickListener {
+                    //更新检查记录，判断是否有更新
                     if (book.lastCheckCount < book.currentCheckCount) {
                         holder.itemView.item_book_lastUpdateTime.background = null
                         Thread(Runnable {

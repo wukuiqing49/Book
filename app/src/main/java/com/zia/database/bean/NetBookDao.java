@@ -9,8 +9,11 @@ import java.util.List;
  */
 @Dao
 public interface NetBookDao {
-    @Query("select * from netBook")
+    @Query("select * from netBook order by date() asc")
     List<NetBook> getNetBooks();
+
+    @Query("select * from netBook where bookName = :bkName and siteName = :stName")
+    NetBook getNetBook(String bkName, String stName);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(NetBook netBook);

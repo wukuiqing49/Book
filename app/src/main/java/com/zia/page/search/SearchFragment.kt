@@ -84,12 +84,14 @@ class SearchFragment : BaseFragment(), EventListener, BookAdapter.BookSelectList
     override fun onEnd(msg: String, file: File?) {
         activity?.runOnUiThread {
             ToastEx.success(context!!, msg).show()
+            hideDialog()
         }
     }
 
     override fun onError(msg: String, e: Exception) {
         activity?.runOnUiThread {
             e.printStackTrace()
+            hideDialog()
             ToastEx.error(context!!, msg).show()
         }
     }
@@ -98,6 +100,7 @@ class SearchFragment : BaseFragment(), EventListener, BookAdapter.BookSelectList
         activity?.runOnUiThread {
             val intent = Intent(context, BookActivity::class.java)
             intent.putExtra("book", book)
+            intent.putExtra("scroll", false)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 val p = arrayListOf<Pair<View, String>>(
                     Pair.create(itemView.item_book_layout, "book"),
@@ -115,7 +118,7 @@ class SearchFragment : BaseFragment(), EventListener, BookAdapter.BookSelectList
         }
     }
 
-    fun updateDialog(msg: String) {
+    private fun updateDialog(msg: String) {
         if (msgDialog != null) {
             msgDialog.setMessage(msg)
             if (!msgDialog.isShowing) {
@@ -124,7 +127,7 @@ class SearchFragment : BaseFragment(), EventListener, BookAdapter.BookSelectList
         }
     }
 
-    fun hideDialog() {
+    private fun hideDialog() {
         if (msgDialog != null) {
             msgDialog.dismiss()
         }

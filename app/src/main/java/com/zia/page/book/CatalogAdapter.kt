@@ -23,7 +23,7 @@ class CatalogAdapter(private val catalogSelectListener: CatalogSelectListener) :
 
     fun freshCatalogs(catalogs: ArrayList<Catalog>, history: Int) {
         this.catalogs = catalogs
-        this.history = history
+        this.history = catalogs.size - history - 1
         Log.e("CatalogAdapter", "history:$history")
         notifyDataSetChanged()
     }

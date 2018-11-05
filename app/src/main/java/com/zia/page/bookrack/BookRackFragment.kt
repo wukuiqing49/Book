@@ -23,19 +23,14 @@ import org.greenrobot.eventbus.ThreadMode
  */
 class BookRackFragment : BaseFragment() {
 
-    private lateinit var bookRackAdapter: BookRackAdapter
+    private var bookRackAdapter: BookRackAdapter? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_book_rack, container, false)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
-        bookRackAdapter = BookRackAdapter(bookRack_rv)
-        bookRack_rv.layoutManager = LinearLayoutManager(context)
-        bookRack_rv.adapter = bookRackAdapter
-
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         //检查收藏小说是否有更新
         Thread(Runnable {
             val updateCount = BookUtil.updateNetBook()
@@ -44,13 +39,21 @@ class BookRackFragment : BaseFragment() {
                     ToastEx.success(context!!, "${updateCount}章小说有更新").show()
                 }
             }
-            bookRackAdapter.fresh()
+            bookRackAdapter?.fresh()
         }).start()
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        bookRackAdapter = BookRackAdapter(bookRack_rv)
+        bookRack_rv.layoutManager = LinearLayoutManager(context)
+        bookRack_rv.adapter = bookRackAdapter
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public fun onBookSave(event: FreshEvent) {
-        bookRackAdapter.fresh()
+        bookRackAdapter?.fresh()
     }
 
     override fun onStart() {

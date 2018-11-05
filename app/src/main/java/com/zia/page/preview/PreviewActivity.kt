@@ -16,6 +16,7 @@ import com.zia.util.BookMarkUtil
 import com.zia.util.defaultSharedPreferences
 import com.zia.util.editor
 import kotlinx.android.synthetic.main.activity_preview.*
+import org.greenrobot.eventbus.EventBus
 import java.util.*
 
 class PreviewActivity : BaseActivity() {
@@ -105,7 +106,7 @@ class PreviewActivity : BaseActivity() {
         val catalog = catalogs[position]
         preview_title.text = catalog.chapterName
         preview_progress.text = "${catalogs.size - position} / ${catalogs.size}"
-        BookMarkUtil.insertOrUpdate(position, book.bookName, site.siteName)
+        BookMarkUtil.insertOrUpdate(catalogs.size - position - 1, book.bookName, site.siteName)
 
         Thread(Runnable {
             val html = NetUtil.getHtml(catalog.url, site.encodeType)

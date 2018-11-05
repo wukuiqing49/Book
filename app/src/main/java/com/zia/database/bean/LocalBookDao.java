@@ -10,7 +10,7 @@ import java.util.List;
 @Dao
 public interface LocalBookDao {
 
-    @Query("select * from localBook")
+    @Query("select * from localBook order by date() desc")
     List<LocalBook> getLocalBooks();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

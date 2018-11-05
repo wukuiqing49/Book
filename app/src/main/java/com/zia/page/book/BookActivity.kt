@@ -34,6 +34,7 @@ import java.util.*
 class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, EventListener {
 
     private lateinit var book: Book
+    private var scroll = true
     private lateinit var adapter: CatalogAdapter
 
     private val dialog by lazy {
@@ -53,6 +54,7 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
         book_layout.setOnClickListener { onBackPressed() }
 
         book = intent.getSerializableExtra("book") as Book
+        scroll = intent.getBooleanExtra("scroll", true)
 
         book_name.text = book.bookName
         book_author.text = book.author
@@ -69,12 +71,11 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
                 val site = book.site as ChapterSite
                 val html = NetUtil.getHtml(book.url, site.encodeType)
                 val catalogs = site.parseCatalog(html, book.url)
-                val history = AppDatabase.getAppDatabase().bookMarkDao().getPosition(book.bookName, site.siteName)
                 val arrayList = ArrayList<Catalog>(catalogs)
                 arrayList.reverse()
+                adapter.catalogs = arrayList
                 runOnUiThread {
-                    adapter.freshCatalogs(arrayList, history)
-                    catalogRv.smoothScrollToPosition(history)
+                    freshBookMark()
                     book_loading.visibility = View.GONE
                 }
             } catch (e: Exception) {
@@ -94,15 +95,21 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
         } else {
             book_favorite.setOnClickListener {
                 if (adapter.itemCount == 0) {
-                    ToastEx.warning(this, "需要目录解析后才能添加").show()
+                    ToastEx.warning(this, "需要解析目录后才能添加").show()
                     return@setOnClickListener
                 }
                 Thread(Runnable {
-                    val netBook = NetBook(book, adapter.itemCount)
-                    AppDatabase.getAppDatabase().netBookDao().insert(netBook)
-                    runOnUiThread {
-                        ToastEx.success(this@BookActivity, "添加书架成功").show()
-                        EventBus.getDefault().post(FreshEvent())
+                    val book = AppDatabase.getAppDatabase().netBookDao().getNetBook(book.bookName, book.site.siteName)
+                    if (book == null) {
+                        AppDatabase.getAppDatabase().netBookDao().insert(NetBook(this.book, adapter.itemCount))
+                        runOnUiThread {
+                            ToastEx.success(this@BookActivity, "添加书架成功").show()
+                            EventBus.getDefault().post(FreshEvent())
+                        }
+                    } else {
+                        runOnUiThread {
+                            ToastEx.info(this@BookActivity, "已经添加过了").show()
+                        }
                     }
                 }).start()
             }
@@ -156,7 +163,8 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
         val intent = Intent(this, PreviewActivity::class.java)
         if (adapter.catalogs == null) return
 
-        BookMarkUtil.insertOrUpdate(position, book.bookName, book.site.siteName)
+        val p = adapter.catalogs!!.size - position - 1
+        BookMarkUtil.insertOrUpdate(p, book.bookName, book.site.siteName)
         adapter.history = position
         adapter.notifyDataSetChanged()
 
@@ -213,5 +221,23 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
             book.site.shutDown()
         }
         super.onDestroy()
+    }
+
+    public fun freshBookMark() {
+        if (adapter.catalogs == null) return
+        Thread(Runnable {
+            val history = AppDatabase.getAppDatabase().bookMarkDao().getPosition(book.bookName, book.site.siteName)
+            runOnUiThread {
+                adapter.freshCatalogs(adapter.catalogs!!, history)
+                if (scroll) {
+                    catalogRv.smoothScrollToPosition(adapter.catalogs!!.size - 1 - history)
+                }
+            }
+        }).start()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        freshBookMark()
     }
 }
