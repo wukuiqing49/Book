@@ -124,8 +124,11 @@ public class Downloader {
 
         eventListener.pushMessage("搜索到" + bookList.size() + "本相关书籍");
 
+        if (bookList.size() > 30) {
+            bookList = new ArrayList<>(bookList.subList(0, 30));
+        }
         //选择要下载的书籍
-        eventListener.onChooseBook(new ArrayList<>(bookList.subList(0, 30)));
+        eventListener.onChooseBook(bookList);
 
     }
 

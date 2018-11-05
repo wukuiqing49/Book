@@ -58,7 +58,7 @@ class PreviewActivity : BaseActivity() {
         preview_tv_next.setOnClickListener { goNext() }
 
         preview_increase.setOnClickListener {
-            val size = defaultSharedPreferences.getFloat(textSizeSP, 16f)
+            val size = defaultSharedPreferences.getFloat(textSizeSP, 20f)
             if (size > 40) {
                 ToastEx.info(this@PreviewActivity, "不能再放大了").show()
                 return@setOnClickListener

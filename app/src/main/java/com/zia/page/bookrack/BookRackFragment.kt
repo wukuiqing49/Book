@@ -35,8 +35,6 @@ class BookRackFragment : BaseFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        Log.e("BookRackFragment", "onActivityCreated")
-
         bookRackAdapter = BookRackAdapter(bookRack_rv)
         bookRack_rv.layoutManager = LinearLayoutManager(context)
         bookRack_rv.adapter = bookRackAdapter
@@ -60,13 +58,11 @@ class BookRackFragment : BaseFragment() {
 
     override fun onStart() {
         super.onStart()
-        Log.e("BookRackFragment", "onStart")
         EventBus.getDefault().register(this)
     }
 
     override fun onStop() {
         super.onStop()
-        Log.e("BookRackFragment", "onStop")
         EventBus.getDefault().unregister(this)
     }
 }
