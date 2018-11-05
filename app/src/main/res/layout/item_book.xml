@@ -27,7 +27,6 @@
 		          android:layout_width="wrap_content"
 		          android:layout_height="30dp"/>
 		
-		
 		<TextView android:id="@+id/item_book_lastUpdateChapter"
 		          android:transitionName="book_lastUpdateChapter"
 		          android:layout_width="match_parent"

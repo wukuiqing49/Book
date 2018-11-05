@@ -14,11 +14,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class NetUtil {
     public static OkHttpClient okHttpClient = new OkHttpClient.Builder()
-            .sslSocketFactory(SSLSocketClient.getSSLSocketFactory())
-            .hostnameVerifier(SSLSocketClient.getHostnameVerifier())
-            .readTimeout(10, TimeUnit.SECONDS)
-            .connectTimeout(10, TimeUnit.SECONDS)
-            .writeTimeout(10, TimeUnit.SECONDS)
+//            .sslSocketFactory(SSLSocketClient.getSSLSocketFactory())
+//            .hostnameVerifier(SSLSocketClient.getHostnameVerifier())
+            .connectTimeout(5, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
             //请设置代理，否则会被小说网站ban的...量小没关系
 //            .proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("106.75.226.36", 808)))
             .build();
@@ -31,7 +31,13 @@ public class NetUtil {
     }
 
     public static String getHtml(String url, String encodeType) throws IOException {
-        return getHtml(url, null, encodeType);
+        try {
+            return getHtml(url, null, encodeType);
+        } catch (IOException e) {
+            System.err.print(url);
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     public static String getHtml(String url, RequestBody requestBody, String encodeType) throws IOException {

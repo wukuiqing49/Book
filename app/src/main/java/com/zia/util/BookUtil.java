@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
  */
 public class BookUtil {
     public static int updateNetBook() {
-        ExecutorService service = Executors.newFixedThreadPool(10);
+        ExecutorService service = Executors.newFixedThreadPool(5);
         NetBookDao netBookDao = AppDatabase.getAppDatabase().netBookDao();
         List<NetBook> netBooks = netBookDao.getNetBooks();
         CountDownLatch bookCountDown = new CountDownLatch(netBooks.size());
@@ -44,10 +44,11 @@ public class BookUtil {
                 }
             });
         }
+        int size = netBooks.size();
         try {
             bookCountDown.await();
             service.shutdown();
-            return (int) (netBooks.size() - sizeCountDown.getCount());
+            return (int) (size - sizeCountDown.getCount());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }finally {

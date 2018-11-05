@@ -1,14 +1,12 @@
 package com.zia.bookdownloader.lib.site.anim;
 
+import android.util.Log;
 import com.zia.bookdownloader.lib.bean.Book;
 import com.zia.bookdownloader.lib.bean.Catalog;
 import com.zia.bookdownloader.lib.engine.ChapterSite;
-import com.zia.bookdownloader.lib.util.BookGriper;
 import com.zia.bookdownloader.lib.util.NetUtil;
-import com.zia.bookdownloader.lib.util.TextUtil;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 
 import java.net.URLEncoder;
@@ -38,12 +36,18 @@ public class Daocaoren extends ChapterSite {
     @Override
     public List<String> parseContent(String chapterHtml) {
         List<String> contents = new ArrayList<>();
-        Elements divs = Jsoup.parse(chapterHtml).getElementById("cont-text").getElementsByTag("div");
-        divs.remove(0);
-        for (Element div : divs) {
-            contents.add(div.text());
-        }
+        Element cont = Jsoup.parse(chapterHtml).getElementById("cont-text");
 
+        for (Element element : cont.children()) {
+            if (element.tagName().equals("div") || element.tagName().equals("p")) {
+                if (element.attr("class").isEmpty()) {
+                    String s = element.html().trim();
+                    if (!s.isEmpty()) {
+                        contents.add(s.replaceAll("<.*?>.*?</.*?>", ""));
+                    }
+                }
+            }
+        }
         return contents;
     }
 

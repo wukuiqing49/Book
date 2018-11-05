@@ -1,6 +1,5 @@
 package com.zia.bookdownloader.lib.site;
 
-import android.util.Log;
 import com.zia.bookdownloader.lib.bean.Book;
 import com.zia.bookdownloader.lib.bean.Catalog;
 import com.zia.bookdownloader.lib.engine.ChapterSite;

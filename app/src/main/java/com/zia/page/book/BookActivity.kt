@@ -25,6 +25,7 @@ import com.zia.page.BaseActivity
 import com.zia.page.preview.PreviewActivity
 import com.zia.toastex.ToastEx
 import com.zia.util.BookMarkUtil
+import com.zia.util.threadPool
 import kotlinx.android.synthetic.main.activity_book.*
 import org.greenrobot.eventbus.EventBus
 import java.io.File
@@ -66,7 +67,7 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
         catalogRv.layoutManager = LinearLayoutManager(this)
         catalogRv.adapter = adapter
 
-        Thread(Runnable {
+        threadPool.execute {
             try {
                 val site = book.site as ChapterSite
                 val html = NetUtil.getHtml(book.url, site.encodeType)
@@ -82,7 +83,7 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
                 e.printStackTrace()
                 runOnUiThread { book_loading.text = "加载失败" }
             }
-        }).start()
+        }
 
         book_download.setOnClickListener {
             chooseType()
@@ -98,7 +99,7 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
                     ToastEx.warning(this, "需要解析目录后才能添加").show()
                     return@setOnClickListener
                 }
-                Thread(Runnable {
+                threadPool.execute {
                     val book = AppDatabase.getAppDatabase().netBookDao().getNetBook(book.bookName, book.site.siteName)
                     if (book == null) {
                         AppDatabase.getAppDatabase().netBookDao().insert(NetBook(this.book, adapter.itemCount))
@@ -111,7 +112,7 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
                             ToastEx.info(this@BookActivity, "已经添加过了").show()
                         }
                     }
-                }).start()
+                }
             }
         }
     }
@@ -133,13 +134,13 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
                         type = Type.TXT
                     }
                 }
-                Thread(Runnable {
+                threadPool.execute {
                     book.site.download(
                         book, type,
                         Environment.getExternalStorageDirectory().path + File.separator + "book",
                         this
                     )
-                }).start()
+                }
             }.show()
     }
 
@@ -195,10 +196,10 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
             }
             if (file != null) {
                 val localBook = LocalBook(file.path, book)
-                Thread(Runnable {
+                threadPool.execute {
                     AppDatabase.getAppDatabase().localBookDao().insert(localBook)
                     runOnUiThread { EventBus.getDefault().post(FreshEvent()) }
-                }).start()
+                }
             }
         }
     }
@@ -225,7 +226,7 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
 
     public fun freshBookMark() {
         if (adapter.catalogs == null) return
-        Thread(Runnable {
+        threadPool.execute {
             val history = AppDatabase.getAppDatabase().bookMarkDao().getPosition(book.bookName, book.site.siteName)
             runOnUiThread {
                 adapter.freshCatalogs(adapter.catalogs!!, history)
@@ -233,7 +234,7 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
                     catalogRv.smoothScrollToPosition(adapter.catalogs!!.size - 1 - history)
                 }
             }
-        }).start()
+        }
     }
 
     override fun onResume() {

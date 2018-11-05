@@ -42,7 +42,7 @@ public class Downloader {
 
         ConcurrentLinkedQueue<List<Book>> bookListList = new ConcurrentLinkedQueue<>();
         CountDownLatch countDownLatch = new CountDownLatch(sites.size());
-        ExecutorService service = Executors.newFixedThreadPool(20);
+        ExecutorService service = Executors.newFixedThreadPool(15);
 
         for (ISite site : sites) {
             service.execute(() -> {
@@ -50,7 +50,7 @@ public class Downloader {
                 try {
                     results = site.search(bookName);
                     for (Book book : results) {
-                        book.setBookName(book.getBookName().replaceAll("[《》]",""));
+                        book.setBookName(book.getBookName().replaceAll("[《》]", ""));
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -85,9 +85,9 @@ public class Downloader {
         }
 
         //混合插入，每一个站点的
-        List<Book> bookList = new ArrayList<>();
+        ArrayList<Book> bookList = new ArrayList<>();
         int index = 0;
-        while (bookList.size() < resultSize) {
+        while (bookList.size() < resultSize && bookList.size() <= 100) {
             for (List<Book> bl : bookListList) {
                 if (index < bl.size()) {
                     bookList.add(bl.get(index));
@@ -97,15 +97,22 @@ public class Downloader {
         }
         //微调排序
         Collections.sort(bookList, (o1, o2) -> {
+            //完全相同
             if (o1.getBookName().equals(bookName) && !o2.getBookName().equals(bookName)) {
                 return -1;
             } else if (!o1.getBookName().equals(bookName) && o2.getBookName().equals(bookName)) {
                 return 1;
-            } else if (o1.getBookName().contains(bookName) && !o2.getBookName().contains(bookName)) {
+            }
+            //包含了字符
+            else if (o1.getBookName().contains(bookName) && !o2.getBookName().contains(bookName)) {
                 return -1;
             } else if (!o1.getBookName().contains(bookName) && o2.getBookName().contains(bookName)) {
                 return 1;
-            } else if (o1.getBookName().length() == bookName.length()
+            } else if (o1.getBookName().contains(bookName) && o2.getBookName().contains(bookName)) {
+                return o1.getBookName().indexOf(bookName) - o2.getBookName().indexOf(bookName);
+            }
+            //长度相同
+            else if (o1.getBookName().length() == bookName.length()
                     && o2.getBookName().length() != bookName.length()) {
                 return -1;
             } else if (o1.getBookName().length() != bookName.length()
@@ -118,7 +125,7 @@ public class Downloader {
         eventListener.pushMessage("搜索到" + bookList.size() + "本相关书籍");
 
         //选择要下载的书籍
-        eventListener.onChooseBook(bookList);
+        eventListener.onChooseBook(new ArrayList<>(bookList.subList(0, 30)));
 
     }
 

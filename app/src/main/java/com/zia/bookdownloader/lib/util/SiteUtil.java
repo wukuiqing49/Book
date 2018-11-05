@@ -18,10 +18,12 @@ public class SiteUtil {
         List<ISite> sites = new ArrayList<>();
         //normal
         sites.add(new Biquge());
-        sites.add(new Dingdian());
+        sites.add(new Shunong());
         sites.add(new Xbiquge());
+        sites.add(new Zhuaji());
         sites.add(new Kanshenzuo());
         sites.add(new Bishenge());
+        sites.add(new Dingdian());
         sites.add(new Mainhuatang());
 
         //anim

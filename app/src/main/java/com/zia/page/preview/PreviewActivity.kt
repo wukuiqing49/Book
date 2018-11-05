@@ -15,8 +15,8 @@ import com.zia.toastex.ToastEx
 import com.zia.util.BookMarkUtil
 import com.zia.util.defaultSharedPreferences
 import com.zia.util.editor
+import com.zia.util.threadPool
 import kotlinx.android.synthetic.main.activity_preview.*
-import org.greenrobot.eventbus.EventBus
 import java.util.*
 
 class PreviewActivity : BaseActivity() {
@@ -107,8 +107,7 @@ class PreviewActivity : BaseActivity() {
         preview_title.text = catalog.chapterName
         preview_progress.text = "${catalogs.size - position} / ${catalogs.size}"
         BookMarkUtil.insertOrUpdate(catalogs.size - position - 1, book.bookName, site.siteName)
-
-        Thread(Runnable {
+        threadPool.execute {
             val html = NetUtil.getHtml(catalog.url, site.encodeType)
             try {
                 val contents = site.parseContent(html)
@@ -125,10 +124,10 @@ class PreviewActivity : BaseActivity() {
             } catch (e: Exception) {
                 e.printStackTrace()
                 runOnUiThread {
-                    preview_tv.text = "解析错误"
+                    preview_tv.text = "解析错误，可以尝试重新打开该章节"
                 }
             }
-        }).start()
+        }
     }
 
     private fun goNext() {

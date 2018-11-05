@@ -102,7 +102,7 @@ public abstract class ChapterSite implements ISite, IRegex {
 
     @Override
     public int getThreadCount() {
-        return 300;
+        return 150;
     }
 
     @Override

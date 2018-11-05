@@ -17,9 +17,9 @@ import com.zia.bookdownloader.lib.engine.Downloader
 import com.zia.bookdownloader.lib.listener.EventListener
 import com.zia.page.BaseFragment
 import com.zia.page.book.BookActivity
-import com.zia.page.main.BookAdapter
 import com.zia.toastex.ToastEx
 import com.zia.util.Java2Kotlin
+import com.zia.util.threadPool
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.item_book.view.*
 import java.io.File
@@ -56,7 +56,9 @@ class SearchFragment : BaseFragment(), EventListener, BookAdapter.BookSelectList
         searchBt.setOnClickListener {
             val bookName = searchEt.text?.toString()
             if (bookName != null && bookName.isNotEmpty()) {
-                Thread(Runnable { downloader.search(bookName) }).start()
+                threadPool.execute{
+                    downloader.search(bookName)
+                }
             }
             searchRv.scrollToPosition(0)
         }
