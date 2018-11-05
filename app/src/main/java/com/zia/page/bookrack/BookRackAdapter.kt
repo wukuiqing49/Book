@@ -25,14 +25,16 @@ import com.zia.util.Java2Kotlin
 import kotlinx.android.synthetic.main.item_book.view.*
 import kotlinx.android.synthetic.main.item_text.view.*
 import java.io.File
+import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * Created by zia on 2018/11/2.
  */
 class BookRackAdapter(private val recyclerView: RecyclerView) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private var netBookList: List<NetBook>? = null
-    private var localBookList: List<LocalBook>? = null
+    private var netBookList: ArrayList<NetBook>? = null
+    private var localBookList: ArrayList<LocalBook>? = null
 
     private val TYPE_TEXT_LOCAL = 1000
     private val TYPE_TEXT_NET = 1001
@@ -44,9 +46,11 @@ class BookRackAdapter(private val recyclerView: RecyclerView) : RecyclerView.Ada
     }
 
     fun fresh() {
-        localBookList = AppDatabase.getAppDatabase().localBookDao().localBooks
-        netBookList = AppDatabase.getAppDatabase().netBookDao().netBooks
-        recyclerView.post { notifyDataSetChanged() }
+        Thread(Runnable {
+            localBookList = ArrayList(AppDatabase.getAppDatabase().localBookDao().localBooks)
+            netBookList = ArrayList(AppDatabase.getAppDatabase().netBookDao().netBooks)
+            recyclerView.post { notifyDataSetChanged() }
+        }).start()
     }
 
     override fun onCreateViewHolder(p0: ViewGroup, viewtype: Int): RecyclerView.ViewHolder {
@@ -84,6 +88,7 @@ class BookRackAdapter(private val recyclerView: RecyclerView) : RecyclerView.Ada
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        holder.setIsRecyclable(false)
         when (getItemViewType(position)) {
             TYPE_TEXT_NET -> {
                 val size = if (netBookList == null) 0 else netBookList!!.size
@@ -115,6 +120,11 @@ class BookRackAdapter(private val recyclerView: RecyclerView) : RecyclerView.Ada
                             AppDatabase.getAppDatabase().netBookDao().update(book)
                         }).start()
                     }
+                    //更新时间
+                    Thread(Runnable {
+                        book.time = Date().time
+                        AppDatabase.getAppDatabase().netBookDao().update(book)
+                    }).start()
                     val intent = Intent(context, BookActivity::class.java)
                     val realBook = Book(
                         book.bookName,

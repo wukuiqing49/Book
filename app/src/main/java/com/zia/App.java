@@ -18,6 +18,7 @@ public class App extends Application {
         context = getApplicationContext();
         CrashReport.initCrashReport(getApplicationContext());
         Stetho.initializeWithDefaults(this);
+//        chrome://inspect
     }
 
     public static Context getContext() {

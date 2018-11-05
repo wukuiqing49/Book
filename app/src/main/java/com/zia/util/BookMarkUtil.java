@@ -13,14 +13,14 @@ public class BookMarkUtil {
         BookMarkDao bookMarkDao = AppDatabase.getAppDatabase().bookMarkDao();
         BookMark bm = bookMarkDao.getBookMark(bkName, siteName);
         if (bm == null) {
-            Log.e("BookMarkUtil", "bm == null,insert position == " + position);
+            Log.d("BookMarkUtil", "bm == null,insert position == " + position);
             BookMark bookMark = new BookMark();
             bookMark.setPosition(position);
             bookMark.setBookName(bkName);
             bookMark.setSiteName(siteName);
             bookMarkDao.insert(bookMark);
         } else {
-            Log.e("BookMarkUtil", "bm != null,update position == " + position);
+            Log.d("BookMarkUtil", "bm != null,update position == " + position);
             bm.setPosition(position);
             bookMarkDao.insert(bm);
         }

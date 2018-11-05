@@ -9,7 +9,7 @@ import java.util.List;
  */
 @Dao
 public interface NetBookDao {
-    @Query("select * from netBook order by date() asc")
+    @Query("select * from netBook order by time desc")
     List<NetBook> getNetBooks();
 
     @Query("select * from netBook where bookName = :bkName and siteName = :stName")

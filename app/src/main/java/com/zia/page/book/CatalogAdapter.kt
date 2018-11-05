@@ -2,7 +2,6 @@ package com.zia.page.book
 
 import android.annotation.SuppressLint
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,13 +17,12 @@ import java.util.*
 class CatalogAdapter(private val catalogSelectListener: CatalogSelectListener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    public var catalogs: ArrayList<Catalog>? = null
-    public var history = 0
+    var catalogs: ArrayList<Catalog>? = null
+    var history = 0
 
     fun freshCatalogs(catalogs: ArrayList<Catalog>, history: Int) {
         this.catalogs = catalogs
         this.history = catalogs.size - history - 1
-        Log.e("CatalogAdapter", "history:$history")
         notifyDataSetChanged()
     }
 

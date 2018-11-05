@@ -4,8 +4,10 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 import com.zia.bookdownloader.lib.bean.Book;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Created by zia on 2018/11/2.
@@ -43,6 +45,9 @@ public class NetBook implements Serializable {
 
     @ColumnInfo(name = "currentCheckCount")
     private int currentCheckCount;//最新章节数量
+
+    @ColumnInfo(name = "time")
+    private long time = new Date().getTime();
 
     public NetBook() {
     }
@@ -137,5 +142,13 @@ public class NetBook implements Serializable {
 
     public void setBkId(int bkId) {
         this.bkId = bkId;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 }

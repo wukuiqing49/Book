@@ -15,16 +15,19 @@ import com.tbruyelle.rxpermissions2.RxPermissions
 import com.zia.bookdownloader.R
 import com.zia.bookdownloader.lib.util.NetUtil
 import com.zia.database.bean.Config
+import com.zia.event.FreshEvent
 import com.zia.page.BaseActivity
 import com.zia.page.bookrack.BookRackFragment
 import com.zia.page.search.SearchFragment
 import com.zia.toastex.ToastEx
+import com.zia.util.BookUtil
 import com.zia.util.FileUtil
 import com.zia.util.Version
 import com.zia.util.downlaodUtil.DownloadRunnable
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.*
+import org.greenrobot.eventbus.EventBus
 import java.io.File
 import java.io.IOException
 
@@ -47,6 +50,15 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
                     finish()
                 }
             }
+
+        //检查收藏小说是否有更新
+        Thread(Runnable {
+            val updateCount = BookUtil.updateNetBook()
+            runOnUiThread {
+                ToastEx.success(this@MainActivity, "${updateCount}章小说有更新").show()
+                EventBus.getDefault().post(FreshEvent())
+            }
+        }).start()
 
         //版本相关
         val versionRequest = Request.Builder()

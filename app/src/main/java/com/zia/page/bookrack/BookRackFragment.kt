@@ -31,16 +31,7 @@ class BookRackFragment : BaseFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //检查收藏小说是否有更新
-        Thread(Runnable {
-            val updateCount = BookUtil.updateNetBook()
-            activity?.runOnUiThread {
-                if (context != null) {
-                    ToastEx.success(context!!, "${updateCount}章小说有更新").show()
-                }
-            }
-            bookRackAdapter?.fresh()
-        }).start()
+
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -64,5 +55,10 @@ class BookRackFragment : BaseFragment() {
     override fun onStop() {
         super.onStop()
         EventBus.getDefault().unregister(this)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        bookRackAdapter?.fresh()
     }
 }
