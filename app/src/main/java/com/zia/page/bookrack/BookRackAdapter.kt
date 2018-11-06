@@ -8,7 +8,6 @@ import android.graphics.Color
 import android.os.Build
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.util.Pair
 import android.view.LayoutInflater
 import android.view.View
@@ -23,7 +22,6 @@ import com.zia.toastex.ToastEx
 import com.zia.util.BookUtil
 import com.zia.util.FileUtil
 import com.zia.util.Java2Kotlin
-import com.zia.util.threadPool
 import kotlinx.android.synthetic.main.item_book.view.*
 import kotlinx.android.synthetic.main.item_text.view.*
 import java.io.File
@@ -48,12 +46,11 @@ class BookRackAdapter(private val recyclerView: RecyclerView) : RecyclerView.Ada
     }
 
     fun fresh() {
-        Log.e("BookRackFragment", "onStart")
-        threadPool.execute {
+        Thread(Runnable {
             localBookList = ArrayList(AppDatabase.getAppDatabase().localBookDao().localBooks)
             netBookList = ArrayList(AppDatabase.getAppDatabase().netBookDao().netBooks)
             recyclerView.post { notifyDataSetChanged() }
-        }
+        }).start()
     }
 
     override fun onCreateViewHolder(p0: ViewGroup, viewtype: Int): RecyclerView.ViewHolder {
@@ -117,16 +114,16 @@ class BookRackAdapter(private val recyclerView: RecyclerView) : RecyclerView.Ada
                     //更新检查记录，判断是否有更新
                     if (book.lastCheckCount < book.currentCheckCount) {
                         holder.itemView.item_book_lastUpdateTime.background = null
-                        threadPool.execute {
+                        Thread(Runnable {
                             book.lastCheckCount = book.currentCheckCount
                             AppDatabase.getAppDatabase().netBookDao().update(book)
-                        }
+                        }).start()
                     }
                     //更新时间
-                    threadPool.execute {
+                    Thread(Runnable {
                         book.time = Date().time
                         AppDatabase.getAppDatabase().netBookDao().update(book)
-                    }
+                    }).start()
                     val intent = Intent(context, BookActivity::class.java)
                     val realBook = Book(
                         book.bookName,
@@ -160,13 +157,13 @@ class BookRackAdapter(private val recyclerView: RecyclerView) : RecyclerView.Ada
                         .setTitle("是否删除${book.bookName}")
                         .setNegativeButton("取消", null)
                         .setPositiveButton("确定") { _, _ ->
-                            threadPool.execute {
+                            Thread(Runnable {
                                 AppDatabase.getAppDatabase().netBookDao().delete(book.bookName, book.siteName)
                                 (context as Activity).runOnUiThread {
                                     ToastEx.success(context, "删除成功").show()
                                     fresh()
                                 }
-                            }
+                            }).start()
                         }
                         .setCancelable(true)
                         .show()
@@ -203,14 +200,14 @@ class BookRackAdapter(private val recyclerView: RecyclerView) : RecyclerView.Ada
                         .setTitle("是否删除${book.bookName}")
                         .setNegativeButton("取消", null)
                         .setPositiveButton("确定") { _, _ ->
-                            threadPool.execute {
+                            Thread(Runnable {
                                 AppDatabase.getAppDatabase().localBookDao().delete(book.bookName, book.siteName)
                                 File(book.filePath).delete()
                                 (context as Activity).runOnUiThread {
                                     ToastEx.success(context, "删除成功").show()
                                     fresh()
                                 }
-                            }
+                            }).start()
                         }
                         .setCancelable(true)
                         .show()

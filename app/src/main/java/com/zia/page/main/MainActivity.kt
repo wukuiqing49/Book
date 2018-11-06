@@ -24,7 +24,6 @@ import com.zia.util.BookUtil
 import com.zia.util.FileUtil
 import com.zia.util.Version
 import com.zia.util.downlaodUtil.DownloadRunnable
-import com.zia.util.threadPool
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.*
@@ -34,8 +33,8 @@ import java.io.IOException
 
 class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
 
-    private val bookRackFragment  = BookRackFragment()
-    private val searchFragment  = SearchFragment()
+    private val bookRackFragment = BookRackFragment()
+    private val searchFragment = SearchFragment()
     private lateinit var disposal: Disposable
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,13 +52,13 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
             }
 
         //检查收藏小说是否有更新
-        threadPool.execute {
+        Thread(Runnable {
             val updateCount = BookUtil.updateNetBook()
             runOnUiThread {
                 ToastEx.success(this@MainActivity, "${updateCount}章小说有更新").show()
                 EventBus.getDefault().post(FreshEvent())
             }
-        }
+        }).start()
 
         //版本相关
         val versionRequest = Request.Builder()
@@ -172,7 +171,7 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
             }
         }
 
-        threadPool.execute(downloadRunnable)
+        Thread(downloadRunnable).start()
     }
 
     override fun onDestroy() {

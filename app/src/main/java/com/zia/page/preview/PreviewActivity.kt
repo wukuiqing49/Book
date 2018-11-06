@@ -1,7 +1,6 @@
 package com.zia.page.preview
 
 import android.annotation.SuppressLint
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import com.zia.bookdownloader.R
@@ -13,15 +12,15 @@ import com.zia.bookdownloader.lib.util.TextUtil
 import com.zia.page.BaseActivity
 import com.zia.toastex.ToastEx
 import com.zia.util.BookMarkUtil
+import com.zia.util.CatalogsHolder
 import com.zia.util.defaultSharedPreferences
 import com.zia.util.editor
-import com.zia.util.threadPool
 import kotlinx.android.synthetic.main.activity_preview.*
 import java.util.*
 
 class PreviewActivity : BaseActivity() {
 
-    private lateinit var catalogs: ArrayList<Catalog>//逆序小说目录
+    private var catalogs: ArrayList<Catalog>? = null//逆序小说目录
     private lateinit var book: Book
     private lateinit var site: ChapterSite
     private var position: Int = 0
@@ -34,20 +33,28 @@ class PreviewActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_preview)
 
         setTextSize(defaultSharedPreferences.getFloat(textSizeSP, 20f))
         setTvTheme(defaultSharedPreferences.getInt(themeSP, 0))
 
-//        preview_tv.typeface = Typeface.createFromAsset(assets, "gbk.ttf")
+        Thread(Runnable {
+            catalogs = CatalogsHolder.getInstance().catalogs
+            if (catalogs == null) {
+                runOnUiThread {
+                    ToastEx.error(this@PreviewActivity, "性能不足...").show()
+                    finish()
+                }
+            }
+            book = intent.getSerializableExtra("book") as Book
+            position = intent.getIntExtra("position", 0)
 
-        catalogs = intent.getParcelableArrayListExtra("catalogs")
-        book = intent.getSerializableExtra("book") as Book
-        position = intent.getIntExtra("position", 0)
+            site = book.site as ChapterSite
 
-        site = book.site as ChapterSite
+            runOnUiThread { loadCatalog() }
+        }).start()
 
-        loadCatalog()
 
         preview_back.setOnClickListener { finish() }
 
@@ -103,11 +110,15 @@ class PreviewActivity : BaseActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun loadCatalog() {
-        val catalog = catalogs[position]
+        if (catalogs == null) {
+            ToastEx.error(this@PreviewActivity, "内存不足，无法加载").show()
+            return
+        }
+        val catalog = catalogs!![position]
         preview_title.text = catalog.chapterName
-        preview_progress.text = "${catalogs.size - position} / ${catalogs.size}"
-        BookMarkUtil.insertOrUpdate(catalogs.size - position - 1, book.bookName, site.siteName)
-        threadPool.execute {
+        preview_progress.text = "${catalogs!!.size - position} / ${catalogs!!.size}"
+        BookMarkUtil.insertOrUpdate(catalogs!!.size - position - 1, book.bookName, site.siteName)
+        Thread(Runnable {
             val html = NetUtil.getHtml(catalog.url, site.encodeType)
             try {
                 val contents = site.parseContent(html)
@@ -127,7 +138,7 @@ class PreviewActivity : BaseActivity() {
                     preview_tv.text = "解析错误，可以尝试重新打开该章节"
                 }
             }
-        }
+        }).start()
     }
 
     private fun goNext() {
@@ -142,8 +153,12 @@ class PreviewActivity : BaseActivity() {
     }
 
     private fun goPrevious() {
+        if (catalogs == null) {
+            ToastEx.error(this@PreviewActivity, "内存不足，无法加载").show()
+            return
+        }
         val p = position + 1
-        if (p < catalogs.size) {
+        if (p < catalogs!!.size) {
             position = p
             preview_tv.text = loading
             loadCatalog()
@@ -171,7 +186,4 @@ class PreviewActivity : BaseActivity() {
         }
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration?) {
-        super.onConfigurationChanged(newConfig)
-    }
 }

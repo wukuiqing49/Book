@@ -28,7 +28,7 @@
 		<!-- 配置APP版本号 -->
 		<meta-data
 				android:name="BUGLY_APP_VERSION"
-				android:value="4"/>
+				android:value="5"/>
 		<!-- 配置APP渠道号 -->
 		<meta-data
 				android:name="BUGLY_APP_CHANNEL"
@@ -67,8 +67,7 @@
 				android:theme="@style/Translucent">
 		</activity>
 		<activity android:name="com.zia.page.preview.PreviewActivity"
-		          android:theme="@style/FullScreen"
-		          android:configChanges="orientation|keyboardHidden">
+		          android:theme="@style/FullScreen">
 		</activity>
 	</application>
 

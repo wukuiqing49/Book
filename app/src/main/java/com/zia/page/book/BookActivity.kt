@@ -25,7 +25,7 @@ import com.zia.page.BaseActivity
 import com.zia.page.preview.PreviewActivity
 import com.zia.toastex.ToastEx
 import com.zia.util.BookMarkUtil
-import com.zia.util.threadPool
+import com.zia.util.CatalogsHolder
 import kotlinx.android.synthetic.main.activity_book.*
 import org.greenrobot.eventbus.EventBus
 import java.io.File
@@ -67,22 +67,30 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
         catalogRv.layoutManager = LinearLayoutManager(this)
         catalogRv.adapter = adapter
 
-        threadPool.execute {
-            try {
-                val site = book.site as ChapterSite
-                val html = NetUtil.getHtml(book.url, site.encodeType)
-                val catalogs = site.parseCatalog(html, book.url)
-                val arrayList = ArrayList<Catalog>(catalogs)
-                arrayList.reverse()
-                adapter.catalogs = arrayList
-                runOnUiThread {
-                    freshBookMark()
-                    book_loading.visibility = View.GONE
+        val bookCache = CatalogsHolder.getInstance().netBook
+        if (bookCache != null && bookCache.site.siteName == book.site.siteName
+            && bookCache.bookName == book.bookName) {
+            adapter.catalogs = CatalogsHolder.getInstance().catalogs!!
+            freshBookMark()
+            book_loading.visibility = View.GONE
+        } else {
+            Thread(Runnable {
+                try {
+                    val site = book.site as ChapterSite
+                    val html = NetUtil.getHtml(book.url, site.encodeType)
+                    val catalogs = site.parseCatalog(html, book.url)
+                    val arrayList = ArrayList<Catalog>(catalogs)
+                    arrayList.reverse()
+                    adapter.catalogs = arrayList
+                    runOnUiThread {
+                        freshBookMark()
+                        book_loading.visibility = View.GONE
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    runOnUiThread { book_loading.text = "加载失败" }
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                runOnUiThread { book_loading.text = "加载失败" }
-            }
+            }).start()
         }
 
         book_download.setOnClickListener {
@@ -99,7 +107,7 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
                     ToastEx.warning(this, "需要解析目录后才能添加").show()
                     return@setOnClickListener
                 }
-                threadPool.execute {
+                Thread(Runnable {
                     val book = AppDatabase.getAppDatabase().netBookDao().getNetBook(book.bookName, book.site.siteName)
                     if (book == null) {
                         AppDatabase.getAppDatabase().netBookDao().insert(NetBook(this.book, adapter.itemCount))
@@ -112,7 +120,7 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
                             ToastEx.info(this@BookActivity, "已经添加过了").show()
                         }
                     }
-                }
+                }).start()
             }
         }
     }
@@ -134,13 +142,13 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
                         type = Type.TXT
                     }
                 }
-                threadPool.execute {
+                Thread(Runnable {
                     book.site.download(
                         book, type,
                         Environment.getExternalStorageDirectory().path + File.separator + "book",
                         this
                     )
-                }
+                }).start()
             }.show()
     }
 
@@ -161,18 +169,20 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
     }
 
     override fun onCatalogSelect(itemView: View, position: Int) {
-        val intent = Intent(this, PreviewActivity::class.java)
         if (adapter.catalogs == null) return
-
-        val p = adapter.catalogs!!.size - position - 1
-        BookMarkUtil.insertOrUpdate(p, book.bookName, book.site.siteName)
-        adapter.history = position
-        adapter.notifyDataSetChanged()
-
-        intent.putExtra("position", position)
-        intent.putExtra("book", book)
-        intent.putParcelableArrayListExtra("catalogs", adapter.catalogs)
-        startActivity(intent)
+        Thread(Runnable {
+            val p = adapter.catalogs!!.size - position - 1
+            BookMarkUtil.insertOrUpdate(p, book.bookName, book.site.siteName)
+            adapter.history = position
+            val intent = Intent(this@BookActivity, PreviewActivity::class.java)
+            intent.putExtra("position", position)
+            intent.putExtra("book", book)
+            CatalogsHolder.getInstance().setCatalogs(adapter.catalogs, book)
+            runOnUiThread {
+                adapter.notifyDataSetChanged()
+                startActivity(intent)
+            }
+        }).start()
     }
 
     override fun onChooseBook(books: MutableList<Book>?) {
@@ -196,10 +206,10 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
             }
             if (file != null) {
                 val localBook = LocalBook(file.path, book)
-                threadPool.execute {
+                Thread(Runnable {
                     AppDatabase.getAppDatabase().localBookDao().insert(localBook)
                     runOnUiThread { EventBus.getDefault().post(FreshEvent()) }
-                }
+                }).start()
             }
         }
     }
@@ -226,7 +236,7 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
 
     public fun freshBookMark() {
         if (adapter.catalogs == null) return
-        threadPool.execute {
+        Thread(Runnable {
             val history = AppDatabase.getAppDatabase().bookMarkDao().getPosition(book.bookName, book.site.siteName)
             runOnUiThread {
                 adapter.freshCatalogs(adapter.catalogs!!, history)
@@ -234,7 +244,7 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener, Event
                     catalogRv.smoothScrollToPosition(adapter.catalogs!!.size - 1 - history)
                 }
             }
-        }
+        }).start()
     }
 
     override fun onResume() {

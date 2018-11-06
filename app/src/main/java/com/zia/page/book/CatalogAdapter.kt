@@ -42,14 +42,14 @@ class CatalogAdapter(private val catalogSelectListener: CatalogSelectListener) :
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is CatalogHolder -> {
-                val catalog = catalogs!![position]
-                holder.itemView.item_catalog_name.text = catalog.chapterName
-                holder.itemView.setOnClickListener { catalogSelectListener.onCatalogSelect(holder.itemView, position) }
                 if (position == history) {
                     holder.itemView.item_catalog_mark.visibility = View.VISIBLE
                 } else {
                     holder.itemView.item_catalog_mark.visibility = View.INVISIBLE
                 }
+                val catalog = catalogs!![position]
+                holder.itemView.item_catalog_name.text = catalog.chapterName
+                holder.itemView.setOnClickListener { catalogSelectListener.onCatalogSelect(holder.itemView, position) }
             }
         }
     }

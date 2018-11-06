@@ -12,7 +12,6 @@ import com.zia.event.FreshEvent
 import com.zia.page.BaseFragment
 import com.zia.toastex.ToastEx
 import com.zia.util.BookUtil
-import com.zia.util.threadPool
 import kotlinx.android.synthetic.main.fragment_book_rack.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -40,14 +39,14 @@ class BookRackFragment : BaseFragment() {
         bookRack_rv.adapter = bookRackAdapter
 
         bookRack_sl.setOnRefreshListener {
-            threadPool.execute {
+            Thread(Runnable {
                 val updateCount = BookUtil.updateNetBook()
                 activity?.runOnUiThread {
                     ToastEx.success(context!!, "${updateCount}章小说有更新").show()
                     bookRackAdapter?.fresh()
                     bookRack_sl.isRefreshing = false
                 }
-            }
+            }).start()
         }
     }
 
