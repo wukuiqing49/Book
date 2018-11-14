@@ -25,10 +25,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
 }
 
 dependencies {
@@ -47,11 +43,7 @@ dependencies {
     implementation 'com.github.tbruyelle:rxpermissions:0.10.2'
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
     implementation 'com.github.Zzzia:ToastEx:1.0.1'
-    implementation('nl.siegmann.epublib:epublib-core:3.1') {
-        exclude group: 'org.slf4j'
-        exclude group: 'xmlpull'
-    }
-    implementation 'org.slf4j:slf4j-android:1.7.25'
+    implementation 'com.github.Zzzia:EasyBook:2.21'
     implementation 'org.greenrobot:eventbus:3.1.1'
     implementation 'android.arch.persistence.room:runtime:1.1.1'
     annotationProcessor "android.arch.persistence.room:compiler:1.1.1"

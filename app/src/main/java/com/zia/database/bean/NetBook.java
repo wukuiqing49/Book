@@ -2,9 +2,10 @@ package com.zia.database.bean;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
-import com.zia.bookdownloader.lib.bean.Book;
-import org.jetbrains.annotations.NotNull;
+import android.util.Log;
+import com.zia.easybookmodule.bean.Book;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -59,9 +60,31 @@ public class NetBook implements Serializable {
         chapterSize = book.getUrl();
         lastUpdateTime = book.getLastUpdateTime();
         lastChapterName = book.getLastChapterName();
-        siteName = book.getSite().getSiteName();
+        siteName = book.getSiteName();
         this.lastCheckCount = lastCheckCount;
         currentCheckCount = lastCheckCount;
+    }
+
+    public Book getRawBook() {
+        Log.e("NetBook", toString());
+        return new Book(bookName, author, url, chapterSize, lastUpdateTime, lastChapterName, siteName);
+    }
+
+    @Override
+    public String toString() {
+        return "NetBook{" +
+                "bkId=" + bkId +
+                ", bookName='" + bookName + '\'' +
+                ", author='" + author + '\'' +
+                ", url='" + url + '\'' +
+                ", chapterSize='" + chapterSize + '\'' +
+                ", lastUpdateTime='" + lastUpdateTime + '\'' +
+                ", lastChapterName='" + lastChapterName + '\'' +
+                ", siteName='" + siteName + '\'' +
+                ", lastCheckCount=" + lastCheckCount +
+                ", currentCheckCount=" + currentCheckCount +
+                ", time=" + time +
+                '}';
     }
 
     public int getLastCheckCount() {

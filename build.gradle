@@ -6,9 +6,6 @@ buildscript {
         google()
         jcenter()
         maven { url 'https://jitpack.io' }
-        maven {
-            url 'https://github.com/psiegman/mvn-repo/raw/master/releases'
-        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.1'
@@ -24,9 +21,6 @@ allprojects {
         google()
         jcenter()
         maven { url 'https://jitpack.io' }
-        maven {
-            url 'https://github.com/psiegman/mvn-repo/raw/master/releases'
-        }
     }
 }
 

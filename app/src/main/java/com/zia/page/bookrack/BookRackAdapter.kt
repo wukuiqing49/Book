@@ -13,13 +13,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.zia.bookdownloader.R
-import com.zia.bookdownloader.lib.bean.Book
 import com.zia.database.AppDatabase
 import com.zia.database.bean.LocalBook
 import com.zia.database.bean.NetBook
+import com.zia.easybookmodule.bean.Book
 import com.zia.page.book.BookActivity
 import com.zia.toastex.ToastEx
-import com.zia.util.BookUtil
 import com.zia.util.FileUtil
 import com.zia.util.Java2Kotlin
 import kotlinx.android.synthetic.main.item_book.view.*
@@ -91,11 +90,11 @@ class BookRackAdapter(private val recyclerView: RecyclerView) : RecyclerView.Ada
         when (getItemViewType(position)) {
             TYPE_TEXT_NET -> {
                 val size = if (netBookList == null) 0 else netBookList!!.size
-                holder.itemView.item_text_tv.text = "收藏：${size}本"
+                holder.itemView.item_text_tv.text = "追更：${size}本"
             }
             TYPE_TEXT_LOCAL -> {
                 val size = if (localBookList == null) 0 else localBookList!!.size
-                holder.itemView.item_text_tv.text = "已下载：${size}本"
+                holder.itemView.item_text_tv.text = "已下载（请用其他阅读器打开）：${size}本"
             }
             TYPE_NET -> {
                 val book = netBookList!![position - 1]
@@ -132,7 +131,7 @@ class BookRackAdapter(private val recyclerView: RecyclerView) : RecyclerView.Ada
                         book.chapterSize,
                         book.lastUpdateTime,
                         book.lastChapterName,
-                        BookUtil.getSiteByName(book.siteName)
+                        book.siteName
                     )
                     intent.putExtra("book", realBook)
                     intent.putExtra("canAddFav", false)

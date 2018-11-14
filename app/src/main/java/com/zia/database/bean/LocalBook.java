@@ -3,7 +3,7 @@ package com.zia.database.bean;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
-import com.zia.bookdownloader.lib.bean.Book;
+import com.zia.easybookmodule.bean.Book;
 
 import java.io.Serializable;
 
@@ -51,7 +51,7 @@ public class LocalBook implements Serializable {
         chapterSize = book.getUrl();
         lastUpdateTime = book.getLastUpdateTime();
         lastChapterName = book.getLastChapterName();
-        siteName = book.getSite().getSiteName();
+        siteName = book.getSiteName();
     }
 
     @Override

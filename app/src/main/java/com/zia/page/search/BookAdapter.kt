@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.zia.bookdownloader.R
-import com.zia.bookdownloader.lib.bean.Book
+import com.zia.easybookmodule.bean.Book
 import kotlinx.android.synthetic.main.item_book.view.*
 
 /**

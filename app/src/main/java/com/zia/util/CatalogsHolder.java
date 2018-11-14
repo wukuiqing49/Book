@@ -1,7 +1,7 @@
 package com.zia.util;
 
-import com.zia.bookdownloader.lib.bean.Book;
-import com.zia.bookdownloader.lib.bean.Catalog;
+import com.zia.easybookmodule.bean.Book;
+import com.zia.easybookmodule.bean.Catalog;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;

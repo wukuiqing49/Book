@@ -4,11 +4,10 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import com.zia.bookdownloader.R
-import com.zia.bookdownloader.lib.bean.Book
-import com.zia.bookdownloader.lib.bean.Catalog
-import com.zia.bookdownloader.lib.engine.ChapterSite
-import com.zia.bookdownloader.lib.util.NetUtil
-import com.zia.bookdownloader.lib.util.TextUtil
+import com.zia.easybookmodule.bean.Book
+import com.zia.easybookmodule.bean.Catalog
+import com.zia.easybookmodule.engine.EasyBook
+import com.zia.easybookmodule.rx.Subscriber
 import com.zia.page.BaseActivity
 import com.zia.toastex.ToastEx
 import com.zia.util.BookMarkUtil
@@ -22,7 +21,6 @@ class PreviewActivity : BaseActivity() {
 
     private var catalogs: ArrayList<Catalog>? = null//逆序小说目录
     private lateinit var book: Book
-    private lateinit var site: ChapterSite
     private var position: Int = 0
     private val textSizeSP = "textSize"
     private val themeSP = "theme"
@@ -49,8 +47,6 @@ class PreviewActivity : BaseActivity() {
             }
             book = intent.getSerializableExtra("book") as Book
             position = intent.getIntExtra("position", 0)
-
-            site = book.site as ChapterSite
 
             runOnUiThread { loadCatalog() }
         }).start()
@@ -117,28 +113,32 @@ class PreviewActivity : BaseActivity() {
         val catalog = catalogs!![position]
         preview_title.text = catalog.chapterName
         preview_progress.text = "${catalogs!!.size - position} / ${catalogs!!.size}"
-        BookMarkUtil.insertOrUpdate(catalogs!!.size - position - 1, book.bookName, site.siteName)
-        Thread(Runnable {
-            val html = NetUtil.getHtml(catalog.url, site.encodeType)
-            try {
-                val contents = site.parseContent(html)
-                val sb = StringBuilder()
-                sb.append(catalog.chapterName).append("\n\n")
-                for (line in contents) {
-                    if (!line.isEmpty()) {
-                        sb.append("        ").append(TextUtil.cleanContent(line)).append("\n\n")
+        BookMarkUtil.insertOrUpdate(catalogs!!.size - position - 1, book.bookName, book.siteName)
+        EasyBook.getContent(book, catalog)
+            .subscribe(object : Subscriber<List<String>> {
+                override fun onFinish(t: List<String>) {
+                    val sb = java.lang.StringBuilder()
+                    sb.append(catalog.chapterName)
+                        .append("\n\n")
+                    for (line in t) {
+                        sb.append("        ")
+                        sb.append(line)
+                        sb.append("\n\n")
                     }
-                }
-                runOnUiThread {
                     preview_tv.text = sb.toString()
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                runOnUiThread {
+
+                override fun onError(e: Exception) {
+                    e.printStackTrace()
                     preview_tv.text = "解析错误，可以尝试重新打开该章节"
                 }
-            }
-        }).start()
+
+                override fun onMessage(message: String) {
+                }
+
+                override fun onProgress(progress: Int) {
+                }
+            })
     }
 
     private fun goNext() {
