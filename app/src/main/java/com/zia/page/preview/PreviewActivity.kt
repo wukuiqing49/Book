@@ -2,6 +2,7 @@ package com.zia.page.preview
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import com.zia.bookdownloader.R
 import com.zia.easybookmodule.bean.Book
@@ -86,11 +87,13 @@ class PreviewActivity : BaseActivity() {
 
         preview_theme_dark.setOnClickListener {
             defaultSharedPreferences.editor { putInt(themeSP, 1) }
+            preview_tv_next.setTextColor(resources.getColor(R.color.textWhite))
             setTvTheme(theme_dark)
         }
 
         preview_theme_white.setOnClickListener {
             defaultSharedPreferences.editor { putInt(themeSP, 0) }
+            preview_tv_next.setTextColor(resources.getColor(R.color.textBlack))
             setTvTheme(theme_white)
         }
 
@@ -129,7 +132,9 @@ class PreviewActivity : BaseActivity() {
                 }
 
                 override fun onError(e: Exception) {
-                    e.printStackTrace()
+                    if (e.message != null) {
+                        Log.d("PreviewActivity", e.message)
+                    }
                     preview_tv.text = "解析错误，可以尝试重新打开该章节"
                 }
 

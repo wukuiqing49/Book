@@ -57,7 +57,7 @@ public class NetBook implements Serializable {
         bookName = book.getBookName();
         author = book.getAuthor();
         url = book.getUrl();
-        chapterSize = book.getUrl();
+        chapterSize = book.getChapterSize();
         lastUpdateTime = book.getLastUpdateTime();
         lastChapterName = book.getLastChapterName();
         siteName = book.getSiteName();

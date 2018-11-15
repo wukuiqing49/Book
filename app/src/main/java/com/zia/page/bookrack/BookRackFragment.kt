@@ -3,6 +3,7 @@ package com.zia.page.bookrack
 
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,6 +30,7 @@ import java.util.concurrent.Executors
 class BookRackFragment : BaseFragment() {
 
     private var bookRackAdapter: BookRackAdapter? = null
+    private val service = Executors.newCachedThreadPool()
 
     //第一次加载时刷新
     companion object {
@@ -49,44 +51,49 @@ class BookRackFragment : BaseFragment() {
 
     /**
      * 拉取所有追更书籍最新章节
+     * 这样写可能发生内存泄漏
      */
     private fun pullBooks() {
         bookRack_sl.isRefreshing = true
-        Thread(Runnable {
-            val netBookDao = AppDatabase.getAppDatabase().netBookDao()
-            val netBooks = netBookDao.netBooks
-            val countDownLatch = CountDownLatch(netBooks.size)
-            val updateLatch = CountDownLatch(netBooks.size)
-            val format = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
-            val service = Executors.newFixedThreadPool(netBooks.size / 2)
-            for (netBook in netBooks) {
-                service.execute {
-                    val book = netBook.rawBook
-                    val site = book.site
-                    try {
-                        val html = NetUtil.getHtml(book.url, site.encodeType)
-                        val catalogs = netBook.rawBook.site.parseCatalog(html, book.url)
-                        if (netBook.lastCheckCount < catalogs.size) {
-                            netBook.currentCheckCount = catalogs.size
-                            netBook.lastChapterName = catalogs[catalogs.size - 1].chapterName
-                            netBook.lastUpdateTime = format.format(Date())
-                            netBookDao.update(netBook)
-                            updateLatch.countDown()
+        if (activity != null) {
+            Thread(Runnable {
+                val netBookDao = AppDatabase.getAppDatabase().netBookDao()
+                val netBooks = netBookDao.netBooks
+                val countDownLatch = CountDownLatch(netBooks.size)
+                val updateLatch = CountDownLatch(netBooks.size)
+                val format = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
+                for (netBook in netBooks) {
+                    Thread(Runnable {
+                        val book = netBook.rawBook
+                        val site = book.site
+                        try {
+                            val html = NetUtil.getHtml(book.url, site.encodeType)
+                            val catalogs = netBook.rawBook.site.parseCatalog(html, book.url)
+                            if (netBook.lastCheckCount < catalogs.size) {
+                                netBook.currentCheckCount = catalogs.size
+                                netBook.lastChapterName = catalogs[catalogs.size - 1].chapterName
+                                netBook.lastUpdateTime = format.format(Date())
+                                netBookDao.update(netBook)
+                                updateLatch.countDown()
+                            }
+                        } catch (e: java.lang.Exception) {
+                            e.printStackTrace()
+                        } finally {
+                            countDownLatch.countDown()
                         }
-                    } catch (e: java.lang.Exception) {
-                        e.printStackTrace()
-                    } finally {
-                        countDownLatch.countDown()
-                    }
+                    }).start()
                 }
-            }
-            countDownLatch.await()
-            activity?.runOnUiThread {
-                ToastEx.success(context!!, "${netBooks.size - updateLatch.count}章小说有更新").show()
-                bookRackAdapter?.fresh()
-                bookRack_sl.isRefreshing = false
-            }
-        }).start()
+                try {
+                    countDownLatch.await()
+                    activity?.runOnUiThread {
+                        ToastEx.success(context!!, "${netBooks.size - updateLatch.count}章小说有更新").show()
+                        bookRackAdapter?.fresh()
+                        bookRack_sl.isRefreshing = false
+                    }
+                } catch (ignore: Exception) {
+                }
+            }).start()
+        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -111,6 +118,8 @@ class BookRackFragment : BaseFragment() {
 
     override fun onStop() {
         super.onStop()
+        Log.e("BookRackFragment", "onStop")
+        service.shutdownNow()
         EventBus.getDefault().unregister(this)
     }
 }

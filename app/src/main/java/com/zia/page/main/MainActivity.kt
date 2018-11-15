@@ -7,7 +7,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.support.design.widget.BottomNavigationView
-import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
 import android.view.MenuItem
 import com.google.gson.Gson
@@ -16,8 +15,6 @@ import com.zia.bookdownloader.R
 import com.zia.database.bean.Config
 import com.zia.easybookmodule.net.NetUtil
 import com.zia.page.BaseActivity
-import com.zia.page.bookrack.BookRackFragment
-import com.zia.page.search.SearchFragment
 import com.zia.toastex.ToastEx
 import com.zia.util.FileUtil
 import com.zia.util.Version
@@ -30,15 +27,15 @@ import java.io.IOException
 
 class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
 
-    private val bookRackFragment = BookRackFragment()
-    private val searchFragment = SearchFragment()
     private lateinit var disposal: Disposable
+    private lateinit var mainPagerAdapter : MainPagerAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         main_nav.setOnNavigationItemSelectedListener(this@MainActivity)
-        transaction(bookRackFragment)
+        mainPagerAdapter = MainPagerAdapter(supportFragmentManager)
+        setViewPager()
         val rxPermissions = RxPermissions(this)
         disposal = rxPermissions.request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             .subscribe { ok ->
@@ -79,20 +76,19 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
         })
     }
 
-    private fun transaction(fragment: Fragment) {
-        val transaction = supportFragmentManager.beginTransaction()
-        transaction.replace(R.id.main_frame, fragment)
-        transaction.commit()
+    private fun setViewPager() {
+        main_vp.adapter = mainPagerAdapter
+        main_vp.offscreenPageLimit = 2
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.bookrack -> {
-                transaction(bookRackFragment)
+                main_vp.currentItem = 0
                 return true
             }
             R.id.search -> {
-                transaction(searchFragment)
+                main_vp.currentItem = 1
                 return true
             }
         }

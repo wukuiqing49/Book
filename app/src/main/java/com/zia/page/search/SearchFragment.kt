@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.util.Pair
 import android.view.LayoutInflater
 import android.view.View
@@ -72,7 +73,9 @@ class SearchFragment : BaseFragment(), BookAdapter.BookSelectListener {
                         }
 
                         override fun onError(e: Exception) {
-                            e.printStackTrace()
+                            if (e.message != null) {
+                                Log.d("SearchFragment", e.message)
+                            }
                             hideDialog()
                             if (e.message != null && context != null) {
                                 ToastEx.error(context!!, e.message!!).show()
