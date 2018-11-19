@@ -16,9 +16,6 @@ public interface LocalBookDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(LocalBook localBook);
 
-    @Delete
-    void delete(LocalBook localBook);
-
     @Query("delete from localBook where bookName = :bkname and siteName = :stname")
     void delete(String bkname, String stname);
 

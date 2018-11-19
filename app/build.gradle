@@ -10,8 +10,8 @@ android {
         applicationId "com.zia.bookdownloader"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 6
-        versionName "1.2.3"
+        versionCode 7
+        versionName "1.2.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         javaCompileOptions {
             annotationProcessorOptions {
@@ -49,7 +49,7 @@ dependencies {
     implementation 'com.tencent.bugly:nativecrashreport:3.3.1'
 
     implementation 'com.github.Zzzia:ToastEx:1.0.1'
-    implementation 'com.github.Zzzia:EasyBook:2.22'
+    implementation 'com.github.Zzzia:EasyBook:2.24'
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
 
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.2'

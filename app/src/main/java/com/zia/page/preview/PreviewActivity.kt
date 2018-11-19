@@ -7,7 +7,9 @@ import android.view.View
 import com.zia.bookdownloader.R
 import com.zia.easybookmodule.bean.Book
 import com.zia.easybookmodule.bean.Catalog
+import com.zia.easybookmodule.bean.Chapter
 import com.zia.easybookmodule.engine.EasyBook
+import com.zia.easybookmodule.engine.strategy.ContentStrategy
 import com.zia.easybookmodule.rx.Subscriber
 import com.zia.page.BaseActivity
 import com.zia.toastex.ToastEx
@@ -29,6 +31,7 @@ class PreviewActivity : BaseActivity() {
     private val theme_white = 0
     private val theme_dark = 1
     private var isControll = true
+    private val contentStrategy = ContentStrategy()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -120,15 +123,8 @@ class PreviewActivity : BaseActivity() {
         EasyBook.getContent(book, catalog)
             .subscribe(object : Subscriber<List<String>> {
                 override fun onFinish(t: List<String>) {
-                    val sb = java.lang.StringBuilder()
-                    sb.append(catalog.chapterName)
-                        .append("\n\n")
-                    for (line in t) {
-                        sb.append("        ")
-                        sb.append(line)
-                        sb.append("\n\n")
-                    }
-                    preview_tv.text = sb.toString()
+                    val chapter = Chapter(catalog.chapterName, catalog.index, t)
+                    preview_tv.text = contentStrategy.parseTxtContent(chapter)
                 }
 
                 override fun onError(e: Exception) {

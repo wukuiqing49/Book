@@ -66,7 +66,6 @@ public class NetBook implements Serializable {
     }
 
     public Book getRawBook() {
-        Log.e("NetBook", toString());
         return new Book(bookName, author, url, chapterSize, lastUpdateTime, lastChapterName, siteName);
     }
 

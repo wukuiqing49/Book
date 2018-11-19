@@ -12,6 +12,6 @@
 * 并发搜索下载，并支持EPUB和TXT格式，再也不用慢吞吞地下载了。
 
 
-[Android下载](http://qiniu.zzzia.net/book_v1.2.3.apk)
+[Android下载](http://qiniu.zzzia.net/book_v1.2.4.apk)
 
 <img src="https://github.com/Zzzia/EasyBook/blob/master/screenshot/book2.png" width="280"><img src="https://github.com/Zzzia/EasyBook/blob/master/screenshot/book3.png" width="280"><img src="https://github.com/Zzzia/EasyBook/blob/master/screenshot/book4.png" width="280">

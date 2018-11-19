@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.zia.bookdownloader.R
@@ -46,6 +47,7 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener {
         dialog.setCancelable(false)
         dialog.progress = 0
         dialog.setTitle("正在下载")
+        dialog.setMessage("")
         dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
         dialog
     }
@@ -156,6 +158,8 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener {
     }
 
     private fun download(type: Type) {
+        updateDialog(0)
+        updateDialog("")
         downloadDisposable = EasyBook.download(book)
             .setType(type)
             .setSavePath(Environment.getExternalStorageDirectory().path + File.separator + "book")
@@ -163,8 +167,10 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener {
                 override fun onFinish(p0: File) {
                     hideDialog()
                     if (p0.length() != 0L) {
+                        Log.e("BookActivity", p0.path + File.separator + p0.name)
                         val localBook = LocalBook(p0.path, book)
                         Thread(Runnable {
+                            AppDatabase.getAppDatabase().localBookDao().delete(localBook.bookName, localBook.siteName)
                             AppDatabase.getAppDatabase().localBookDao().insert(localBook)
                             runOnUiThread { EventBus.getDefault().post(FreshEvent()) }
                         }).start()

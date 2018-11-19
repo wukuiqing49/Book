@@ -5,9 +5,11 @@ import android.app.Activity
 import android.app.ActivityOptions
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.util.Pair
 import android.view.LayoutInflater
 import android.view.View
@@ -19,7 +21,6 @@ import com.zia.database.bean.NetBook
 import com.zia.easybookmodule.bean.Book
 import com.zia.page.book.BookActivity
 import com.zia.toastex.ToastEx
-import com.zia.util.FileUtil
 import com.zia.util.Java2Kotlin
 import kotlinx.android.synthetic.main.item_book.view.*
 import kotlinx.android.synthetic.main.item_text.view.*
@@ -113,13 +114,12 @@ class BookRackAdapter(private val recyclerView: RecyclerView) : RecyclerView.Ada
                     //更新检查记录，判断是否有更新
                     if (book.lastCheckCount < book.currentCheckCount) {
                         holder.itemView.item_book_lastUpdateTime.background = null
-                        Thread(Runnable {
-                            book.lastCheckCount = book.currentCheckCount
-                            AppDatabase.getAppDatabase().netBookDao().update(book)
-                        }).start()
                     }
                     //更新时间
                     Thread(Runnable {
+                        if (book.lastCheckCount < book.currentCheckCount) {
+                            book.lastCheckCount = book.currentCheckCount
+                        }
                         book.time = Date().time
                         AppDatabase.getAppDatabase().netBookDao().update(book)
                     }).start()
@@ -160,7 +160,6 @@ class BookRackAdapter(private val recyclerView: RecyclerView) : RecyclerView.Ada
                                 AppDatabase.getAppDatabase().netBookDao().delete(book.bookName, book.siteName)
                                 (context as Activity).runOnUiThread {
                                     ToastEx.success(context, "删除成功").show()
-                                    fresh()
                                 }
                             }).start()
                         }
@@ -182,11 +181,10 @@ class BookRackAdapter(private val recyclerView: RecyclerView) : RecyclerView.Ada
                     val file = File(localBookList!![p].filePath)
                     val intent = Intent(Intent.ACTION_VIEW)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    } else {
-                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     }
-                    intent.setDataAndType(FileUtil.getFileUri(context, file), "text/plain")
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    intent.setDataAndType(Uri.parse(file.path), "text/plain")
                     try {
                         context.startActivity(intent)
                     } catch (e: Exception) {

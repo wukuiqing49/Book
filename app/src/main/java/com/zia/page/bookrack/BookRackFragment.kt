@@ -34,6 +34,7 @@ class BookRackFragment : BaseFragment() {
 
     //第一次加载时刷新
     companion object {
+        @Volatile
         private var refresh = true
     }
 
@@ -47,6 +48,7 @@ class BookRackFragment : BaseFragment() {
             pullBooks()
             refresh = false
         }
+        bookRackAdapter?.fresh()
     }
 
     /**
@@ -118,7 +120,6 @@ class BookRackFragment : BaseFragment() {
 
     override fun onStop() {
         super.onStop()
-        Log.e("BookRackFragment", "onStop")
         service.shutdownNow()
         EventBus.getDefault().unregister(this)
     }
