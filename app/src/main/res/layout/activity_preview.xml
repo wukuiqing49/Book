@@ -24,7 +24,7 @@
 					android:paddingLeft="25dp"
 					android:paddingRight="25dp"
 					android:paddingTop="15dp"
-					android:paddingBottom="15dp"
+					android:paddingBottom="5dp"
 					android:id="@+id/preview_tv"
 					android:textSize="20sp"
 					android:lineSpacingMultiplier="1.4"
@@ -38,7 +38,7 @@
 					android:text="下一章"
 					android:textSize="20sp"
 					android:gravity="center"
-					android:padding="10dp"
+					android:paddingBottom="10dp"
 					android:textColor="@color/textBlack"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"/>

@@ -5,6 +5,7 @@ import android.content.Context;
 import com.facebook.stetho.Stetho;
 import com.squareup.leakcanary.LeakCanary;
 import com.tencent.bugly.crashreport.CrashReport;
+import com.zia.util.threadPool.DefaultExecutorSupplier;
 
 /**
  * Created by zia on 2018/11/2.
@@ -26,6 +27,8 @@ public class App extends Application {
             return;
         }
         LeakCanary.install(this);
+        //初始化线程池
+        DefaultExecutorSupplier.getInstance();
     }
 
     public static Context getContext() {

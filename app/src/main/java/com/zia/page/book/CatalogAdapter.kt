@@ -1,6 +1,5 @@
 package com.zia.page.book
 
-import android.annotation.SuppressLint
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -8,7 +7,6 @@ import android.view.ViewGroup
 import com.zia.bookdownloader.R
 import com.zia.easybookmodule.bean.Catalog
 import kotlinx.android.synthetic.main.item_catalog.view.*
-import java.util.*
 
 
 /**
@@ -17,13 +15,20 @@ import java.util.*
 class CatalogAdapter(private val catalogSelectListener: CatalogSelectListener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    var catalogs: ArrayList<Catalog>? = null
+    var catalogs: List<Catalog>? = null
     var history = 0
 
-    fun freshCatalogs(catalogs: ArrayList<Catalog>, history: Int) {
+    fun freshCatalogs(catalogs: List<Catalog>, history: Int) {
         this.catalogs = catalogs
-        this.history = catalogs.size - history - 1
+        this.history = history
         notifyDataSetChanged()
+    }
+
+    fun freshBookMark(history: Int) {
+        if (catalogs != null) {
+            this.history = history
+            notifyDataSetChanged()
+        }
     }
 
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): RecyclerView.ViewHolder {
@@ -38,7 +43,6 @@ class CatalogAdapter(private val catalogSelectListener: CatalogSelectListener) :
         }
     }
 
-    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is CatalogHolder -> {

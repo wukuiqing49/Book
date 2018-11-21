@@ -1,37 +1,28 @@
 package com.zia.page.preview
 
 import android.annotation.SuppressLint
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import com.zia.bookdownloader.R
-import com.zia.easybookmodule.bean.Book
-import com.zia.easybookmodule.bean.Catalog
-import com.zia.easybookmodule.bean.Chapter
-import com.zia.easybookmodule.engine.EasyBook
-import com.zia.easybookmodule.engine.strategy.ContentStrategy
-import com.zia.easybookmodule.rx.Subscriber
-import com.zia.page.BaseActivity
+import com.zia.page.base.BaseActivity
 import com.zia.toastex.ToastEx
-import com.zia.util.BookMarkUtil
-import com.zia.util.CatalogsHolder
+import com.zia.util.ToastUtil
 import com.zia.util.defaultSharedPreferences
 import com.zia.util.editor
 import kotlinx.android.synthetic.main.activity_preview.*
-import java.util.*
 
 class PreviewActivity : BaseActivity() {
 
-    private var catalogs: ArrayList<Catalog>? = null//逆序小说目录
-    private lateinit var book: Book
-    private var position: Int = 0
     private val textSizeSP = "textSize"
     private val themeSP = "theme"
-    private val loading = "加载中..."
     private val theme_white = 0
     private val theme_dark = 1
     private var isControll = true
-    private val contentStrategy = ContentStrategy()
+
+    private lateinit var viewModel: PreviewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,28 +32,26 @@ class PreviewActivity : BaseActivity() {
         setTextSize(defaultSharedPreferences.getFloat(textSizeSP, 20f))
         setTvTheme(defaultSharedPreferences.getInt(themeSP, 0))
 
-        Thread(Runnable {
-            catalogs = CatalogsHolder.getInstance().catalogs
-            if (catalogs == null) {
-                runOnUiThread {
-                    ToastEx.error(this@PreviewActivity, "性能不足...").show()
-                    finish()
-                }
-            }
-            book = intent.getSerializableExtra("book") as Book
-            position = intent.getIntExtra("position", 0)
+        viewModel = ViewModelProviders.of(this).get(PreviewModel::class.java)
 
-            runOnUiThread { loadCatalog() }
-        }).start()
+        initObserver()
 
+        preview_tv.text = "加载中.."
+        viewModel.loadContent()
 
         preview_back.setOnClickListener { finish() }
 
-        preview_previous.setOnClickListener { goPrevious() }
+        preview_previous.setOnClickListener {
+            viewModel.goPrevious()
+        }
 
-        preview_next.setOnClickListener { goNext() }
+        preview_next.setOnClickListener {
+            viewModel.goNext()
+        }
 
-        preview_tv_next.setOnClickListener { goNext() }
+        preview_tv_next.setOnClickListener {
+            viewModel.goNext()
+        }
 
         preview_increase.setOnClickListener {
             val size = defaultSharedPreferences.getFloat(textSizeSP, 20f)
@@ -110,62 +99,27 @@ class PreviewActivity : BaseActivity() {
         }
     }
 
-    @SuppressLint("SetTextI18n")
-    private fun loadCatalog() {
-        if (catalogs == null) {
-            ToastEx.error(this@PreviewActivity, "内存不足，无法加载").show()
-            return
-        }
-        val catalog = catalogs!![position]
-        preview_title.text = catalog.chapterName
-        preview_progress.text = "${catalogs!!.size - position} / ${catalogs!!.size}"
-        BookMarkUtil.insertOrUpdate(catalogs!!.size - position - 1, book.bookName, book.siteName)
-        EasyBook.getContent(book, catalog)
-            .subscribe(object : Subscriber<List<String>> {
-                override fun onFinish(t: List<String>) {
-                    val chapter = Chapter(catalog.chapterName, catalog.index, t)
-                    preview_tv.text = contentStrategy.parseTxtContent(chapter)
-                }
+    private fun initObserver() {
+        viewModel.result.observe(this, Observer {
+            preview_tv.text = it
+        })
 
-                override fun onError(e: Exception) {
-                    if (e.message != null) {
-                        Log.d("PreviewActivity", e.message)
-                    }
-                    preview_tv.text = "解析错误，可以尝试重新打开该章节"
-                }
+        viewModel.progress.observe(this, Observer {
+            preview_progress.text = it
+        })
 
-                override fun onMessage(message: String) {
-                }
+        viewModel.title.observe(this, Observer {
+            preview_title.text = it
+        })
 
-                override fun onProgress(progress: Int) {
-                }
-            })
-    }
+        viewModel.error.observe(this, Observer {
+            it?.printStackTrace()
+            ToastUtil.onError(this@PreviewActivity, it?.message)
+        })
 
-    private fun goNext() {
-        val p = position - 1
-        if (p >= 0) {
-            position = p
-            preview_tv.text = loading
-            loadCatalog()
-        } else {
-            ToastEx.info(this@PreviewActivity, "没有下一章了").show()
-        }
-    }
-
-    private fun goPrevious() {
-        if (catalogs == null) {
-            ToastEx.error(this@PreviewActivity, "内存不足，无法加载").show()
-            return
-        }
-        val p = position + 1
-        if (p < catalogs!!.size) {
-            position = p
-            preview_tv.text = loading
-            loadCatalog()
-        } else {
-            ToastEx.info(this@PreviewActivity, "没有上一章了").show()
-        }
+        viewModel.toast.observe(this, Observer {
+            ToastUtil.onNormal(this@PreviewActivity, it)
+        })
     }
 
     @SuppressLint("SetTextI18n")
@@ -179,12 +133,13 @@ class PreviewActivity : BaseActivity() {
             theme_white -> {
                 preview_scrollView.setBackgroundColor(resources.getColor(R.color.preview_theme_white))
                 preview_tv.setTextColor(resources.getColor(R.color.textBlack))
+                preview_tv_next.setTextColor(resources.getColor(R.color.textBlack))
             }
             theme_dark -> {
                 preview_scrollView.setBackgroundColor(resources.getColor(R.color.preview_theme_dark))
                 preview_tv.setTextColor(resources.getColor(R.color.textWhite))
+                preview_tv_next.setTextColor(resources.getColor(R.color.textWhite))
             }
         }
     }
-
 }

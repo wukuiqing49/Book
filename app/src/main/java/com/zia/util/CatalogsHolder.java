@@ -4,23 +4,25 @@ import com.zia.easybookmodule.bean.Book;
 import com.zia.easybookmodule.bean.Catalog;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by zia on 2018/11/7.
  */
 public class CatalogsHolder {
 
-    private ArrayList<Catalog> catalogs = null;
+    private List<Catalog> catalogs = null;
     private Book book = null;
+    private int position = 0;
 
-    public void setCatalogs(ArrayList<Catalog> catalogs, Book book) {
+    public void setCatalogs(List<Catalog> catalogs, Book book, int position) {
         this.catalogs = catalogs;
         this.book = book;
+        this.position = position;
     }
 
     public @Nullable
-    ArrayList<Catalog> getCatalogs() {
+    List<Catalog> getCatalogs() {
         return catalogs;
     }
 
@@ -29,9 +31,19 @@ public class CatalogsHolder {
         return book;
     }
 
+    public @Nullable
+    int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
+
     public void clean() {
         catalogs = null;
         book = null;
+        position = 0;
     }
 
     private CatalogsHolder() {

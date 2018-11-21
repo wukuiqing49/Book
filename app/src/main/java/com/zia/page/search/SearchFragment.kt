@@ -3,24 +3,22 @@ package com.zia.page.search
 
 import android.app.ActivityOptions
 import android.app.ProgressDialog
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
-import android.util.Log
 import android.util.Pair
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.zia.bookdownloader.R
 import com.zia.easybookmodule.bean.Book
-import com.zia.easybookmodule.engine.EasyBook
-import com.zia.easybookmodule.rx.Disposable
-import com.zia.easybookmodule.rx.Subscriber
-import com.zia.page.BaseFragment
+import com.zia.page.base.BaseFragment
 import com.zia.page.book.BookActivity
-import com.zia.toastex.ToastEx
 import com.zia.util.Java2Kotlin
+import com.zia.util.ToastUtil
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.item_book.view.*
 
@@ -32,7 +30,7 @@ import kotlinx.android.synthetic.main.item_book.view.*
 class SearchFragment : BaseFragment(), BookAdapter.BookSelectListener {
 
     private lateinit var bookAdapter: BookAdapter
-    private var searchDisposable: Disposable? = null
+    private lateinit var viewModel: SearchViewModel
     private val dialog by lazy {
         val dialog = ProgressDialog(context)
         dialog.setCancelable(true)
@@ -42,79 +40,79 @@ class SearchFragment : BaseFragment(), BookAdapter.BookSelectListener {
         dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
         dialog.show()
         dialog.setOnCancelListener {
-            searchDisposable?.dispose()
+            viewModel.shutDown()
         }
         dialog
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_search, container, false)
-    }
-
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
+        viewModel = ViewModelProviders.of(this).get(SearchViewModel::class.java)
+
+        viewModel.loadBooks.observe(this, Observer<List<Book>> {
+            if (it != null) {
+                ToastUtil.onSuccess(context, "搜索到${it.size}本书籍")
+                bookAdapter.freshBooks(ArrayList(it))
+                searchRv.scrollToPosition(0)
+                hideDialog()
+            }
+        })
+
+        viewModel.error.observe(this, Observer {
+            it?.printStackTrace()
+            ToastUtil.onError(context, it?.message)
+            hideDialog()
+        })
+
+        viewModel.toast.observe(this, Observer {
+            ToastUtil.onInfo(context, it)
+        })
+
+        viewModel.dialogMessage.observe(this, Observer {
+            updateDialog(it)
+        })
+
+        viewModel.dialogProgress.observe(this, Observer {
+            updateDialog(it)
+        })
 
         bookAdapter = BookAdapter(this)
         searchRv.layoutManager = LinearLayoutManager(context)
         searchRv.adapter = bookAdapter
 
         searchBt.setOnClickListener {
-            searchDisposable?.dispose()
-            updateDialog(0)
-            updateDialog("")
+            viewModel.shutDown()
             val bookName = searchEt.text?.toString()
             if (bookName != null && bookName.isNotEmpty()) {
-                searchDisposable = EasyBook.search(bookName)
-                    .subscribe(object : Subscriber<List<Book>> {
-                        override fun onFinish(t: List<Book>) {
-                            ToastEx.success(context!!, "搜索到${t.size}本书籍").show()
-                            bookAdapter.freshBooks(ArrayList(t))
-                            hideDialog()
-                        }
-
-                        override fun onError(e: Exception) {
-                            if (e.message != null) {
-                                Log.d("SearchFragment", e.message)
-                            }
-                            hideDialog()
-                            if (e.message != null && context != null) {
-                                ToastEx.error(context!!, e.message!!).show()
-                            }
-                        }
-
-                        override fun onMessage(message: String) {
-                            updateDialog(message)
-
-                        }
-
-                        override fun onProgress(progress: Int) {
-                            updateDialog(progress)
-                        }
-                    })
+                initDialog()
+                viewModel.search(bookName)
             }
-            searchRv.scrollToPosition(0)
         }
     }
 
+    private fun initDialog() {
+        updateDialog(0)
+        updateDialog("")
+    }
+
     override fun onBookSelect(itemView: View, book: Book) {
-        activity?.runOnUiThread {
-            val intent = Intent(context, BookActivity::class.java)
-            intent.putExtra("book", book)
-            intent.putExtra("scroll", false)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                val p = arrayListOf<Pair<View, String>>(
-                    Pair.create(itemView.item_book_layout, "book"),
-                    Pair.create(itemView.item_book_name, "book_name"),
-                    Pair.create(itemView.item_book_author, "book_author"),
-                    Pair.create(itemView.item_book_lastUpdateChapter, "book_lastUpdateChapter"),
-                    Pair.create(itemView.item_book_lastUpdateTime, "book_lastUpdateTime"),
-                    Pair.create(itemView.item_book_site, "book_site")
-                )
-                val options = ActivityOptions.makeSceneTransitionAnimation(activity, *Java2Kotlin.getPairs(p))
-                startActivity(intent, options.toBundle())
-            } else {
-                startActivity(intent)
-            }
+        val intent = Intent(context, BookActivity::class.java)
+        intent.putExtra("book", book)
+        intent.putExtra("scroll", false)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            val p = arrayListOf<Pair<View, String>>(
+                Pair.create(itemView.item_book_layout, "book"),
+                Pair.create(itemView.item_book_name, "book_name"),
+                Pair.create(itemView.item_book_author, "book_author"),
+                Pair.create(itemView.item_book_lastUpdateChapter, "book_lastUpdateChapter"),
+                Pair.create(itemView.item_book_lastUpdateTime, "book_lastUpdateTime"),
+                Pair.create(itemView.item_book_site, "book_site")
+            )
+            val options = ActivityOptions.makeSceneTransitionAnimation(activity, *Java2Kotlin.getPairs(p))
+            startActivity(intent, options.toBundle())
+        } else {
+            startActivity(intent)
         }
     }
 
@@ -140,8 +138,7 @@ class SearchFragment : BaseFragment(), BookAdapter.BookSelectListener {
         dialog.dismiss()
     }
 
-    override fun onDestroy() {
-        searchDisposable?.dispose()
-        super.onDestroy()
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_search, container, false)
     }
 }

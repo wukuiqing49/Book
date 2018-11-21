@@ -1,56 +1,46 @@
 package com.zia.page.bookrack
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.app.ActivityOptions
-import android.content.Intent
 import android.graphics.Color
-import android.net.Uri
-import android.os.Build
-import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
-import android.util.Log
-import android.util.Pair
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.zia.bookdownloader.R
-import com.zia.database.AppDatabase
 import com.zia.database.bean.LocalBook
 import com.zia.database.bean.NetBook
-import com.zia.easybookmodule.bean.Book
-import com.zia.page.book.BookActivity
-import com.zia.toastex.ToastEx
-import com.zia.util.Java2Kotlin
 import kotlinx.android.synthetic.main.item_book.view.*
 import kotlinx.android.synthetic.main.item_text.view.*
-import java.io.File
-import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  * Created by zia on 2018/11/2.
  */
-class BookRackAdapter(private val recyclerView: RecyclerView) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class BookRackAdapter(private val recyclerView: RecyclerView, private val onBookRackSelect: OnBookRackSelect) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private var netBookList: ArrayList<NetBook>? = null
-    private var localBookList: ArrayList<LocalBook>? = null
+    public var netBookList: List<NetBook>? = null
+    private var localBookList: List<LocalBook>? = null
 
     private val TYPE_TEXT_LOCAL = 1000
     private val TYPE_TEXT_NET = 1001
     private val TYPE_LOCAL = 1002
     private val TYPE_NET = 1004
 
-    init {
-        fresh()
+    interface OnBookRackSelect {
+        fun onNetBookSelected(viewHolder: RecyclerView.ViewHolder, netBook: NetBook, position: Int)
+        fun onNetBookPressed(viewHolder: RecyclerView.ViewHolder, netBook: NetBook, position: Int)
+        fun onLocalBookSelected(viewHolder: RecyclerView.ViewHolder, localBook: LocalBook, position: Int)
+        fun onLocalBookPressed(viewHolder: RecyclerView.ViewHolder, localBook: LocalBook, position: Int)
     }
 
-    fun fresh() {
-        Thread(Runnable {
-            localBookList = ArrayList(AppDatabase.getAppDatabase().localBookDao().localBooks)
-            netBookList = ArrayList(AppDatabase.getAppDatabase().netBookDao().netBooks)
-            recyclerView.post { notifyDataSetChanged() }
-        }).start()
+    fun freshNetBooks(netBookList: List<NetBook>) {
+        this.netBookList = netBookList
+        recyclerView.post { notifyDataSetChanged() }
+    }
+
+    fun freshLocalBooks(localBookList: List<LocalBook>) {
+        this.localBookList = localBookList
+        recyclerView.post { notifyDataSetChanged() }
     }
 
     override fun onCreateViewHolder(p0: ViewGroup, viewtype: Int): RecyclerView.ViewHolder {
@@ -110,66 +100,14 @@ class BookRackAdapter(private val recyclerView: RecyclerView) : RecyclerView.Ada
                 holder.itemView.item_book_lastUpdateChapter.text = "最新：${book.lastChapterName}"
                 holder.itemView.item_book_site.text = book.siteName
                 holder.itemView.item_book_lastUpdateTime.text = "更新：${book.lastUpdateTime}"
-                holder.itemView.setOnClickListener {
-                    //更新检查记录，判断是否有更新
-                    if (book.lastCheckCount < book.currentCheckCount) {
-                        holder.itemView.item_book_lastUpdateTime.background = null
-                    }
-                    //更新时间
-                    Thread(Runnable {
-                        if (book.lastCheckCount < book.currentCheckCount) {
-                            book.lastCheckCount = book.currentCheckCount
-                        }
-                        book.time = Date().time
-                        AppDatabase.getAppDatabase().netBookDao().update(book)
-                    }).start()
-                    val intent = Intent(context, BookActivity::class.java)
-                    val realBook = Book(
-                        book.bookName,
-                        book.author,
-                        book.url,
-                        book.chapterSize,
-                        book.lastUpdateTime,
-                        book.lastChapterName,
-                        book.siteName
-                    )
-                    intent.putExtra("book", realBook)
-                    intent.putExtra("canAddFav", false)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        val p = arrayListOf<Pair<View, String>>(
-                            Pair.create(holder.itemView.item_book_layout, "book"),
-                            Pair.create(holder.itemView.item_book_name, "book_name"),
-                            Pair.create(holder.itemView.item_book_author, "book_author"),
-                            Pair.create(holder.itemView.item_book_lastUpdateChapter, "book_lastUpdateChapter"),
-                            Pair.create(holder.itemView.item_book_lastUpdateTime, "book_lastUpdateTime"),
-                            Pair.create(holder.itemView.item_book_site, "book_site")
-                        )
-                        val options =
-                            ActivityOptions.makeSceneTransitionAnimation(context as Activity, *Java2Kotlin.getPairs(p))
-                        context.startActivity(intent, options.toBundle())
-                    } else {
-                        context.startActivity(intent)
-                    }
-                }
+
+                holder.itemView.setOnClickListener { onBookRackSelect.onNetBookSelected(holder, book, position) }
                 holder.itemView.setOnLongClickListener {
-                    AlertDialog.Builder(context)
-                        .setTitle("是否删除${book.bookName}")
-                        .setNegativeButton("取消", null)
-                        .setPositiveButton("确定") { _, _ ->
-                            Thread(Runnable {
-                                AppDatabase.getAppDatabase().netBookDao().delete(book.bookName, book.siteName)
-                                (context as Activity).runOnUiThread {
-                                    ToastEx.success(context, "删除成功").show()
-                                }
-                            }).start()
-                        }
-                        .setCancelable(true)
-                        .show()
+                    onBookRackSelect.onNetBookPressed(holder, book, position)
                     true
                 }
             }
             TYPE_LOCAL -> {
-                val context = holder.itemView.context
                 val p = position - getFavTextIndex() - 1
                 val book = localBookList!![p]
                 holder.itemView.item_book_name.text = book.bookName
@@ -177,37 +115,9 @@ class BookRackAdapter(private val recyclerView: RecyclerView) : RecyclerView.Ada
                 holder.itemView.item_book_lastUpdateChapter.text = "最新：${book.lastChapterName}"
                 holder.itemView.item_book_site.text = book.site
                 holder.itemView.item_book_lastUpdateTime.text = "更新：${book.lastUpdateTime}"
-                holder.itemView.setOnClickListener {
-                    val file = File(localBookList!![p].filePath)
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    }
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    intent.setDataAndType(Uri.parse(file.path), "text/plain")
-                    try {
-                        context.startActivity(intent)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        ToastEx.error(context, "无法调用第三方阅读器").show()
-                    }
-                }
+                holder.itemView.setOnClickListener { onBookRackSelect.onLocalBookSelected(holder, book, position) }
                 holder.itemView.setOnLongClickListener {
-                    AlertDialog.Builder(context)
-                        .setTitle("是否删除${book.bookName}")
-                        .setNegativeButton("取消", null)
-                        .setPositiveButton("确定") { _, _ ->
-                            Thread(Runnable {
-                                AppDatabase.getAppDatabase().localBookDao().delete(book.bookName, book.siteName)
-                                File(book.filePath).delete()
-                                (context as Activity).runOnUiThread {
-                                    ToastEx.success(context, "删除成功").show()
-                                    fresh()
-                                }
-                            }).start()
-                        }
-                        .setCancelable(true)
-                        .show()
+                    onBookRackSelect.onLocalBookPressed(holder, book, position)
                     true
                 }
             }

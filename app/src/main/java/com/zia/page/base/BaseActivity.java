@@ -1,4 +1,4 @@
-package com.zia.page;
+package com.zia.page.base;
 
 import android.support.v7.app.AppCompatActivity;
 

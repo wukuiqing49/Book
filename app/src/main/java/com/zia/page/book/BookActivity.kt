@@ -2,36 +2,25 @@ package com.zia.page.book
 
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
-import android.util.Log
 import android.view.View
-import android.widget.Toast
 import com.zia.bookdownloader.R
-import com.zia.database.AppDatabase
-import com.zia.database.bean.LocalBook
-import com.zia.database.bean.NetBook
 import com.zia.easybookmodule.bean.Book
-import com.zia.easybookmodule.bean.Catalog
 import com.zia.easybookmodule.bean.Type
-import com.zia.easybookmodule.engine.EasyBook
 import com.zia.easybookmodule.rx.Disposable
-import com.zia.easybookmodule.rx.Subscriber
-import com.zia.event.FreshEvent
-import com.zia.page.BaseActivity
+import com.zia.page.base.BaseActivity
 import com.zia.page.preview.PreviewActivity
 import com.zia.toastex.ToastEx
-import com.zia.util.BookMarkUtil
 import com.zia.util.CatalogsHolder
+import com.zia.util.ToastUtil
 import kotlinx.android.synthetic.main.activity_book.*
-import org.greenrobot.eventbus.EventBus
-import java.io.File
-import java.util.*
 
 
 class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener {
@@ -41,6 +30,9 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener {
     private lateinit var adapter: CatalogAdapter
     private var catalogDisposable: Disposable? = null
     private var downloadDisposable: Disposable? = null
+    private var isFinished = false
+
+    private lateinit var viewModel: BookViewModel
 
     private val dialog by lazy {
         val dialog = ProgressDialog(this)
@@ -61,6 +53,7 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener {
 
         book = intent.getSerializableExtra("book") as Book
         scroll = intent.getBooleanExtra("scroll", true)
+        val canAddFav = intent.getBooleanExtra("canAddFav", true)
 
         book_name.text = book.bookName
         book_author.text = book.author
@@ -69,81 +62,79 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener {
         book_lastUpdateTime.text = "更新：${book.lastUpdateTime}"
 
         adapter = CatalogAdapter(this)
-        catalogRv.layoutManager = LinearLayoutManager(this)
         catalogRv.adapter = adapter
 
-        val bookCache = CatalogsHolder.getInstance().netBook
-        if (bookCache != null && bookCache.site.siteName == book.site.siteName
-            && bookCache.bookName == book.bookName
-        ) {
-            adapter.catalogs = CatalogsHolder.getInstance().catalogs!!
-            freshBookMark()
-            book_loading.visibility = View.GONE
-        } else {
-            catalogDisposable = EasyBook.getCatalog(book)
-                .subscribe(object : Subscriber<List<Catalog>> {
-                    override fun onFinish(p0: List<Catalog>) {
-                        val arrayList = ArrayList<Catalog>(p0)
-                        arrayList.reverse()
-                        adapter.catalogs = arrayList
-                        freshBookMark()
-                        book_loading.visibility = View.GONE
-                    }
+        val layoutManager = LinearLayoutManager(this)
+        layoutManager.stackFromEnd = true
+        layoutManager.reverseLayout = true
+        catalogRv.layoutManager = layoutManager
 
-                    override fun onMessage(p0: String) {
-                    }
+        viewModel = ViewModelProviders.of(this).get(BookViewModel::class.java)
+        initObservers()
 
-                    override fun onProgress(p0: Int) {
-                    }
+        book_download.setOnClickListener { chooseType() }
 
-                    override fun onError(p0: java.lang.Exception) {
-                        p0.printStackTrace()
-                        book_loading.text = "加载失败"
-                    }
-
-                })
-        }
-
-        book_download.setOnClickListener {
-            chooseType()
-        }
-
-        val canAddFav = intent.getBooleanExtra("canAddFav", true)
-        if (!canAddFav) {
+        //添加到书架
+        if (!canAddFav) {//从书架打开
             book_favorite.setBackgroundColor(Color.GRAY)
             book_favorite.setOnClickListener { ToastEx.info(this@BookActivity, "已经在书架了").show() }
         } else {
             book_favorite.setOnClickListener {
                 if (adapter.itemCount == 0) {
-                    ToastEx.warning(this, "需要解析目录后才能添加").show()
+                    ToastUtil.onWarning(this@BookActivity, "需要解析目录后才能添加")
                     return@setOnClickListener
                 }
-                Thread(Runnable {
-                    val book = AppDatabase.getAppDatabase().netBookDao().getNetBook(book.bookName, book.site.siteName)
-                    if (book == null) {
-                        AppDatabase.getAppDatabase().netBookDao().insert(NetBook(this.book, adapter.itemCount))
-                        runOnUiThread {
-                            ToastEx.success(this@BookActivity, "添加书架成功").show()
-                            EventBus.getDefault().post(FreshEvent())
-                        }
-                    } else {
-                        runOnUiThread {
-                            ToastEx.info(this@BookActivity, "已经添加过了").show()
-                        }
-                    }
-                }).start()
+                viewModel.insertBookIntoBookRack(book, adapter.itemCount)
             }
         }
+
+        //在onResume中加载目录
+    }
+
+    private fun initObservers() {
+        viewModel.onCatalogUpdate.observe(this, Observer {
+            if (it != null && viewModel.history.value != null) {
+                book_loading.visibility = View.GONE
+                adapter.freshCatalogs(it, viewModel.history.value!!)
+                if (scroll) {
+                    catalogRv.smoothScrollToPosition(viewModel.history.value!!)
+                }
+            }
+        })
+
+        viewModel.savedFile.observe(this, Observer {
+            if (it != null) {
+                ToastUtil.onSuccess(this@BookActivity, "保存成功，路径为${it.path}")
+            } else {
+                ToastUtil.onError(this@BookActivity, "保存失败")
+            }
+            hideDialog()
+        })
+
+        viewModel.dialogProgress.observe(this, Observer { updateDialog(it) })
+
+        viewModel.dialogMessage.observe(this, Observer { updateDialog(it) })
+
+        viewModel.error.observe(this, Observer {
+            hideDialog()
+            val text = "解析失败，点击重试" + "\n" + it?.message
+            book_loading.text = text
+            book_loading.setOnClickListener {
+                book_loading.setOnClickListener(null)
+                viewModel.loadCatalog(book)
+            }
+        })
+
+        viewModel.toast.observe(this, Observer { ToastUtil.onNormal(this@BookActivity, it) })
     }
 
     private fun chooseType() {
-        val types = arrayOf("EPUB", "TXT")
+        val types = arrayOf("EPUB(推荐)", "TXT")
         val style =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) android.R.style.Theme_Material_Light_Dialog
-            else android.R.style.Theme_DeviceDefault_Light_Dialog
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) android.R.style.ThemeOverlay_Material_Dialog
+            else android.R.style.Theme_DeviceDefault_Light_Dialog_NoActionBar_MinWidth
         AlertDialog.Builder(this, style)
-            .setTitle("选择下载格式")
-            .setItems(types) { dialog, which ->
+            .setItems(types) { _, which ->
                 var type = Type.EPUB
                 when (which) {
                     0 -> {
@@ -160,40 +151,20 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener {
     private fun download(type: Type) {
         updateDialog(0)
         updateDialog("")
-        downloadDisposable = EasyBook.download(book)
-            .setType(type)
-            .setSavePath(Environment.getExternalStorageDirectory().path + File.separator + "book")
-            .subscribe(object : Subscriber<File> {
-                override fun onFinish(p0: File) {
-                    hideDialog()
-                    if (p0.length() != 0L) {
-                        Log.e("BookActivity", p0.path + File.separator + p0.name)
-                        val localBook = LocalBook(p0.path, book)
-                        Thread(Runnable {
-                            AppDatabase.getAppDatabase().localBookDao().delete(localBook.bookName, localBook.siteName)
-                            AppDatabase.getAppDatabase().localBookDao().insert(localBook)
-                            runOnUiThread { EventBus.getDefault().post(FreshEvent()) }
-                        }).start()
-                    }
-                }
+        //在viewModel中进行了数据库插入和通知bookRackFragment刷新界面
+        viewModel.downloadBook(book, type)
+    }
 
-                override fun onMessage(p0: String) {
-                    updateDialog(p0)
-                }
+    override fun onCatalogSelect(itemView: View, position: Int) {
+        if (adapter.catalogs == null) return
+        //更新书签
+        viewModel.insertBookMark(book, position)
 
-                override fun onProgress(p0: Int) {
-                    updateDialog(p0)
-                }
-
-                override fun onError(p0: Exception) {
-                    p0.printStackTrace()
-                    hideDialog()
-                    if (p0.message != null) {
-                        ToastEx.error(this@BookActivity, p0.message!!, Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-            })
+        //跳转到阅读界面
+        val intent = Intent(this@BookActivity, PreviewActivity::class.java)
+        CatalogsHolder.getInstance().setCatalogs(adapter.catalogs, book, position)
+        adapter.freshBookMark(position)
+        startActivity(intent)
     }
 
     private fun updateDialog(progress: Int?) {
@@ -218,44 +189,18 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener {
         dialog.dismiss()
     }
 
-    override fun onCatalogSelect(itemView: View, position: Int) {
-        if (adapter.catalogs == null) return
-        Thread(Runnable {
-            val p = adapter.catalogs!!.size - position - 1
-            BookMarkUtil.insertOrUpdate(p, book.bookName, book.site.siteName)
-            adapter.history = position
-            val intent = Intent(this@BookActivity, PreviewActivity::class.java)
-            intent.putExtra("position", position)
-            intent.putExtra("book", book)
-            CatalogsHolder.getInstance().setCatalogs(adapter.catalogs, book)
-            runOnUiThread {
-                adapter.notifyDataSetChanged()
-                startActivity(intent)
-            }
-        }).start()
-    }
-
     override fun onDestroy() {
-        downloadDisposable?.dispose()
-        catalogDisposable?.dispose()
+        viewModel.shutDown()
         super.onDestroy()
     }
 
-    fun freshBookMark() {
-        if (adapter.catalogs == null) return
-        Thread(Runnable {
-            val history = AppDatabase.getAppDatabase().bookMarkDao().getPosition(book.bookName, book.site.siteName)
-            runOnUiThread {
-                adapter.freshCatalogs(adapter.catalogs!!, history)
-                if (scroll) {
-                    catalogRv.smoothScrollToPosition(adapter.catalogs!!.size - 1 - history)
-                }
-            }
-        }).start()
+    override fun onBackPressed() {
+        super.onBackPressed()
+        viewModel.shutDown()
     }
 
     override fun onResume() {
         super.onResume()
-        freshBookMark()
+        viewModel.loadCatalog(book)
     }
 }
