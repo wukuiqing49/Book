@@ -41,7 +41,7 @@ class BookRackModel : BaseViewModel() {
                                 val catalogs = netBook.rawBook.site.parseCatalog(html, book.url)
                                 val cacheDao = AppDatabase.getAppDatabase().bookCacheDao()
                                 val cacheSize = cacheDao.getBookCaches(book.bookName,book.siteName).size
-                                for (i in cacheSize - 1 until catalogs.size) {
+                                for (i in cacheSize until catalogs.size) {
                                     cacheDao.insert(
                                         BookCache(
                                             book.siteName,

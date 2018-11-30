@@ -55,7 +55,7 @@ class BookViewModel : ProgressViewModel() {
                                 .getPosition(book.bookName, book.site.siteName)
                             history.postValue(p)
                             //把章节存入数据，这个要先做，避免点的太快空指针
-                            for (i in chapterNames.size - 1 until p0.size) {
+                            for (i in chapterNames.size until p0.size) {
                                 dao.insert(
                                     BookCache(
                                         book.siteName,
