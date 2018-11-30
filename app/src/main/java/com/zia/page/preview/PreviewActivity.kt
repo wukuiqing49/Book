@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import com.zia.bookdownloader.R
+import com.zia.easybookmodule.bean.Book
 import com.zia.page.base.BaseActivity
 import com.zia.toastex.ToastEx
 import com.zia.util.ToastUtil
@@ -23,6 +24,7 @@ class PreviewActivity : BaseActivity() {
     private var isControll = true
 
     private lateinit var viewModel: PreviewModel
+    private lateinit var book: Book
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,17 +42,18 @@ class PreviewActivity : BaseActivity() {
             e.printStackTrace()
         }
 
+        book = intent.getSerializableExtra("book") as Book
+
         setContentView(R.layout.activity_preview)
 
         setTextSize(defaultSharedPreferences.getFloat(textSizeSP, 20f))
         setTvTheme(defaultSharedPreferences.getInt(themeSP, 0))
-
-        viewModel = ViewModelProviders.of(this).get(PreviewModel::class.java)
+        viewModel = ViewModelProviders.of(this, PreviewModelFactory(book)).get(PreviewModel::class.java)
 
         initObserver()
 
         preview_tv.text = "加载中.."
-        viewModel.loadContent()
+        viewModel.loadContent(null)
 
         preview_back.setOnClickListener { finish() }
 

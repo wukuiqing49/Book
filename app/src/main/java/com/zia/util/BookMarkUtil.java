@@ -25,4 +25,10 @@ public class BookMarkUtil {
             bookMarkDao.insert(bm);
         }
     }
+
+    public static int getMarkPosition(String bkName, String siteName) {
+        BookMarkDao bookMarkDao = AppDatabase.getAppDatabase().bookMarkDao();
+        BookMark bm = bookMarkDao.getBookMark(bkName, siteName);
+        return bm.getPosition();
+    }
 }

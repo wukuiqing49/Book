@@ -15,10 +15,10 @@ import kotlinx.android.synthetic.main.item_catalog.view.*
 class CatalogAdapter(private val catalogSelectListener: CatalogSelectListener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    var catalogs: List<Catalog>? = null
+    var catalogs: List<String>? = null
     var history = 0
 
-    fun freshCatalogs(catalogs: List<Catalog>, history: Int) {
+    fun freshCatalogs(catalogs: List<String>, history: Int) {
         this.catalogs = catalogs
         this.history = history
         notifyDataSetChanged()
@@ -52,7 +52,7 @@ class CatalogAdapter(private val catalogSelectListener: CatalogSelectListener) :
                     holder.itemView.item_catalog_mark.visibility = View.INVISIBLE
                 }
                 val catalog = catalogs!![position]
-                holder.itemView.item_catalog_name.text = catalog.chapterName
+                holder.itemView.item_catalog_name.text = catalog
                 holder.itemView.setOnClickListener { catalogSelectListener.onCatalogSelect(holder.itemView, position) }
             }
         }

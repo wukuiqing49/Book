@@ -11,7 +11,6 @@ import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
-import android.view.animation.AlphaAnimation
 import com.zia.bookdownloader.R
 import com.zia.easybookmodule.bean.Book
 import com.zia.easybookmodule.bean.Type
@@ -19,7 +18,6 @@ import com.zia.page.base.BaseActivity
 import com.zia.page.preview.PreviewActivity
 import com.zia.toastex.ToastEx
 import com.zia.util.AnimationUtil
-import com.zia.util.CatalogsHolder
 import com.zia.util.ToastUtil
 import com.zia.util.loadImage
 import kotlinx.android.synthetic.main.activity_book.*
@@ -162,7 +160,7 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener {
 
         //跳转到阅读界面
         val intent = Intent(this@BookActivity, PreviewActivity::class.java)
-        CatalogsHolder.getInstance().setCatalogs(adapter.catalogs, book, position)
+        intent.putExtra("book", book)
         adapter.freshBookMark(position)
         startActivity(intent)
     }

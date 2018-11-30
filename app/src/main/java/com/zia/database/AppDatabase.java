@@ -1,18 +1,15 @@
 package com.zia.database;
 
-import android.arch.persistence.db.SupportSQLiteDatabase;
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
-import android.arch.persistence.room.migration.Migration;
-import android.support.annotation.NonNull;
 import com.zia.App;
 import com.zia.database.bean.*;
 
 /**
  * Created by zia on 2018/5/6.
  */
-@Database(entities = {LocalBook.class, NetBook.class, BookMark.class}, version = 3)
+@Database(entities = {LocalBook.class, NetBook.class, BookMark.class, BookCache.class}, version = 5)
 public abstract class AppDatabase extends RoomDatabase {
     private static final String DATABASE_NAME = "book_db";
 
@@ -21,6 +18,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract NetBookDao netBookDao();
 
     public abstract BookMarkDao bookMarkDao();
+
+    public abstract BookCacheDao bookCacheDao();
 
     private static AppDatabase INSTANCE;
 

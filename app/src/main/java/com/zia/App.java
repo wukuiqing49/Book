@@ -2,6 +2,7 @@ package com.zia;
 
 import android.app.Application;
 import android.content.Context;
+import android.support.multidex.MultiDexApplication;
 import com.facebook.stetho.Stetho;
 import com.squareup.leakcanary.LeakCanary;
 import com.tencent.bugly.crashreport.CrashReport;
@@ -10,7 +11,7 @@ import com.zia.util.threadPool.DefaultExecutorSupplier;
 /**
  * Created by zia on 2018/11/2.
  */
-public class App extends Application {
+public class App extends MultiDexApplication {
 
     private static Context context;
 

@@ -3,6 +3,7 @@ package com.zia.page.bookrack
 import android.arch.lifecycle.MutableLiveData
 import android.util.Log
 import com.zia.database.AppDatabase
+import com.zia.database.bean.BookCache
 import com.zia.database.bean.LocalBook
 import com.zia.database.bean.NetBook
 import com.zia.easybookmodule.net.NetUtil
@@ -38,6 +39,20 @@ class BookRackModel : BaseViewModel() {
                             try {
                                 val html = NetUtil.getHtml(book.url, site.encodeType)
                                 val catalogs = netBook.rawBook.site.parseCatalog(html, book.url)
+                                val cacheDao = AppDatabase.getAppDatabase().bookCacheDao()
+                                val cacheSize = cacheDao.getBookCaches(book.bookName,book.siteName).size
+                                for (i in cacheSize - 1 until catalogs.size) {
+                                    cacheDao.insert(
+                                        BookCache(
+                                            book.siteName,
+                                            book.bookName,
+                                            i,
+                                            catalogs[i].chapterName,
+                                            catalogs[i].url,
+                                            ArrayList()
+                                        )
+                                    )
+                                }
                                 if (netBook.currentCheckCount < catalogs.size) {
                                     netBook.currentCheckCount = catalogs.size
                                     netBook.lastChapterName = catalogs[catalogs.size - 1].chapterName

@@ -4,6 +4,7 @@ import android.arch.lifecycle.MutableLiveData
 import android.os.Environment
 import android.util.Log
 import com.zia.database.AppDatabase
+import com.zia.database.bean.BookCache
 import com.zia.database.bean.LocalBook
 import com.zia.database.bean.NetBook
 import com.zia.easybookmodule.bean.Book
@@ -15,7 +16,6 @@ import com.zia.easybookmodule.rx.Subscriber
 import com.zia.event.FreshEvent
 import com.zia.page.base.ProgressViewModel
 import com.zia.util.BookMarkUtil
-import com.zia.util.CatalogsHolder
 import com.zia.util.threadPool.DefaultExecutorSupplier
 import org.greenrobot.eventbus.EventBus
 import java.io.File
@@ -24,7 +24,7 @@ import java.io.File
  * Created by zia on 2018/11/21.
  */
 class BookViewModel : ProgressViewModel() {
-    val onCatalogUpdate = MutableLiveData<List<Catalog>>()
+    val onCatalogUpdate = MutableLiveData<List<String>>()
     val history = MutableLiveData<Int>()
     val savedFile = MutableLiveData<File>()
 
@@ -32,34 +32,45 @@ class BookViewModel : ProgressViewModel() {
     private var downloadDisposable: Disposable? = null
 
     fun loadCatalog(book: Book) {
-        val bookCache = CatalogsHolder.getInstance().netBook
-        if (bookCache != null &&
-            bookCache.site.siteName == book.site.siteName &&
-            bookCache.bookName == book.bookName
-        ) {
-            DefaultExecutorSupplier.getInstance()
-                .forLightWeightBackgroundTasks()
-                .execute {
-                    val p = AppDatabase.getAppDatabase().bookMarkDao()
-                        .getPosition(book.bookName, book.site.siteName)
-                    history.postValue(p)
-                    onCatalogUpdate.postValue(CatalogsHolder.getInstance().catalogs)
-                    Log.e("BookViewModel","from cache")
-                }
+        val dao = AppDatabase.getAppDatabase().bookCacheDao()
+        val chapterNames = dao.getChapterNames(book.bookName, book.siteName)
+        //数据库有缓存
+        if (chapterNames != null && chapterNames.size != 0) {
+            Log.e("BookViewModel", "from sql cache")
+            val p = AppDatabase.getAppDatabase().bookMarkDao()
+                .getPosition(book.bookName, book.site.siteName)
+            history.postValue(p)
+            onCatalogUpdate.postValue(chapterNames)
             return
         }
-        Log.e("BookViewModel","from net")
+        //从网络下载
+        Log.e("BookViewModel", "from net")
         catalogDisposable = EasyBook.getCatalog(book)
             .subscribe(object : Subscriber<List<Catalog>> {
                 override fun onFinish(p0: List<Catalog>) {
                     DefaultExecutorSupplier.getInstance()
-                        .forLightWeightBackgroundTasks()
+                        .forBackgroundTasks()
                         .execute {
                             val p = AppDatabase.getAppDatabase().bookMarkDao()
                                 .getPosition(book.bookName, book.site.siteName)
-                            CatalogsHolder.getInstance().setCatalogs(p0, book, p)
                             history.postValue(p)
-                            onCatalogUpdate.postValue(p0)
+                            //把章节存入数据，这个要先做，避免点的太快空指针
+                            for (i in chapterNames.size - 1 until p0.size) {
+                                dao.insert(
+                                    BookCache(
+                                        book.siteName,
+                                        book.bookName,
+                                        i,
+                                        p0[i].chapterName,
+                                        p0[i].url,
+                                        ArrayList()
+                                    )
+                                )
+                            }
+                            //把章节名传到rv里
+                            val names = ArrayList<String>()
+                            p0.forEach { names.add(it.chapterName) }
+                            onCatalogUpdate.postValue(names)
                         }
                 }
 
