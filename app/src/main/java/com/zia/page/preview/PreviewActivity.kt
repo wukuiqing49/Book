@@ -28,19 +28,7 @@ class PreviewActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                val uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-                        View.SYSTEM_UI_FLAG_FULLSCREEN or
-                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                window.decorView.systemUiVisibility = uiOptions
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        setNavigationColor()
 
         book = intent.getSerializableExtra("book") as Book
 
@@ -138,10 +126,31 @@ class PreviewActivity : BaseActivity() {
         })
     }
 
+    private fun setNavigationColor(){
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                val uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+                        View.SYSTEM_UI_FLAG_FULLSCREEN or
+                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                window.decorView.systemUiVisibility = uiOptions
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     @SuppressLint("SetTextI18n")
     private fun setTextSize(textSize: Float) {
         preview_tv.textSize = textSize
         preview_textSize.text = "字号：${textSize.toInt()}sp"
+    }
+
+    override fun onResume() {
+        setNavigationColor()
+        super.onResume()
     }
 
     private fun setTvTheme(themeId: Int) {
