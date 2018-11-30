@@ -25,7 +25,10 @@
 				android:layout_gravity="center_vertical"
 				android:layout_width="0dp"
 				android:layout_weight="1"
-				android:layout_height="wrap_content"/>
+				android:singleLine="true"
+				android:inputType="text"
+				android:layout_height="wrap_content"
+				android:imeOptions="actionSearch"/>
 		<Button
 				android:layout_width="50dp"
 				android:layout_height="30dp"

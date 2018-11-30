@@ -37,11 +37,15 @@ class BookViewModel : ProgressViewModel() {
             bookCache.site.siteName == book.site.siteName &&
             bookCache.bookName == book.bookName
         ) {
-            val p = AppDatabase.getAppDatabase().bookMarkDao()
-                .getPosition(book.bookName, book.site.siteName)
-            history.postValue(p)
-            onCatalogUpdate.postValue(CatalogsHolder.getInstance().catalogs)
-            Log.e("BookViewModel","from cache")
+            DefaultExecutorSupplier.getInstance()
+                .forLightWeightBackgroundTasks()
+                .execute {
+                    val p = AppDatabase.getAppDatabase().bookMarkDao()
+                        .getPosition(book.bookName, book.site.siteName)
+                    history.postValue(p)
+                    onCatalogUpdate.postValue(CatalogsHolder.getInstance().catalogs)
+                    Log.e("BookViewModel","from cache")
+                }
             return
         }
         Log.e("BookViewModel","from net")

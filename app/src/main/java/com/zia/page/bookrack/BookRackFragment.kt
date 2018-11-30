@@ -108,7 +108,8 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
                 Pair.create(viewHolder.itemView.item_book_author, "book_author"),
                 Pair.create(viewHolder.itemView.item_book_lastUpdateChapter, "book_lastUpdateChapter"),
                 Pair.create(viewHolder.itemView.item_book_lastUpdateTime, "book_lastUpdateTime"),
-                Pair.create(viewHolder.itemView.item_book_site, "book_site")
+                Pair.create(viewHolder.itemView.item_book_site, "book_site"),
+                Pair.create(viewHolder.itemView.item_book_image, "book_image")
             )
             val options =
                 ActivityOptions.makeSceneTransitionAnimation(context as Activity, *Java2Kotlin.getPairs(p))
@@ -143,11 +144,14 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
      * 长按追更书籍
      */
     override fun onNetBookPressed(viewHolder: RecyclerView.ViewHolder, netBook: NetBook, position: Int) {
-        if (context != null) return
+        if (context == null) return
         AlertDialog.Builder(context!!)
             .setTitle("是否删除${netBook.bookName}")
             .setNegativeButton("取消", null)
-            .setPositiveButton("确定") { _, _ -> viewModel.deleteNetBook(netBook) }
+            .setPositiveButton("确定") { _, _ ->
+                viewModel.deleteNetBook(netBook)
+                freshBookRack()
+            }
             .setCancelable(true)
             .show()
     }
@@ -160,7 +164,10 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
         AlertDialog.Builder(context!!)
             .setTitle("是否删除${localBook.bookName}")
             .setNegativeButton("取消", null)
-            .setPositiveButton("确定") { _, _ -> viewModel.deleteLocalBook(localBook) }
+            .setPositiveButton("确定") { _, _ ->
+                viewModel.deleteLocalBook(localBook)
+                freshBookRack()
+            }
             .setCancelable(true)
             .show()
     }

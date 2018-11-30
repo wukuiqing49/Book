@@ -7,12 +7,14 @@ import android.view.View
 import android.view.ViewGroup
 import com.zia.bookdownloader.R
 import com.zia.easybookmodule.bean.Book
+import com.zia.util.loadImage
 import kotlinx.android.synthetic.main.item_book.view.*
 
 /**
  * Created by zia on 2018/11/1.
  */
-class BookAdapter(val bookSelectListener: BookSelectListener) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class BookAdapter(private val bookSelectListener: BookSelectListener) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var books = ArrayList<Book>()
 
@@ -41,6 +43,7 @@ class BookAdapter(val bookSelectListener: BookSelectListener) : RecyclerView.Ada
                 holder.itemView.item_book_site.text = book.site.siteName
                 holder.itemView.item_book_lastUpdateTime.text = "更新：${book.lastUpdateTime}"
                 holder.itemView.setOnClickListener { bookSelectListener.onBookSelect(holder.itemView, book) }
+                holder.itemView.context.loadImage(book.imageUrl, holder.itemView.item_book_image)
             }
         }
     }

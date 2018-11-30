@@ -2,9 +2,7 @@ package com.zia.database.bean;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
-import android.util.Log;
 import com.zia.easybookmodule.bean.Book;
 
 import java.io.Serializable;
@@ -30,7 +28,7 @@ public class NetBook implements Serializable {
     private String url;
 
     @ColumnInfo(name = "chapterSize")
-    private String chapterSize = "未知";
+    private String imageUrl = "未知";
 
     @ColumnInfo(name = "lastUpdateTime")
     private String lastUpdateTime = "未知";
@@ -57,7 +55,7 @@ public class NetBook implements Serializable {
         bookName = book.getBookName();
         author = book.getAuthor();
         url = book.getUrl();
-        chapterSize = book.getChapterSize();
+        imageUrl = book.getImageUrl();
         lastUpdateTime = book.getLastUpdateTime();
         lastChapterName = book.getLastChapterName();
         siteName = book.getSiteName();
@@ -66,7 +64,7 @@ public class NetBook implements Serializable {
     }
 
     public Book getRawBook() {
-        return new Book(bookName, author, url, chapterSize, lastUpdateTime, lastChapterName, siteName);
+        return new Book(bookName, author, url, imageUrl, imageUrl, lastUpdateTime, lastChapterName, siteName);
     }
 
     @Override
@@ -76,7 +74,7 @@ public class NetBook implements Serializable {
                 ", bookName='" + bookName + '\'' +
                 ", author='" + author + '\'' +
                 ", url='" + url + '\'' +
-                ", chapterSize='" + chapterSize + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
                 ", lastUpdateTime='" + lastUpdateTime + '\'' +
                 ", lastChapterName='" + lastChapterName + '\'' +
                 ", siteName='" + siteName + '\'' +
@@ -118,12 +116,12 @@ public class NetBook implements Serializable {
         this.url = url;
     }
 
-    public String getChapterSize() {
-        return chapterSize;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
-    public void setChapterSize(String chapterSize) {
-        this.chapterSize = chapterSize;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public String getLastUpdateTime() {

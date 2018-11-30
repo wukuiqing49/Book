@@ -9,7 +9,9 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.util.Pair
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +20,7 @@ import com.zia.easybookmodule.bean.Book
 import com.zia.page.base.BaseFragment
 import com.zia.page.book.BookActivity
 import com.zia.util.Java2Kotlin
+import com.zia.util.KeyboardktUtils
 import com.zia.util.ToastUtil
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.item_book.view.*
@@ -81,13 +84,28 @@ class SearchFragment : BaseFragment(), BookAdapter.BookSelectListener {
         searchRv.layoutManager = LinearLayoutManager(context)
         searchRv.adapter = bookAdapter
 
-        searchBt.setOnClickListener {
-            viewModel.shutDown()
-            val bookName = searchEt.text?.toString()
-            if (bookName != null && bookName.isNotEmpty()) {
-                initDialog()
-                viewModel.search(bookName)
+        searchEt.setOnEditorActionListener { _, actionId, event ->
+            if ((actionId == KeyEvent.KEYCODE_UNKNOWN || actionId == KeyEvent.KEYCODE_SEARCH || actionId == KeyEvent.KEYCODE_HOME)
+                && event != null && event.action == KeyEvent.ACTION_DOWN
+            ) {
+                search()
+                KeyboardktUtils.hideKeyboard(searchBt)
+                return@setOnEditorActionListener true
             }
+            false
+        }
+
+        searchBt.setOnClickListener {
+            search()
+        }
+    }
+
+    private fun search() {
+        viewModel.shutDown()
+        val bookName = searchEt.text?.toString()
+        if (bookName != null && bookName.isNotEmpty()) {
+            initDialog()
+            viewModel.search(bookName)
         }
     }
 
@@ -107,7 +125,8 @@ class SearchFragment : BaseFragment(), BookAdapter.BookSelectListener {
                 Pair.create(itemView.item_book_author, "book_author"),
                 Pair.create(itemView.item_book_lastUpdateChapter, "book_lastUpdateChapter"),
                 Pair.create(itemView.item_book_lastUpdateTime, "book_lastUpdateTime"),
-                Pair.create(itemView.item_book_site, "book_site")
+                Pair.create(itemView.item_book_site, "book_site"),
+                Pair.create(itemView.item_book_image, "book_image")
             )
             val options = ActivityOptions.makeSceneTransitionAnimation(activity, *Java2Kotlin.getPairs(p))
             startActivity(intent, options.toBundle())

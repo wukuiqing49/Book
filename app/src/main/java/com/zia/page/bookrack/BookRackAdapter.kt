@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import com.zia.bookdownloader.R
 import com.zia.database.bean.LocalBook
 import com.zia.database.bean.NetBook
+import com.zia.util.loadImage
 import kotlinx.android.synthetic.main.item_book.view.*
 import kotlinx.android.synthetic.main.item_text.view.*
 
@@ -100,6 +101,7 @@ class BookRackAdapter(private val recyclerView: RecyclerView, private val onBook
                 holder.itemView.item_book_lastUpdateChapter.text = "最新：${book.lastChapterName}"
                 holder.itemView.item_book_site.text = book.siteName
                 holder.itemView.item_book_lastUpdateTime.text = "更新：${book.lastUpdateTime}"
+                holder.itemView.context.loadImage(book.imageUrl, holder.itemView.item_book_image)
 
                 holder.itemView.setOnClickListener { onBookRackSelect.onNetBookSelected(holder, book, position) }
                 holder.itemView.setOnLongClickListener {
@@ -115,6 +117,8 @@ class BookRackAdapter(private val recyclerView: RecyclerView, private val onBook
                 holder.itemView.item_book_lastUpdateChapter.text = "最新：${book.lastChapterName}"
                 holder.itemView.item_book_site.text = book.site
                 holder.itemView.item_book_lastUpdateTime.text = "更新：${book.lastUpdateTime}"
+                holder.itemView.context.loadImage(book.imageUrl, holder.itemView.item_book_image)
+
                 holder.itemView.setOnClickListener { onBookRackSelect.onLocalBookSelected(holder, book, position) }
                 holder.itemView.setOnLongClickListener {
                     onBookRackSelect.onLocalBookPressed(holder, book, position)

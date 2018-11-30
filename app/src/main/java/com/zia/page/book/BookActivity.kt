@@ -11,15 +11,17 @@ import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
+import android.view.animation.AlphaAnimation
 import com.zia.bookdownloader.R
 import com.zia.easybookmodule.bean.Book
 import com.zia.easybookmodule.bean.Type
-import com.zia.easybookmodule.rx.Disposable
 import com.zia.page.base.BaseActivity
 import com.zia.page.preview.PreviewActivity
 import com.zia.toastex.ToastEx
+import com.zia.util.AnimationUtil
 import com.zia.util.CatalogsHolder
 import com.zia.util.ToastUtil
+import com.zia.util.loadImage
 import kotlinx.android.synthetic.main.activity_book.*
 
 
@@ -28,9 +30,6 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener {
     private lateinit var book: Book
     private var scroll = true
     private lateinit var adapter: CatalogAdapter
-    private var catalogDisposable: Disposable? = null
-    private var downloadDisposable: Disposable? = null
-    private var isFinished = false
 
     private lateinit var viewModel: BookViewModel
 
@@ -49,8 +48,6 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_book)
 
-        book_layout.setOnClickListener { onBackPressed() }
-
         book = intent.getSerializableExtra("book") as Book
         scroll = intent.getBooleanExtra("scroll", true)
         val canAddFav = intent.getBooleanExtra("canAddFav", true)
@@ -60,6 +57,7 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener {
         book_lastUpdateChapter.text = "最新：${book.lastChapterName}"
         book_site.text = book.site.siteName
         book_lastUpdateTime.text = "更新：${book.lastUpdateTime}"
+        loadImage(book.imageUrl, book_image)
 
         adapter = CatalogAdapter(this)
         catalogRv.adapter = adapter
@@ -93,8 +91,9 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener {
 
     private fun initObservers() {
         viewModel.onCatalogUpdate.observe(this, Observer {
+            book_loading.startAnimation(AnimationUtil.getHideAlphaAnimation(500))
+            book_loading.visibility = View.INVISIBLE
             if (it != null && viewModel.history.value != null) {
-                book_loading.visibility = View.GONE
                 adapter.freshCatalogs(it, viewModel.history.value!!)
                 if (scroll) {
                     catalogRv.smoothScrollToPosition(viewModel.history.value!!)
@@ -117,6 +116,7 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener {
 
         viewModel.error.observe(this, Observer {
             hideDialog()
+            book_loading.visibility = View.VISIBLE
             val text = "解析失败，点击重试" + "\n" + it?.message
             book_loading.text = text
             book_loading.setOnClickListener {
@@ -201,6 +201,7 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener {
 
     override fun onResume() {
         super.onResume()
+        book_loading.visibility = View.VISIBLE
         viewModel.loadCatalog(book)
     }
 }

@@ -29,7 +29,7 @@ public class LocalBook implements Serializable {
     private String url;
 
     @ColumnInfo(name = "chapterSize")
-    private String chapterSize = "未知";
+    private String imageUrl = "";
 
     @ColumnInfo(name = "lastUpdateTime")
     private String lastUpdateTime = "未知";
@@ -48,7 +48,7 @@ public class LocalBook implements Serializable {
         bookName = book.getBookName();
         author = book.getAuthor();
         url = book.getUrl();
-        chapterSize = book.getUrl();
+        imageUrl = book.getImageUrl();
         lastUpdateTime = book.getLastUpdateTime();
         lastChapterName = book.getLastChapterName();
         siteName = book.getSiteName();
@@ -61,7 +61,7 @@ public class LocalBook implements Serializable {
                 ", bookName='" + bookName + '\'' +
                 ", author='" + author + '\'' +
                 ", url='" + url + '\'' +
-                ", chapterSize='" + chapterSize + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
                 ", lastUpdateTime='" + lastUpdateTime + '\'' +
                 ", lastChapterName='" + lastChapterName + '\'' +
                 ", site='" + siteName + '\'' +
@@ -92,12 +92,12 @@ public class LocalBook implements Serializable {
         this.url = url;
     }
 
-    public String getChapterSize() {
-        return chapterSize;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
-    public void setChapterSize(String chapterSize) {
-        this.chapterSize = chapterSize;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public String getLastUpdateTime() {
