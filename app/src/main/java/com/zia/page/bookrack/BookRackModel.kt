@@ -22,6 +22,7 @@ class BookRackModel : BaseViewModel() {
     val onNetBooksUpdate = MutableLiveData<List<NetBook>>()
     val onLocalBooksUpdate = MutableLiveData<List<LocalBook>>()
 
+    @Synchronized
     fun updateBooks() {
         DefaultExecutorSupplier.getInstance()
             .forBackgroundTasks()
@@ -40,7 +41,7 @@ class BookRackModel : BaseViewModel() {
                                 val html = NetUtil.getHtml(book.url, site.encodeType)
                                 val catalogs = netBook.rawBook.site.parseCatalog(html, book.url)
                                 val cacheDao = AppDatabase.getAppDatabase().bookCacheDao()
-                                val cacheSize = cacheDao.getBookCaches(book.bookName,book.siteName).size
+                                val cacheSize = cacheDao.getBookCacheSize(book.bookName,book.siteName)
                                 for (i in cacheSize until catalogs.size) {
                                     cacheDao.insert(
                                         BookCache(

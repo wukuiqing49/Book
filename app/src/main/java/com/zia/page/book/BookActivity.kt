@@ -6,11 +6,17 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.view.View
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.SimpleTarget
+import com.bumptech.glide.request.transition.Transition
+import com.jaeger.library.StatusBarUtil
 import com.zia.bookdownloader.R
 import com.zia.easybookmodule.bean.Book
 import com.zia.easybookmodule.bean.Type
@@ -18,16 +24,17 @@ import com.zia.page.base.BaseActivity
 import com.zia.page.preview.PreviewActivity
 import com.zia.toastex.ToastEx
 import com.zia.util.AnimationUtil
+import com.zia.util.BlurUtil
 import com.zia.util.ToastUtil
-import com.zia.util.loadImage
 import kotlinx.android.synthetic.main.activity_book.*
+import kotlinx.android.synthetic.main.fragment_book_rack.*
 
 
-class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener {
+class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener {
 
     private lateinit var book: Book
     private var scroll = true
-    private lateinit var adapter: CatalogAdapter
+    private lateinit var adapter: CatalogPagingAdapter
 
     private lateinit var viewModel: BookViewModel
 
@@ -44,59 +51,96 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener {
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        StatusBarUtil.setTranslucentForImageView(this, book_blurImage)
         setContentView(R.layout.activity_book)
+
+        book_sl.isRefreshing = true
 
         book = intent.getSerializableExtra("book") as Book
         scroll = intent.getBooleanExtra("scroll", true)
-        val canAddFav = intent.getBooleanExtra("canAddFav", true)
+        var canAddFav = intent.getBooleanExtra("canAddFav", true)
 
         book_name.text = book.bookName
         book_author.text = book.author
-        book_lastUpdateChapter.text = "最新：${book.lastChapterName}"
+        book_lastUpdateChapter.text = book.lastChapterName
         book_site.text = book.site.siteName
-        book_lastUpdateTime.text = "更新：${book.lastUpdateTime}"
-        loadImage(book.imageUrl, book_image)
+        book_lastUpdateTime.text = book.lastUpdateTime
+        //加载图片、模糊图片
+        Glide.with(this).load(book.imageUrl).into(object : SimpleTarget<Drawable>() {
+            override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
+                book_image.background = resource
+                if (book.imageUrl.isNotEmpty()) {
+                    book_blurImage.setImageBitmap(BlurUtil.blurBitmap(this@BookActivity, resource))
+                }
+            }
+        })
 
-        adapter = CatalogAdapter(this)
+        adapter = CatalogPagingAdapter(this)
         catalogRv.adapter = adapter
 
         val layoutManager = LinearLayoutManager(this)
-        layoutManager.stackFromEnd = true
-        layoutManager.reverseLayout = true
         catalogRv.layoutManager = layoutManager
 
-        viewModel = ViewModelProviders.of(this).get(BookViewModel::class.java)
+        viewModel = ViewModelProviders.of(this, BookViewModelFactory(book)).get(BookViewModel::class.java)
         initObservers()
+
+        book_sl.setOnRefreshListener { viewModel.loadCatalog(true) }
 
         book_download.setOnClickListener { chooseType() }
 
+        book_beginRead.setOnClickListener {
+            //跳转到阅读界面
+            val intent = Intent(this@BookActivity, PreviewActivity::class.java)
+            intent.putExtra("book", book)
+            startActivity(intent)
+        }
+
         //添加到书架
         if (!canAddFav) {//从书架打开
-            book_favorite.setBackgroundColor(Color.GRAY)
-            book_favorite.setOnClickListener { ToastEx.info(this@BookActivity, "已经在书架了").show() }
-        } else {
-            book_favorite.setOnClickListener {
+            book_favorite.setBackgroundColor(Color.parseColor("#bfbfbf"))
+        }
+        book_favorite.setOnClickListener {
+            if (canAddFav) {
                 if (adapter.itemCount == 0) {
-                    ToastUtil.onWarning(this@BookActivity, "需要解析目录后才能添加")
+                    ToastUtil.onWarning(this@BookActivity, "需要解析目录后才能添加，请稍等")
                     return@setOnClickListener
                 }
-                viewModel.insertBookIntoBookRack(book, adapter.itemCount)
+                book_favorite.setBackgroundColor(Color.parseColor("#bfbfbf"))
+                viewModel.insertBookIntoBookRack(adapter.itemCount)
+                canAddFav = false
+            } else {
+                ToastEx.info(this@BookActivity, "已经在书架了").show()
             }
         }
 
-        //在onResume中加载目录
+        book_back.setOnClickListener {
+            onBackPressed()
+        }
+
+        //加载目录
+        viewModel.loadCatalog()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun initObservers() {
+        //paging的数据源观察
+        viewModel.catalogStrings.observe(this, Observer {
+            adapter.submitList(it)
+        })
+
+        //加载完毕的监听
         viewModel.onCatalogUpdate.observe(this, Observer {
             book_loading.startAnimation(AnimationUtil.getHideAlphaAnimation(500))
-            book_loading.visibility = View.INVISIBLE
-            if (it != null && viewModel.history.value != null) {
-                adapter.freshCatalogs(it, viewModel.history.value!!)
-                if (scroll) {
-                    catalogRv.smoothScrollToPosition(viewModel.history.value!!)
-                }
+            book_loading.visibility = View.GONE
+            book_sl.isRefreshing = false
+            if (it != null){
+                Log.e("BookActivity","last:$it")
+                book_lastUpdateChapter.text = it
             }
+        })
+
+        viewModel.history.observe(this, Observer {
+            book_history.text = "第${it}章"
         })
 
         viewModel.savedFile.observe(this, Observer {
@@ -119,7 +163,8 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener {
             book_loading.text = text
             book_loading.setOnClickListener {
                 book_loading.setOnClickListener(null)
-                viewModel.loadCatalog(book)
+                book_loading.text = "正在重试.."
+                viewModel.loadCatalog()
             }
         })
 
@@ -150,18 +195,16 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener {
         updateDialog(0)
         updateDialog("")
         //在viewModel中进行了数据库插入和通知bookRackFragment刷新界面
-        viewModel.downloadBook(book, type)
+        viewModel.downloadBook(type)
     }
 
     override fun onCatalogSelect(itemView: View, position: Int) {
-        if (adapter.catalogs == null) return
         //更新书签
-        viewModel.insertBookMark(book, position)
+        viewModel.insertBookMark(position)
 
         //跳转到阅读界面
         val intent = Intent(this@BookActivity, PreviewActivity::class.java)
         intent.putExtra("book", book)
-        adapter.freshBookMark(position)
         startActivity(intent)
     }
 
@@ -200,6 +243,6 @@ class BookActivity : BaseActivity(), CatalogAdapter.CatalogSelectListener {
     override fun onResume() {
         super.onResume()
         book_loading.visibility = View.VISIBLE
-        viewModel.loadCatalog(book)
+        viewModel.freshHistory()
     }
 }

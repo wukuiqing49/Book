@@ -120,12 +120,12 @@ class SearchFragment : BaseFragment(), BookAdapter.BookSelectListener {
         intent.putExtra("scroll", false)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val p = arrayListOf<Pair<View, String>>(
-                Pair.create(itemView.item_book_layout, "book"),
-                Pair.create(itemView.item_book_name, "book_name"),
-                Pair.create(itemView.item_book_author, "book_author"),
-                Pair.create(itemView.item_book_lastUpdateChapter, "book_lastUpdateChapter"),
-                Pair.create(itemView.item_book_lastUpdateTime, "book_lastUpdateTime"),
-                Pair.create(itemView.item_book_site, "book_site"),
+//                Pair.create(itemView.item_book_layout, "book"),
+//                Pair.create(itemView.item_book_name, "book_name"),
+//                Pair.create(itemView.item_book_author, "book_author"),
+//                Pair.create(itemView.item_book_lastUpdateChapter, "book_lastUpdateChapter"),
+//                Pair.create(itemView.item_book_lastUpdateTime, "book_lastUpdateTime"),
+//                Pair.create(itemView.item_book_site, "book_site"),
                 Pair.create(itemView.item_book_image, "book_image")
             )
             val options = ActivityOptions.makeSceneTransitionAnimation(activity, *Java2Kotlin.getPairs(p))

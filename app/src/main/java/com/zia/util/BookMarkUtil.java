@@ -29,6 +29,9 @@ public class BookMarkUtil {
     public static int getMarkPosition(String bkName, String siteName) {
         BookMarkDao bookMarkDao = AppDatabase.getAppDatabase().bookMarkDao();
         BookMark bm = bookMarkDao.getBookMark(bkName, siteName);
+        if (bm == null){
+            return 0;
+        }
         return bm.getPosition();
     }
 }

@@ -46,8 +46,10 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
      * 偷懒没优化，可能发生内存泄漏
      */
     private fun pullBooks() {
-        bookRack_sl.isRefreshing = true
-        viewModel.updateBooks()
+        bookRack_sl.post {
+            bookRack_sl.isRefreshing = true
+            viewModel.updateBooks()
+        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -103,12 +105,12 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
         //动画
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val p = arrayListOf<Pair<View, String>>(
-                Pair.create(viewHolder.itemView.item_book_layout, "book"),
-                Pair.create(viewHolder.itemView.item_book_name, "book_name"),
-                Pair.create(viewHolder.itemView.item_book_author, "book_author"),
-                Pair.create(viewHolder.itemView.item_book_lastUpdateChapter, "book_lastUpdateChapter"),
-                Pair.create(viewHolder.itemView.item_book_lastUpdateTime, "book_lastUpdateTime"),
-                Pair.create(viewHolder.itemView.item_book_site, "book_site"),
+//                Pair.create(viewHolder.itemView.item_book_layout, "book"),
+//                Pair.create(viewHolder.itemView.item_book_name, "book_name"),
+//                Pair.create(viewHolder.itemView.item_book_author, "book_author"),
+//                Pair.create(viewHolder.itemView.item_book_lastUpdateChapter, "book_lastUpdateChapter"),
+//                Pair.create(viewHolder.itemView.item_book_lastUpdateTime, "book_lastUpdateTime"),
+//                Pair.create(viewHolder.itemView.item_book_site, "book_site"),
                 Pair.create(viewHolder.itemView.item_book_image, "book_image")
             )
             val options =
@@ -201,8 +203,10 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
     override fun onResume() {
         super.onResume()
         if (needRefresh) {
-            pullBooks()
-            needRefresh = false
+            bookRack_rv.post {
+                pullBooks()
+                needRefresh = false
+            }
         } else {
             viewModel.freshNetBooks()
         }

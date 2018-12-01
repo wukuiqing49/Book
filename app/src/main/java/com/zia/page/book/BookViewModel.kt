@@ -1,10 +1,13 @@
 package com.zia.page.book
 
 import android.arch.lifecycle.MutableLiveData
+import android.arch.paging.LivePagedListBuilder
+import android.arch.paging.PagedList
 import android.os.Environment
 import android.util.Log
 import com.zia.database.AppDatabase
 import com.zia.database.bean.BookCache
+import com.zia.database.bean.BookCacheDao
 import com.zia.database.bean.LocalBook
 import com.zia.database.bean.NetBook
 import com.zia.easybookmodule.bean.Book
@@ -23,70 +26,81 @@ import java.io.File
 /**
  * Created by zia on 2018/11/21.
  */
-class BookViewModel : ProgressViewModel() {
-    val onCatalogUpdate = MutableLiveData<List<String>>()
+class BookViewModel(private val book: Book) : ProgressViewModel() {
+    val onCatalogUpdate = MutableLiveData<String>()
     val history = MutableLiveData<Int>()
     val savedFile = MutableLiveData<File>()
+    val dao: BookCacheDao = AppDatabase.getAppDatabase().bookCacheDao()
+    val catalogStrings = LivePagedListBuilder(
+        dao.getChapterNamesFactory(book.bookName, book.siteName), PagedList.Config.Builder()
+            .setPageSize(30)
+            .setPrefetchDistance(10)
+            .setInitialLoadSizeHint(60)
+            .setEnablePlaceholders(false)
+            .build()
+    ).build()
 
     private var catalogDisposable: Disposable? = null
     private var downloadDisposable: Disposable? = null
 
-    fun loadCatalog(book: Book) {
-        val dao = AppDatabase.getAppDatabase().bookCacheDao()
-        val chapterNames = dao.getChapterNames(book.bookName, book.siteName)
+    fun loadCatalog(forcePull: Boolean = false) {
         //数据库有缓存
-        if (chapterNames != null && chapterNames.size != 0) {
-            Log.e("BookViewModel", "from sql cache")
-            val p = AppDatabase.getAppDatabase().bookMarkDao()
-                .getPosition(book.bookName, book.site.siteName)
-            history.postValue(p)
-            onCatalogUpdate.postValue(chapterNames)
-            return
-        }
-        //从网络下载
-        Log.e("BookViewModel", "from net")
-        catalogDisposable = EasyBook.getCatalog(book)
-            .subscribe(object : Subscriber<List<Catalog>> {
-                override fun onFinish(p0: List<Catalog>) {
-                    DefaultExecutorSupplier.getInstance()
-                        .forBackgroundTasks()
-                        .execute {
-                            val p = AppDatabase.getAppDatabase().bookMarkDao()
-                                .getPosition(book.bookName, book.site.siteName)
-                            history.postValue(p)
-                            //把章节存入数据，这个要先做，避免点的太快空指针
-                            for (i in chapterNames.size until p0.size) {
-                                dao.insert(
-                                    BookCache(
-                                        book.siteName,
-                                        book.bookName,
-                                        i,
-                                        p0[i].chapterName,
-                                        p0[i].url,
-                                        ArrayList()
-                                    )
-                                )
-                            }
-                            //把章节名传到rv里
-                            val names = ArrayList<String>()
-                            p0.forEach { names.add(it.chapterName) }
-                            onCatalogUpdate.postValue(names)
+        DefaultExecutorSupplier.getInstance()
+            .forBackgroundTasks()
+            .execute {
+                if (!forcePull && dao.getBookCacheSize(book.bookName, book.siteName) != 0) {
+                    Log.e("BookViewModel", "from sql cache")
+                    onCatalogUpdate.postValue(null)
+                    freshHistory()
+                    return@execute
+                }
+                //从网络下载
+                Log.e("BookViewModel", "from net")
+                catalogDisposable = EasyBook.getCatalog(book)
+                    .subscribe(object : Subscriber<List<Catalog>> {
+                        override fun onFinish(p0: List<Catalog>) {
+                            DefaultExecutorSupplier.getInstance()
+                                .forBackgroundTasks()
+                                .execute {
+                                    //把章节存入数据，这个要先做，避免点的太快空指针
+                                    for (i in catalogStrings.value!!.size until p0.size) {
+                                        dao.insert(
+                                            BookCache(
+                                                book.siteName,
+                                                book.bookName,
+                                                i,
+                                                p0[i].chapterName,
+                                                p0[i].url,
+                                                ArrayList()
+                                            )
+                                        )
+                                    }
+                                    onCatalogUpdate.postValue(p0.last().chapterName)
+                                    freshHistory()
+                                }
                         }
-                }
 
-                override fun onMessage(p0: String) {
-                }
+                        override fun onMessage(p0: String) {
+                        }
 
-                override fun onProgress(p0: Int) {
-                }
+                        override fun onProgress(p0: Int) {
+                        }
 
-                override fun onError(p0: java.lang.Exception) {
-                    error.postValue(p0)
-                }
-            })
+                        override fun onError(p0: java.lang.Exception) {
+                            error.postValue(p0)
+                        }
+                    })
+            }
     }
 
-    fun insertBookIntoBookRack(book: Book, position: Int) {
+    fun freshHistory() {
+        DefaultExecutorSupplier.getInstance().forLightWeightBackgroundTasks()
+            .execute {
+                history.postValue(BookMarkUtil.getMarkPosition(book.bookName, book.siteName) + 1)
+            }
+    }
+
+    fun insertBookIntoBookRack(position: Int) {
         DefaultExecutorSupplier.getInstance()
             .forLightWeightBackgroundTasks()
             .execute {
@@ -101,7 +115,7 @@ class BookViewModel : ProgressViewModel() {
             }
     }
 
-    fun downloadBook(book: Book, type: Type) {
+    fun downloadBook(type: Type) {
         downloadDisposable = EasyBook.download(book)
             .setType(type)
             .setSavePath(Environment.getExternalStorageDirectory().path + File.separator + "book")
@@ -135,7 +149,7 @@ class BookViewModel : ProgressViewModel() {
             })
     }
 
-    fun insertBookMark(book: Book, position: Int) {
+    fun insertBookMark(position: Int) {
         DefaultExecutorSupplier.getInstance()
             .forLightWeightBackgroundTasks()
             .execute {

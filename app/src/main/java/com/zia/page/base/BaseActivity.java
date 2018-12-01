@@ -2,10 +2,16 @@ package com.zia.page.base;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
+import android.support.v4.view.ViewCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import com.zia.bookdownloader.R;
@@ -21,6 +27,7 @@ public class BaseActivity extends AppCompatActivity {
         setWindowStatusBarColor(this, R.color.colorPrimary);
         super.onCreate(savedInstanceState);
     }
+
     private void setWindowStatusBarColor(Activity activity, int colorResId) {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
