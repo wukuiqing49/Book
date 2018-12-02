@@ -11,7 +11,6 @@ import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
-import android.util.Log
 import android.view.View
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
@@ -27,7 +26,6 @@ import com.zia.util.AnimationUtil
 import com.zia.util.BlurUtil
 import com.zia.util.ToastUtil
 import kotlinx.android.synthetic.main.activity_book.*
-import kotlinx.android.synthetic.main.fragment_book_rack.*
 
 
 class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener {
@@ -106,7 +104,7 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
                     return@setOnClickListener
                 }
                 book_favorite.setBackgroundColor(Color.parseColor("#bfbfbf"))
-                viewModel.insertBookIntoBookRack(adapter.itemCount)
+                viewModel.insertBookIntoBookRack()
                 canAddFav = false
             } else {
                 ToastEx.info(this@BookActivity, "已经在书架了").show()
@@ -133,8 +131,7 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
             book_loading.startAnimation(AnimationUtil.getHideAlphaAnimation(500))
             book_loading.visibility = View.GONE
             book_sl.isRefreshing = false
-            if (it != null){
-                Log.e("BookActivity","last:$it")
+            if (it != null) {
                 book_lastUpdateChapter.text = it
             }
         })
@@ -201,7 +198,6 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
     override fun onCatalogSelect(itemView: View, position: Int) {
         //更新书签
         viewModel.insertBookMark(position)
-
         //跳转到阅读界面
         val intent = Intent(this@BookActivity, PreviewActivity::class.java)
         intent.putExtra("book", book)

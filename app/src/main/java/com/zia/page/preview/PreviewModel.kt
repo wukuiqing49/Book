@@ -6,6 +6,7 @@ import com.zia.easybookmodule.bean.Book
 import com.zia.easybookmodule.bean.Catalog
 import com.zia.easybookmodule.bean.Chapter
 import com.zia.easybookmodule.engine.EasyBook
+import com.zia.easybookmodule.net.NetUtil
 import com.zia.easybookmodule.rx.Disposable
 import com.zia.easybookmodule.rx.Subscriber
 import com.zia.page.base.BaseViewModel
@@ -54,36 +55,35 @@ class PreviewModel(private val book: Book) : BaseViewModel() {
                     result.postValue(content)
                     return@execute
                 }
-                //从网络下载
-                disposable = EasyBook.getContent(book, Catalog(bookCache.chapterName, bookCache.url))
-                    .subscribe(object : Subscriber<List<String>> {
-                        override fun onFinish(t: List<String>) {
-                            DefaultExecutorSupplier.getInstance()
-                                .forBackgroundTasks()
-                                .execute {
-                                    //构造排版内容传出去
-                                    val chapter = Chapter(bookCache.chapterName, position, t)
-                                    val content = contentStrategy.parseTxtContent(chapter)
-                                    result.postValue(content)
-                                    if (t.isNotEmpty()) {
-                                        //存入数据库
-                                        bookCache.contents = t
-                                        cacheDao.insert(bookCache)
-                                    }
-                                }
+                //下载后面三章的内容
+                val site = book.site
+                for (i in position..position + 3) {
+                    val cache = cacheDao.getBookCache(book.bookName, book.siteName, i)
+                    if (cache == null || cache.contents.isNotEmpty()) {
+                        //有缓存就跳过
+                        continue
+                    }
+                    try {
+                        val html = NetUtil.getHtml(cache.url, site.encodeType)
+                        val contents = site.parseContent(html)
+                        //将当前章节解析成String传出去
+                        if (i == position) {
+                            val chapter = Chapter(bookCache.chapterName, i, contents)
+                            val contentResult = contentStrategy.parseTxtContent(chapter)
+                            result.postValue(contentResult)
                         }
-
-                        override fun onError(e: Exception) {
-                            error.postValue(e)
+                        //插入数据库
+                        if (contents.isNotEmpty()) {
+                            cache.contents = contents
+                            cacheDao.insert(cache)
+                        }
+                    } catch (e: Exception) {
+                        toast.postValue("${e.message}\n错误章节:${cache.chapterName}")
+                        if (i == position) {
                             result.postValue("解析错误，可以尝试重新打开该章节")
                         }
-
-                        override fun onMessage(message: String) {
-                        }
-
-                        override fun onProgress(progress: Int) {
-                        }
-                    })
+                    }
+                }
             }
     }
 

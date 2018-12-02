@@ -32,7 +32,7 @@ class BookViewModel(private val book: Book) : ProgressViewModel() {
     val savedFile = MutableLiveData<File>()
     val dao: BookCacheDao = AppDatabase.getAppDatabase().bookCacheDao()
     val catalogStrings = LivePagedListBuilder(
-        dao.getChapterNamesFactory(book.bookName, book.siteName), PagedList.Config.Builder()
+        dao.getCachesFactory(book.bookName, book.siteName), PagedList.Config.Builder()
             .setPageSize(30)
             .setPrefetchDistance(10)
             .setInitialLoadSizeHint(60)
@@ -100,13 +100,15 @@ class BookViewModel(private val book: Book) : ProgressViewModel() {
             }
     }
 
-    fun insertBookIntoBookRack(position: Int) {
+    fun insertBookIntoBookRack() {
         DefaultExecutorSupplier.getInstance()
             .forLightWeightBackgroundTasks()
             .execute {
                 val netBook = AppDatabase.getAppDatabase().netBookDao().getNetBook(book.bookName, book.site.siteName)
                 if (netBook == null) {
-                    AppDatabase.getAppDatabase().netBookDao().insert(NetBook(book, position))
+                    val size =
+                        AppDatabase.getAppDatabase().bookCacheDao().getBookCacheSize(book.bookName, book.siteName)
+                    AppDatabase.getAppDatabase().netBookDao().insert(NetBook(book, size))
                     toast.postValue("添加书架成功")
                     EventBus.getDefault().post(FreshEvent())
                 } else {

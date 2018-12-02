@@ -4,13 +4,14 @@ import android.arch.paging.PagedListAdapter
 import android.support.v7.util.DiffUtil
 import android.view.View
 import android.view.ViewGroup
+import com.zia.database.bean.BookCache
 import kotlinx.android.synthetic.main.item_catalog.view.*
 
 /**
  * Created by zia on 2018/12/1.
  */
 class CatalogPagingAdapter(private val catalogSelectListener: CatalogSelectListener) :
-    PagedListAdapter<String, CatalogPagingVH>(diffCallback) {
+    PagedListAdapter<BookCache, CatalogPagingVH>(diffCallback) {
 
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): CatalogPagingVH = CatalogPagingVH(p0)
 
@@ -20,9 +21,13 @@ class CatalogPagingAdapter(private val catalogSelectListener: CatalogSelectListe
 //        } else {
 //            holder.itemView.item_catalog_mark.visibility = View.INVISIBLE
 //        }
-        val chapterName = getItem(position)
-        holder.itemView.item_catalog_name.text = chapterName
-        holder.itemView.setOnClickListener { catalogSelectListener.onCatalogSelect(holder.itemView, position) }
+        val cache = getItem(position)
+        holder.itemView.item_catalog_name.text = cache?.chapterName
+        holder.itemView.setOnClickListener {
+            if (cache != null) {
+                catalogSelectListener.onCatalogSelect(holder.itemView, cache.index)
+            }
+        }
     }
 
 
@@ -37,16 +42,16 @@ class CatalogPagingAdapter(private val catalogSelectListener: CatalogSelectListe
          *
          * @see android.support.v7.util.DiffUtil
          */
-        private val diffCallback = object : DiffUtil.ItemCallback<String>() {
-            override fun areItemsTheSame(oldItem: String, newItem: String): Boolean =
-                oldItem == newItem
+        private val diffCallback = object : DiffUtil.ItemCallback<BookCache>() {
+            override fun areItemsTheSame(oldItem: BookCache, newItem: BookCache): Boolean =
+                oldItem.chapterName == newItem.chapterName
 
             /**
              * Note that in kotlin, == checking on data classes compares all contents, but in Java,
              * typically you'll implement Object#equals, and use it to compare object contents.
              */
-            override fun areContentsTheSame(oldItem: String, newItem: String): Boolean =
-                oldItem == newItem
+            override fun areContentsTheSame(oldItem: BookCache, newItem: BookCache): Boolean =
+                oldItem.index == newItem.index
         }
     }
 

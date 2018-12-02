@@ -29,6 +29,9 @@ public interface BookCacheDao {
     @Query("select chapterName from bookCache where bookName = :bookName and siteName = :siteName order by `index` asc")
     DataSource.Factory<Integer, String> getChapterNamesFactory(String bookName, String siteName);
 
+    @Query("select * from bookCache where bookName = :bookName and siteName = :siteName order by `index` asc")
+    DataSource.Factory<Integer, BookCache> getCachesFactory(String bookName, String siteName);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(BookCache bookCache);
 }

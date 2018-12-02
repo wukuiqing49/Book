@@ -106,6 +106,8 @@ class PreviewActivity : BaseActivity() {
     private fun initObserver() {
         viewModel.result.observe(this, Observer {
             preview_tv.text = it
+            preview_scrollView.scrollTo(0, 0)
+
         })
 
         viewModel.progress.observe(this, Observer {
@@ -126,7 +128,7 @@ class PreviewActivity : BaseActivity() {
         })
     }
 
-    private fun setNavigationColor(){
+    private fun setNavigationColor() {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 val uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
