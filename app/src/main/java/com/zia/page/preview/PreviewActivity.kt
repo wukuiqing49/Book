@@ -24,19 +24,22 @@ class PreviewActivity : BaseActivity() {
     private var isControll = true
 
     private lateinit var viewModel: PreviewModel
+    private lateinit var bookName: String
+    private lateinit var siteName: String
     private lateinit var book: Book
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setNavigationColor()
 
-        book = intent.getSerializableExtra("book") as Book
+        bookName = intent.getStringExtra("bookName")
+        siteName = intent.getStringExtra("siteName")
 
         setContentView(R.layout.activity_preview)
 
         setTextSize(defaultSharedPreferences.getFloat(textSizeSP, 20f))
         setTvTheme(defaultSharedPreferences.getInt(themeSP, 0))
-        viewModel = ViewModelProviders.of(this, PreviewModelFactory(book)).get(PreviewModel::class.java)
+        viewModel = ViewModelProviders.of(this, PreviewModelFactory(bookName, siteName)).get(PreviewModel::class.java)
 
         initObserver()
 

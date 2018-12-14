@@ -2,21 +2,18 @@ package com.zia.page.preview
 
 import android.arch.lifecycle.MutableLiveData
 import com.zia.database.AppDatabase
-import com.zia.easybookmodule.bean.Book
-import com.zia.easybookmodule.bean.Catalog
 import com.zia.easybookmodule.bean.Chapter
-import com.zia.easybookmodule.engine.EasyBook
 import com.zia.easybookmodule.net.NetUtil
 import com.zia.easybookmodule.rx.Disposable
-import com.zia.easybookmodule.rx.Subscriber
 import com.zia.page.base.BaseViewModel
 import com.zia.util.BookMarkUtil
+import com.zia.util.BookUtil
 import com.zia.util.threadPool.DefaultExecutorSupplier
 
 /**
  * Created by zia on 2018/11/20.
  */
-class PreviewModel(private val book: Book) : BaseViewModel() {
+class PreviewModel(private val bookName: String, private val siteName: String) : BaseViewModel() {
 
     val result = MutableLiveData<String>()
     val title = MutableLiveData<String>()
@@ -29,22 +26,25 @@ class PreviewModel(private val book: Book) : BaseViewModel() {
     private val cacheDao by lazy {
         AppDatabase.getAppDatabase().bookCacheDao()
     }
+    private val book by lazy {
+
+    }
 
     fun loadContent(index: Int?) {
         DefaultExecutorSupplier.getInstance()
             .forBackgroundTasks()
             .execute {
                 if (cacheSize == -1) {
-                    cacheSize = cacheDao.getChapterNames(book.bookName, book.siteName).size
+                    cacheSize = cacheDao.getChapterNames(bookName, siteName).size
                 }
                 //获取位置
                 if (index != null) {//传入了新的位置，插入数据库
                     this.position = index
-                    BookMarkUtil.insertOrUpdate(position, book.bookName, book.siteName)
+                    BookMarkUtil.insertOrUpdate(position, bookName, siteName)
                 } else {
-                    this.position = BookMarkUtil.getMarkPosition(book.bookName, book.siteName)
+                    this.position = BookMarkUtil.getMarkPosition(bookName, siteName)
                 }
-                val bookCache = cacheDao.getBookCache(book.bookName, book.siteName, position)
+                val bookCache = cacheDao.getBookCache(bookName, siteName, position)
                 //设置阅读信息
                 progress.postValue("${position + 1} / $cacheSize")
                 title.postValue(bookCache.chapterName)
@@ -56,9 +56,9 @@ class PreviewModel(private val book: Book) : BaseViewModel() {
                     return@execute
                 }
                 //下载后面三章的内容
-                val site = book.site
+                val site = BookUtil.getSite(siteName)
                 for (i in position..position + 3) {
-                    val cache = cacheDao.getBookCache(book.bookName, book.siteName, i)
+                    val cache = cacheDao.getBookCache(bookName, siteName, i)
                     if (cache == null || cache.contents.isNotEmpty()) {
                         //有缓存就跳过
                         continue

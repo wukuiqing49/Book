@@ -40,10 +40,12 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val goFragment = intent.getIntExtra("goFragment", 0)
+
         main_nav.setOnNavigationItemSelectedListener(this@MainActivity)
 
         mainPagerAdapter = MainPagerAdapter(supportFragmentManager)
-        setViewPager()
+        setViewPager(goFragment)
 
         viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
         initObserver()
@@ -53,6 +55,9 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
 
         //更新版本
         viewModel.checkApkVersion()
+
+        //添加shortcut
+        viewModel.addSearchShortcut(this)
     }
 
     private fun initObserver() {
@@ -106,9 +111,10 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
             }
     }
 
-    private fun setViewPager() {
+    private fun setViewPager(position: Int = 0) {
         main_vp.adapter = mainPagerAdapter
         main_vp.offscreenPageLimit = 2
+        main_vp.currentItem = position
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {

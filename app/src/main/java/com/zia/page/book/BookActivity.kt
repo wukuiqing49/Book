@@ -89,7 +89,8 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
         book_beginRead.setOnClickListener {
             //跳转到阅读界面
             val intent = Intent(this@BookActivity, PreviewActivity::class.java)
-            intent.putExtra("book", book)
+            intent.putExtra("bookName", book.bookName)
+            intent.putExtra("siteName", book.siteName)
             startActivity(intent)
         }
 
@@ -104,8 +105,13 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
                     return@setOnClickListener
                 }
                 book_favorite.setBackgroundColor(Color.parseColor("#bfbfbf"))
-                viewModel.insertBookIntoBookRack()
                 canAddFav = false
+                viewModel.insertBookIntoBookRack()
+                Glide.with(this).load(book.imageUrl).into(object : SimpleTarget<Drawable>() {
+                    override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
+                        viewModel.addShortcut(resource)
+                    }
+                })
             } else {
                 ToastEx.info(this@BookActivity, "已经在书架了").show()
             }
@@ -200,7 +206,8 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
         viewModel.insertBookMark(position)
         //跳转到阅读界面
         val intent = Intent(this@BookActivity, PreviewActivity::class.java)
-        intent.putExtra("book", book)
+        intent.putExtra("bookName", book.bookName)
+        intent.putExtra("siteName", book.siteName)
         startActivity(intent)
     }
 

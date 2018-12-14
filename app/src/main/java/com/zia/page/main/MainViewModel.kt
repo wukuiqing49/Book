@@ -1,12 +1,19 @@
 package com.zia.page.main
 
 import android.arch.lifecycle.MutableLiveData
-import android.os.Environment
+import android.content.Context
+import android.content.Intent
+import android.content.pm.ShortcutInfo
+import android.graphics.drawable.Icon
+import android.os.Build
 import com.google.gson.Gson
+import com.zia.App
+import com.zia.bookdownloader.R
 import com.zia.database.bean.Config
 import com.zia.easybookmodule.net.NetUtil
 import com.zia.page.base.ProgressViewModel
-import com.zia.util.downlaodUtil.DownloadRunnable
+import com.zia.util.DownloadUtil
+import com.zia.util.ShortcutsUtil
 import com.zia.util.threadPool.DefaultExecutorSupplier
 import okhttp3.*
 import java.io.File
@@ -45,25 +52,45 @@ class MainViewModel : ProgressViewModel() {
     }
 
     fun downloadApk(url: String) {
-        val apkName = "book.apk"
-        val savePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
-        val downloadRunnable = DownloadRunnable(url, savePath, apkName) { ratio, part, total ->
-            if (ratio == 100F) {
-                file.postValue(File(savePath + File.separator + apkName))
-                return@DownloadRunnable
-            }
-            dialogProgress.postValue(ratio.toInt())
-            dialogMessage.postValue(
-                String.format(
-                    "%.2fm / %.2fm",
-                    part / 1024f / 1024f,
-                    total / 1024f / 1024f
-                )
-            )
-        }
-        DefaultExecutorSupplier
-            .getInstance()
+        DownloadUtil(App.getContext(), url, "book.apk")
+//        val apkName = "book.apk"
+//        val savePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+//        val downloadRunnable = DownloadRunnable(url, savePath, apkName) { ratio, part, total ->
+//            if (ratio == 100F) {
+//                file.postValue(File(savePath + File.separator + apkName))
+//                return@DownloadRunnable
+//            }
+//            dialogProgress.postValue(ratio.toInt())
+//            dialogMessage.postValue(
+//                String.format(
+//                    "%.2fm / %.2fm",
+//                    part / 1024f / 1024f,
+//                    total / 1024f / 1024f
+//                )
+//            )
+//        }
+//        DefaultExecutorSupplier
+//            .getInstance()
+//            .forBackgroundTasks()
+//            .execute(downloadRunnable)
+    }
+
+    fun addSearchShortcut(context: Context) {
+        DefaultExecutorSupplier.getInstance()
             .forBackgroundTasks()
-            .execute(downloadRunnable)
+            .execute {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                    val intent = Intent(context, MainActivity::class.java)
+                    intent.action = Intent.ACTION_VIEW
+                    intent.putExtra("goFragment", 1)
+                    val shortcut = ShortcutInfo.Builder(context, "SEARCH")
+                        .setIcon(Icon.createWithResource(context, R.drawable.ic_search))
+                        .setShortLabel("搜索小说")
+                        .setLongLabel("搜索小说")
+                        .setIntent(intent)
+                        .build()
+                    ShortcutsUtil.addShortcut(context, shortcut)
+                }
+            }
     }
 }

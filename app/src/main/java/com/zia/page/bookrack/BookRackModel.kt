@@ -2,12 +2,14 @@ package com.zia.page.bookrack
 
 import android.arch.lifecycle.MutableLiveData
 import android.util.Log
+import com.zia.App
 import com.zia.database.AppDatabase
 import com.zia.database.bean.BookCache
 import com.zia.database.bean.LocalBook
 import com.zia.database.bean.NetBook
 import com.zia.easybookmodule.net.NetUtil
 import com.zia.page.base.BaseViewModel
+import com.zia.util.ShortcutsUtil
 import com.zia.util.threadPool.DefaultExecutorSupplier
 import java.io.File
 import java.text.SimpleDateFormat
@@ -41,7 +43,7 @@ class BookRackModel : BaseViewModel() {
                                 val html = NetUtil.getHtml(book.url, site.encodeType)
                                 val catalogs = netBook.rawBook.site.parseCatalog(html, book.url)
                                 val cacheDao = AppDatabase.getAppDatabase().bookCacheDao()
-                                val cacheSize = cacheDao.getBookCacheSize(book.bookName,book.siteName)
+                                val cacheSize = cacheDao.getBookCacheSize(book.bookName, book.siteName)
                                 for (i in cacheSize until catalogs.size) {
                                     cacheDao.insert(
                                         BookCache(
@@ -89,6 +91,11 @@ class BookRackModel : BaseViewModel() {
                 AppDatabase.getAppDatabase().netBookDao().delete(book.bookName, book.siteName)
                 toast.postValue("删除成功")
                 freshNetBooks()
+            }
+        DefaultExecutorSupplier.getInstance()
+            .forBackgroundTasks()
+            .execute {
+                ShortcutsUtil.removeBook(App.getContext(), book.rawBook)
             }
     }
 

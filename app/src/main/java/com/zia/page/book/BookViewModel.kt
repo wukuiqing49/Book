@@ -3,8 +3,13 @@ package com.zia.page.book
 import android.arch.lifecycle.MutableLiveData
 import android.arch.paging.LivePagedListBuilder
 import android.arch.paging.PagedList
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.Icon
+import android.os.Build
 import android.os.Environment
 import android.util.Log
+import com.zia.App
 import com.zia.database.AppDatabase
 import com.zia.database.bean.BookCache
 import com.zia.database.bean.BookCacheDao
@@ -19,6 +24,7 @@ import com.zia.easybookmodule.rx.Subscriber
 import com.zia.event.FreshEvent
 import com.zia.page.base.ProgressViewModel
 import com.zia.util.BookMarkUtil
+import com.zia.util.ShortcutsUtil
 import com.zia.util.threadPool.DefaultExecutorSupplier
 import org.greenrobot.eventbus.EventBus
 import java.io.File
@@ -115,6 +121,20 @@ class BookViewModel(private val book: Book) : ProgressViewModel() {
                     toast.postValue("已经添加过了")
                 }
             }
+    }
+
+    fun addShortcut(resource: Drawable) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            DefaultExecutorSupplier.getInstance()
+                .forBackgroundTasks()
+                .execute {
+                    ShortcutsUtil.addBook(
+                        App.getContext(),
+                        book,
+                        Icon.createWithBitmap((resource as BitmapDrawable).bitmap)
+                    )
+                }
+        }
     }
 
     fun downloadBook(type: Type) {
