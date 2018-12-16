@@ -14,7 +14,7 @@
 * 并发搜索下载，并支持EPUB和TXT格式，再也不用慢吞吞地下载了。
 
 
-[Android下载](http://qiniu.zzzia.net/book_v1.3.1.apk)
+[Android下载](http://qiniu.zzzia.net/book_v1.3.2.apk)
 
 
 <img src="https://github.com/Zzzia/Book/blob/master/screenshot/1.png" width="280"><img src="https://github.com/Zzzia/Book/blob/master/screenshot/2.png" width="280"><img src="https://github.com/Zzzia/Book/blob/master/screenshot/3.png" width="280">

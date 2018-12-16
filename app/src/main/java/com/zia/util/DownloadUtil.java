@@ -114,7 +114,7 @@ public class DownloadUtil {
         if (Build.VERSION.SDK_INT >= 24) {
             File file = (new File(pathstr));
             //参数1 上下文, 参数2 Provider主机地址 和配置文件中保持一致   参数3  共享的文件
-            Uri apkUri = FileProvider.getUriForFile(mContext, "com.lxtwsw.weather.fileprovider", file);
+            Uri apkUri = FileProvider.getUriForFile(mContext, "com.zia.book.FileProvider", file);
             //添加这一句表示对目标应用临时授权该Uri所代表的文件
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
