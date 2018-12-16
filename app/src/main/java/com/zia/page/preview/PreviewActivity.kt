@@ -1,11 +1,15 @@
 package com.zia.page.preview
 
+import android.animation.Animator
+import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
 import android.widget.ScrollView
 import com.zia.bookdownloader.R
 import com.zia.page.base.BaseActivity
@@ -60,6 +64,9 @@ class PreviewActivity : BaseActivity() {
             viewModel.goNext()
         }
 
+        viewModel.initTime()
+        viewModel.registerBattery()
+
         preview_increase.setOnClickListener {
             val size = defaultSharedPreferences.getFloat(textSizeSP, 20f)
             if (size > 40) {
@@ -96,11 +103,24 @@ class PreviewActivity : BaseActivity() {
             setTvTheme(theme_white)
         }
 
+        val fadeInAnimation = ObjectAnimator.ofFloat(preview_controlLayout,"alpha",0f, 1f)
+        fadeInAnimation.duration = 400
+
+        val fadeOutAnimation = ObjectAnimator.ofFloat(preview_controlLayout,"alpha",1f, 0f)
+        fadeOutAnimation.duration = 400
+
         preview_tv.setOnClickListener {
+            preview_controlLayout.visibility = View.VISIBLE
+            if (fadeInAnimation.isRunning){
+                fadeInAnimation.cancel()
+            }
+            if (fadeOutAnimation.isRunning){
+                fadeOutAnimation.cancel()
+            }
             if (isControll) {
-                preview_controlLayout.visibility = View.VISIBLE
+                fadeInAnimation.start()
             } else {
-                preview_controlLayout.visibility = View.GONE
+                fadeOutAnimation.start()
             }
             isControll = !isControll
         }
@@ -111,7 +131,7 @@ class PreviewActivity : BaseActivity() {
         viewModel.result.observe(this, Observer {
             preview_tv.text = it
             preview_scrollView.fullScroll(ScrollView.FOCUS_UP)
-            if (shouldLoadProgress){
+            if (shouldLoadProgress) {
                 viewModel.loadReadProgress()
                 shouldLoadProgress = false
             }
@@ -127,6 +147,17 @@ class PreviewActivity : BaseActivity() {
 
         viewModel.title.observe(this, Observer {
             preview_title.text = it
+            preview_title_inside.text = it
+        })
+
+        viewModel.currentTime.observe(this, Observer {
+            preview_currentTime.text = it
+        })
+
+        viewModel.battery.observe(this, Observer {
+            preview_battery.post {
+                preview_battery.setPower(it!!)
+            }
         })
 
         viewModel.error.observe(this, Observer {
@@ -155,6 +186,10 @@ class PreviewActivity : BaseActivity() {
         }
     }
 
+    private fun setBottomStatusBar() {
+        preview_battery.setPower(100f)
+    }
+
     @SuppressLint("SetTextI18n")
     private fun setTextSize(textSize: Float) {
         preview_tv.textSize = textSize
@@ -174,14 +209,20 @@ class PreviewActivity : BaseActivity() {
     private fun setTvTheme(themeId: Int) {
         when (themeId) {
             theme_white -> {
-                preview_scrollView.setBackgroundColor(resources.getColor(R.color.preview_theme_white))
+                preview_bg.setBackgroundColor(resources.getColor(R.color.preview_theme_white))
                 preview_tv.setTextColor(resources.getColor(R.color.textBlack))
                 preview_tv_next.setTextColor(resources.getColor(R.color.textBlack))
+                preview_title_inside.setTextColor(resources.getColor(R.color.textBlack))
+                preview_currentTime.setTextColor(resources.getColor(R.color.textBlack))
+                preview_battery.setColor(resources.getColor(R.color.textBlack))
             }
             theme_dark -> {
-                preview_scrollView.setBackgroundColor(resources.getColor(R.color.preview_theme_dark))
+                preview_bg.setBackgroundColor(resources.getColor(R.color.preview_theme_dark))
                 preview_tv.setTextColor(resources.getColor(R.color.textWhite))
                 preview_tv_next.setTextColor(resources.getColor(R.color.textWhite))
+                preview_title_inside.setTextColor(resources.getColor(R.color.textWhite))
+                preview_currentTime.setTextColor(resources.getColor(R.color.textWhite))
+                preview_battery.setColor(resources.getColor(R.color.textWhite))
             }
         }
     }

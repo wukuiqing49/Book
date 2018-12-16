@@ -1,7 +1,12 @@
 package com.zia.page.preview
 
 import android.arch.lifecycle.MutableLiveData
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.util.Log
+import com.zia.App
 import com.zia.database.AppDatabase
 import com.zia.easybookmodule.bean.Chapter
 import com.zia.easybookmodule.net.NetUtil
@@ -12,6 +17,12 @@ import com.zia.util.BookUtil
 import com.zia.util.defaultSharedPreferences
 import com.zia.util.editor
 import com.zia.util.threadPool.DefaultExecutorSupplier
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
+
 
 /**
  * Created by zia on 2018/11/20.
@@ -22,6 +33,8 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
     val title = MutableLiveData<String>()
     val progress = MutableLiveData<String>()
     val readProgress = MutableLiveData<Int>()
+    val currentTime = MutableLiveData<String>()
+    val battery = MutableLiveData<Float>()
 
     private val contentStrategy = MyContentStrategy()
     private var disposable: Disposable? = null
@@ -29,6 +42,33 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
     private var cacheSize = -1
     private val cacheDao by lazy {
         AppDatabase.getAppDatabase().bookCacheDao()
+    }
+
+    private var timeExecutor: ScheduledExecutorService? = null
+    private val timeFormatter = SimpleDateFormat("HH:mm", Locale.CHINA)
+    private val batteryReceiver = BatteryReceiver()
+
+    fun initTime() {
+        timeExecutor?.shutdownNow()
+        timeExecutor = Executors.newSingleThreadScheduledExecutor()
+        timeExecutor!!.scheduleAtFixedRate({
+            val timeText = timeFormatter.format(Date())
+            currentTime.postValue(timeText)
+        }, 0, 1, TimeUnit.MINUTES)
+    }
+
+    fun registerBattery() {
+        val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+        App.getContext().registerReceiver(batteryReceiver, filter)
+    }
+
+    inner class BatteryReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val current = intent.extras!!.getInt("level")// 获得当前电量
+            val total = intent.extras!!.getInt("scale")// 获得总电量
+            val percent = current / total.toFloat()
+            battery.postValue(percent)
+        }
     }
 
     fun loadContent(index: Int?) {
@@ -56,12 +96,12 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
                     result.postValue(content)
                     return@execute
                 }
-                //下载后面三章的内容
+                //下载后面五章的内容
                 val site = BookUtil.getSite(siteName)
-                for (i in position..position + 3) {
+                for (i in position..position + 5) {
                     val cache = cacheDao.getBookCache(bookName, siteName, i)
                     if (cache == null || cache.contents.isNotEmpty()) {
-                        //有缓存就跳过
+                        //有缓存或者没有该章节，跳过
                         continue
                     }
                     try {
@@ -134,6 +174,9 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
 
     override fun onCleared() {
         disposable?.dispose()
+        timeExecutor?.shutdownNow()
+        timeExecutor = null
+        App.getContext().unregisterReceiver(batteryReceiver)
         super.onCleared()
     }
 }

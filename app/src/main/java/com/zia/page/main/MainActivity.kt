@@ -4,21 +4,26 @@ import android.Manifest
 import android.app.ProgressDialog
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.v7.app.AlertDialog
+import android.view.Menu
 import android.view.MenuItem
 import com.tbruyelle.rxpermissions2.RxPermissions
 import com.zia.bookdownloader.R
 import com.zia.database.bean.Config
 import com.zia.page.base.BaseActivity
 import com.zia.util.FileUtil
+import com.zia.util.QQUtil
 import com.zia.util.ToastUtil
 import com.zia.util.Version
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.toolbar.*
 
 class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
 
@@ -39,6 +44,8 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        setSupportActionBar(toolbar)
 
         val goFragment = intent.getIntExtra("goFragment", 0)
 
@@ -150,6 +157,26 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
             }
             .setCancelable(true)
             .show()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_toolbar, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when (item?.itemId) {
+            R.id.menu_toolbar_joinQQ -> {
+                if (!QQUtil.joinQQGroup("-yIvYqsrr3nJg2RVF2GWO1zhYf5QNvwO", this@MainActivity)) {
+                    val clipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                    val data = ClipData.newPlainText("QQ Group", "29527219")
+                    clipboard.primaryClip = data
+                    ToastUtil.onInfo(this@MainActivity, "无法唤起QQ...\n已复制29527219到粘贴板，麻烦手动加入")
+                }
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onDestroy() {
