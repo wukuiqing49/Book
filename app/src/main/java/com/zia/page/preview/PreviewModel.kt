@@ -1,6 +1,7 @@
 package com.zia.page.preview
 
 import android.arch.lifecycle.MutableLiveData
+import android.util.Log
 import com.zia.database.AppDatabase
 import com.zia.easybookmodule.bean.Chapter
 import com.zia.easybookmodule.net.NetUtil
@@ -8,6 +9,8 @@ import com.zia.easybookmodule.rx.Disposable
 import com.zia.page.base.BaseViewModel
 import com.zia.util.BookMarkUtil
 import com.zia.util.BookUtil
+import com.zia.util.defaultSharedPreferences
+import com.zia.util.editor
 import com.zia.util.threadPool.DefaultExecutorSupplier
 
 /**
@@ -18,6 +21,7 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
     val result = MutableLiveData<String>()
     val title = MutableLiveData<String>()
     val progress = MutableLiveData<String>()
+    val readProgress = MutableLiveData<Int>()
 
     private val contentStrategy = MyContentStrategy()
     private var disposable: Disposable? = null
@@ -25,9 +29,6 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
     private var cacheSize = -1
     private val cacheDao by lazy {
         AppDatabase.getAppDatabase().bookCacheDao()
-    }
-    private val book by lazy {
-
     }
 
     fun loadContent(index: Int?) {
@@ -87,6 +88,16 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
             }
     }
 
+    fun loadReadProgress() {
+        DefaultExecutorSupplier.getInstance()
+            .forLightWeightBackgroundTasks()
+            .execute {
+                val p = defaultSharedPreferences()
+                    .getInt(BookUtil.buildId(bookName, siteName), 0)
+                readProgress.postValue(p)
+            }
+    }
+
     fun goNext() {
         if (position >= cacheSize - 1) {
             toast("没有下一章了")
@@ -103,6 +114,22 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
         }
         result.postValue("加载中..")
         loadContent(position - 1)
+    }
+
+    /**
+     * 增加阅读进度
+     * 需要在Preview的onPause添加，在删除书籍时归零
+     */
+    fun saveReadProgress(progress: Int = 0) {
+        DefaultExecutorSupplier.getInstance()
+            .forBackgroundTasks()
+            .execute {
+                defaultSharedPreferences()
+                    .editor {
+                        Log.e(javaClass.simpleName, "progress:$progress")
+                        putInt(BookUtil.buildId(bookName, siteName), progress)
+                    }
+            }
     }
 
     override fun onCleared() {

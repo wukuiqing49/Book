@@ -10,8 +10,17 @@ import java.util.Iterator;
  * Created by zia on 2018/12/14.
  */
 public class BookUtil {
+    /**
+     * 通过小说名字和站点名字能够构成唯一的id
+     * @param book
+     * @return
+     */
     public static String buildId(Book book) {
         return book.getBookName() + "_" + book.getSiteName();
+    }
+
+    public static String buildId(String bookName, String siteName) {
+        return bookName + "_" + siteName;
     }
 
     public static Site getSite(String siteName) {

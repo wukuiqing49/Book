@@ -9,7 +9,10 @@ import com.zia.database.bean.LocalBook
 import com.zia.database.bean.NetBook
 import com.zia.easybookmodule.net.NetUtil
 import com.zia.page.base.BaseViewModel
+import com.zia.util.BookUtil
 import com.zia.util.ShortcutsUtil
+import com.zia.util.defaultSharedPreferences
+import com.zia.util.editor
 import com.zia.util.threadPool.DefaultExecutorSupplier
 import java.io.File
 import java.text.SimpleDateFormat
@@ -96,6 +99,17 @@ class BookRackModel : BaseViewModel() {
             .forBackgroundTasks()
             .execute {
                 ShortcutsUtil.removeBook(App.getContext(), book.rawBook)
+            }
+    }
+
+    fun resetNetBookProgress(book: NetBook) {
+        DefaultExecutorSupplier.getInstance()
+            .forLightWeightBackgroundTasks()
+            .execute {
+                defaultSharedPreferences()
+                    .editor {
+                        putInt(BookUtil.buildId(book.bookName, book.siteName), 0)
+                    }
             }
     }
 

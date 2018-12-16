@@ -152,6 +152,7 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
             .setNegativeButton("取消", null)
             .setPositiveButton("确定") { _, _ ->
                 viewModel.deleteNetBook(netBook)
+                viewModel.resetNetBookProgress(netBook)
                 freshBookRack()
             }
             .setCancelable(true)

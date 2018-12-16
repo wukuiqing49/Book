@@ -6,8 +6,8 @@ import android.arch.lifecycle.ViewModelProviders
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.widget.ScrollView
 import com.zia.bookdownloader.R
-import com.zia.easybookmodule.bean.Book
 import com.zia.page.base.BaseActivity
 import com.zia.toastex.ToastEx
 import com.zia.util.ToastUtil
@@ -22,11 +22,11 @@ class PreviewActivity : BaseActivity() {
     private val theme_white = 0
     private val theme_dark = 1
     private var isControll = true
+    private var shouldLoadProgress = true
 
     private lateinit var viewModel: PreviewModel
     private lateinit var bookName: String
     private lateinit var siteName: String
-    private lateinit var book: Book
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,13 +104,21 @@ class PreviewActivity : BaseActivity() {
             }
             isControll = !isControll
         }
+
     }
 
     private fun initObserver() {
         viewModel.result.observe(this, Observer {
             preview_tv.text = it
-            preview_scrollView.scrollTo(0, 0)
+            preview_scrollView.fullScroll(ScrollView.FOCUS_UP)
+            if (shouldLoadProgress){
+                viewModel.loadReadProgress()
+                shouldLoadProgress = false
+            }
+        })
 
+        viewModel.readProgress.observe(this, Observer {
+            preview_scrollView.scrollTo(0, it!!)
         })
 
         viewModel.progress.observe(this, Observer {
@@ -156,6 +164,11 @@ class PreviewActivity : BaseActivity() {
     override fun onResume() {
         setNavigationColor()
         super.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.saveReadProgress(preview_scrollView.scrollY)
     }
 
     private fun setTvTheme(themeId: Int) {
