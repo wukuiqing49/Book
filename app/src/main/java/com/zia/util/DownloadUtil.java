@@ -42,8 +42,8 @@ public class DownloadUtil {
         request.setAllowedOverRoaming(false);
         //在通知栏中显示，默认就是显示的
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
-        request.setTitle("正在更新版本");
-        request.setDescription("小说神器下载中...");
+        request.setTitle("小说神器");
+        request.setDescription("下载中...");
         request.setVisibleInDownloadsUi(true);
 
         //设置下载的路径

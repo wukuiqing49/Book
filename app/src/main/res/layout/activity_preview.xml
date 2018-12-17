@@ -51,6 +51,8 @@
                         android:id="@+id/preview_tv_next"
                         android:text="下一章"
                         android:textSize="20sp"
+                        android:paddingTop="10dp"
+                        android:paddingBottom="20dp"
                         android:gravity="center"
                         android:textColor="@color/textBlack"
                         android:layout_width="match_parent"
