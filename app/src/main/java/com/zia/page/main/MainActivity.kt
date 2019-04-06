@@ -64,7 +64,7 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
         viewModel.checkApkVersion()
 
         //添加shortcut
-        viewModel.addSearchShortcut(this)
+//        viewModel.addSearchShortcut(this)
     }
 
     private fun initObserver() {

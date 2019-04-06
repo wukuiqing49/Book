@@ -23,6 +23,7 @@ import com.zia.event.FreshEvent
 import com.zia.page.base.BaseFragment
 import com.zia.page.book.BookActivity
 import com.zia.util.Java2Kotlin
+import com.zia.util.ReaderUtil
 import com.zia.util.ToastUtil
 import kotlinx.android.synthetic.main.fragment_book_rack.*
 import kotlinx.android.synthetic.main.item_book.view.*
@@ -133,7 +134,7 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.setDataAndType(Uri.parse(file.path), "text/plain")
+        intent.setDataAndType(Uri.parse(file.path), ReaderUtil.getMIMEType(file))
         try {
             startActivity(intent)
         } catch (e: Exception) {

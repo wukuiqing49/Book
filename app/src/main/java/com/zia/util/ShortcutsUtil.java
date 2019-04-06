@@ -1,10 +1,12 @@
 package com.zia.util;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.graphics.drawable.Icon;
+import android.os.Build;
 import com.zia.easybookmodule.bean.Book;
 import com.zia.page.preview.PreviewActivity;
 
@@ -80,6 +82,11 @@ public class ShortcutsUtil {
     public static void addShortcut(Context context, ShortcutInfo shortcutInfo) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1) {
             ShortcutManager shortcutManager = context.getSystemService(ShortcutManager.class);
+            autoRemoveShortcut(shortcutManager);
+            List<ShortcutInfo> shortcutInfos = shortcutManager.getDynamicShortcuts();
+            if (shortcutInfos.size() >= 5) {
+                shortcutInfos.remove(shortcutInfos.size() - 1);
+            }
             shortcutManager.addDynamicShortcuts(Collections.singletonList(shortcutInfo));
         }
     }
@@ -94,6 +101,7 @@ public class ShortcutsUtil {
     public static void addShortcut(Context context, ShortcutInfo shortcutInfo, int index) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1) {
             ShortcutManager shortcutManager = context.getSystemService(ShortcutManager.class);
+            autoRemoveShortcut(shortcutManager);
             List<ShortcutInfo> dynamicShortcuts = shortcutManager.getDynamicShortcuts();
             for (ShortcutInfo dynamicShortcut : dynamicShortcuts) {
                 if (dynamicShortcut.getId().equals(shortcutInfo.getId())) {
@@ -105,4 +113,11 @@ public class ShortcutsUtil {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.N_MR1)
+    private static void autoRemoveShortcut(ShortcutManager shortcutManager) {
+        List<ShortcutInfo> shortcutInfos = shortcutManager.getDynamicShortcuts();
+        if (shortcutInfos.size() >= 5) {
+            shortcutManager.removeDynamicShortcuts(Collections.singletonList(shortcutInfos.get(shortcutInfos.size() - 1).getId()));
+        }
+    }
 }
