@@ -25,6 +25,7 @@ import com.zia.toastex.ToastEx
 import com.zia.util.AnimationUtil
 import com.zia.util.BlurUtil
 import com.zia.util.ToastUtil
+import com.zia.widget.FastScrollLinearLayoutManager
 import kotlinx.android.synthetic.main.activity_book.*
 
 
@@ -76,7 +77,7 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
         adapter = CatalogPagingAdapter(this)
         catalogRv.adapter = adapter
 
-        val layoutManager = LinearLayoutManager(this)
+        val layoutManager = FastScrollLinearLayoutManager(this)
         catalogRv.layoutManager = layoutManager
 
         viewModel = ViewModelProviders.of(this, BookViewModelFactory(book)).get(BookViewModel::class.java)

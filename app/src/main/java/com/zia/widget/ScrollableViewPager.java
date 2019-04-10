@@ -23,21 +23,13 @@ public class ScrollableViewPager extends ViewPager {
     }
 
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (scrollable) {
-            return super.onInterceptTouchEvent(ev);
-        } else {
-            return false;
-        }
+    public boolean onTouchEvent(MotionEvent ev) {
+        return scrollable && super.onTouchEvent(ev);
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        if (scrollable){
-            return super.onTouchEvent(ev);
-        }else{
-            return false;
-        }
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return scrollable && super.onInterceptTouchEvent(ev);
     }
 
     public void setScrollable(boolean scrollable) {

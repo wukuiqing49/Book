@@ -29,7 +29,7 @@
         <!-- 配置APP版本号 -->
         <meta-data
                 android:name="BUGLY_APP_VERSION"
-                android:value="12"/>
+                android:value="13"/>
         <!-- 配置APP渠道号 -->
         <meta-data
                 android:name="BUGLY_APP_CHANNEL"
