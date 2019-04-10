@@ -87,7 +87,8 @@ dependencies {
     //toast
     implementation 'com.github.Zzzia:ToastEx:1.0.1'
     //EasyBook
-    implementation 'com.github.Zzzia:EasyBook:2.42'
+    //由于使用热修复，直接引入jar至libs会方便一些
+//    implementation 'com.github.Zzzia:EasyBook:2.42'
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
     //viewModel & lifeCycle
     implementation 'android.arch.lifecycle:extensions:1.1.1'
