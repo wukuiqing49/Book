@@ -1,6 +1,14 @@
 <resources>
-	<string name="app_name">小说神器</string>
-	
-	<string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="app_name">小说神器</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="join_qq">加入反馈qq群</string>
+    <string name="bookrack">书架</string>
+    <string name="bookstore">书城</string>
+    <string name="setting">设置</string>
+    <string name="blame_off">免责声明</string>
+    <string name="check_update">检查更新</string>
+    <string name="fix_easybook">解析修复</string>
+    <string name="join_qq_group">加入反馈QQ群</string>
+    <string name="search">搜索</string>
 </resources>

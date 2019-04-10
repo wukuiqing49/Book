@@ -15,8 +15,8 @@ class MyContentStrategy : ContentStrategy(){
         sb.append(chapter.chapterName)
         sb.append("\n")
         for (line in chapter.contents) {
-            //4个空格+正文+换行
-            sb.append("        ")
+            //2个缩进+正文+换行
+            sb.append("\u3000")
             sb.append(line)
             sb.append("\n")
         }

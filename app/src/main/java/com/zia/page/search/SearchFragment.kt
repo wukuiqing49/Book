@@ -9,7 +9,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
-import android.util.Log
 import android.util.Pair
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -48,9 +47,8 @@ class SearchFragment : BaseFragment(), BookAdapter.BookSelectListener {
         dialog
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
+    override fun lazyLoadData() {
+        super.lazyLoadData()
         viewModel = ViewModelProviders.of(this).get(SearchViewModel::class.java)
 
         viewModel.loadBooks.observe(this, Observer<List<Book>> {

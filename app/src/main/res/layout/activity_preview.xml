@@ -7,23 +7,17 @@
         android:orientation="vertical"
         tools:context="com.zia.page.preview.PreviewActivity"
         android:clickable="true"
-        android:focusable="true">
+        android:focusable="true"
+        android:id="@+id/preview_bg"
+        android:background="@color/preview_theme_white">
 
     <LinearLayout
-            android:id="@+id/preview_bg"
             android:orientation="vertical"
+            android:layout_marginTop="25dp"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/preview_theme_white">
-        <TextView
-                android:id="@+id/preview_title_inside"
-                android:layout_width="match_parent"
-                tools:text="第一章 陨落的天才"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
-                android:paddingTop="5dp"
-                android:textColor="@color/textBlack"
-                android:layout_height="wrap_content"/>
+            android:layout_height="match_parent">
+
+
         <ScrollView
                 android:id="@+id/preview_scrollView"
                 android:layout_width="match_parent"
@@ -43,7 +37,7 @@
                         android:textSize="20sp"
                         android:lineSpacingMultiplier="1.4"
                         android:textColor="@color/textBlack"
-                        android:text="        加载中..."
+                        android:text="\u3000加载中..."
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"/>
 
@@ -59,28 +53,34 @@
                         android:layout_height="wrap_content"/>
             </LinearLayout>
         </ScrollView>
-
-        <FrameLayout
-                android:id="@+id/preview_statusLayout"
-                android:layout_width="match_parent"
-                android:layout_height="20dp"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
-                android:layout_gravity="bottom">
-            <TextView
-                    android:id="@+id/preview_currentTime"
-                    tools:text="19:20"
-                    android:textColor="@color/textBlack"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"/>
-
-            <com.zia.page.preview.BatteryView
-                    android:id="@+id/preview_battery"
-                    android:layout_gravity="end|center"
-                    android:layout_width="22dp"
-                    android:layout_height="10dp"/>
-        </FrameLayout>
     </LinearLayout>
+
+    <TextView
+            android:id="@+id/preview_title_inside"
+            android:layout_width="wrap_content"
+            tools:text="第一章 陨落的天才"
+            android:layout_marginTop="5dp"
+            android:layout_marginStart="15dp"
+            android:textColor="@color/textBlack"
+            android:layout_height="20dp"/>
+
+    <TextView
+            android:id="@+id/preview_currentTime"
+            tools:text="19:20"
+            android:layout_marginEnd="45dp"
+            android:layout_marginTop="5dp"
+            android:layout_gravity="end"
+            android:textColor="@color/textBlack"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"/>
+
+    <com.zia.widget.BatteryView
+            android:id="@+id/preview_battery"
+            android:layout_gravity="end"
+            android:layout_marginEnd="15dp"
+            android:layout_marginTop="10dp"
+            android:layout_width="22dp"
+            android:layout_height="10dp"/>
 
     <FrameLayout
             android:id="@+id/preview_controlLayout"

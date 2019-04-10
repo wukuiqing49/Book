@@ -27,6 +27,7 @@ import com.zia.util.ReaderUtil
 import com.zia.util.ToastUtil
 import kotlinx.android.synthetic.main.fragment_book_rack.*
 import kotlinx.android.synthetic.main.item_book.view.*
+import kotlinx.android.synthetic.main.toolbar.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -56,6 +57,8 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
+        toolbar.text = "我的书架"
+
         viewModel = ViewModelProviders.of(this).get(BookRackModel::class.java)
         initObservers()
 
@@ -64,6 +67,7 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
         bookRack_rv.adapter = bookRackAdapter
 
         bookRack_sl.setOnRefreshListener { pullBooks() }
+        bookRack_sl.setColorSchemeColors(resources.getColor(R.color.colorAccent))
 
         freshBookRack()
     }

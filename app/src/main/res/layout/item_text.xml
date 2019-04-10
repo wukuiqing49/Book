@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content">
-	<TextView
-			android:id="@+id/item_text_tv"
-			android:text="收藏：1本"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:padding="5dp"/>
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent" android:layout_height="wrap_content">
+    <TextView
+            android:id="@+id/item_text_tv"
+            tools:text="我的收藏"
+            android:gravity="center"
+            android:layout_margin="3dp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_source"
+            android:textColor="@color/textColor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"/>
 </LinearLayout>

@@ -14,7 +14,19 @@
 * 并发搜索下载，并支持EPUB和TXT格式，再也不用慢吞吞地下载了。
 
 
-[Android下载](http://qiniu.zzzia.net/book_v1.4.0.apk)
+[Android下载](http://qiniu.zzzia.net/book_v1.5.0.apk)
 
 
-<img src="https://github.com/Zzzia/Book/blob/master/screenshot/1.png" width="280"><img src="https://github.com/Zzzia/Book/blob/master/screenshot/2.png" width="280"><img src="https://github.com/Zzzia/Book/blob/master/screenshot/3.png" width="280">
+<img src="https://github.com/Zzzia/Book/blob/master/screenshot/1.jpg"
+width="280"><img
+src="https://github.com/Zzzia/Book/blob/master/screenshot/2.jpg"
+width="280"><img
+src="https://github.com/Zzzia/Book/blob/master/screenshot/3.jpg"
+width="280">
+
+
+~~~
+V1.5.0
+适配刘海屏
+增加热修复功能~~~
+~~~

@@ -1,23 +1,23 @@
 package com.zia.page.preview
 
-import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
-import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
 import android.widget.ScrollView
 import com.zia.bookdownloader.R
 import com.zia.page.base.BaseActivity
 import com.zia.toastex.ToastEx
+import com.zia.util.DisplayUtil
 import com.zia.util.ToastUtil
 import com.zia.util.defaultSharedPreferences
 import com.zia.util.editor
 import kotlinx.android.synthetic.main.activity_preview.*
+
 
 class PreviewActivity : BaseActivity() {
 
@@ -40,6 +40,11 @@ class PreviewActivity : BaseActivity() {
         siteName = intent.getStringExtra("siteName")
 
         setContentView(R.layout.activity_preview)
+
+        preview_scrollView.post {
+            //适配刘海屏
+            fixWindow()
+        }
 
         setTextSize(defaultSharedPreferences.getFloat(textSizeSP, 20f))
         setTvTheme(defaultSharedPreferences.getInt(themeSP, 0))
@@ -103,18 +108,18 @@ class PreviewActivity : BaseActivity() {
             setTvTheme(theme_white)
         }
 
-        val fadeInAnimation = ObjectAnimator.ofFloat(preview_controlLayout,"alpha",0f, 1f)
+        val fadeInAnimation = ObjectAnimator.ofFloat(preview_controlLayout, "alpha", 0f, 1f)
         fadeInAnimation.duration = 400
 
-        val fadeOutAnimation = ObjectAnimator.ofFloat(preview_controlLayout,"alpha",1f, 0f)
+        val fadeOutAnimation = ObjectAnimator.ofFloat(preview_controlLayout, "alpha", 1f, 0f)
         fadeOutAnimation.duration = 400
 
         preview_tv.setOnClickListener {
             preview_controlLayout.visibility = View.VISIBLE
-            if (fadeInAnimation.isRunning){
+            if (fadeInAnimation.isRunning) {
                 fadeInAnimation.cancel()
             }
-            if (fadeOutAnimation.isRunning){
+            if (fadeOutAnimation.isRunning) {
                 fadeOutAnimation.cancel()
             }
             if (isControll) {
@@ -168,6 +173,25 @@ class PreviewActivity : BaseActivity() {
         viewModel.toast.observe(this, Observer {
             ToastUtil.onNormal(this@PreviewActivity, it)
         })
+    }
+
+    private fun fixWindow() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val decorView = window.decorView
+            val displayCutout = decorView.rootWindowInsets?.displayCutout
+            val rects = displayCutout?.boundingRects ?: return
+
+            if (rects.isNotEmpty()) {
+                //是刘海屏
+                Log.d("PreviewActivity", "刘海屏")
+                preview_tv.post {
+
+                    val paddingWid = DisplayUtil.dip2px(this, 25f)
+                    preview_tv.setPadding(paddingWid, displayCutout.safeInsetTop, paddingWid, 0)
+                }
+            }
+
+        }
     }
 
     private fun setNavigationColor() {

@@ -20,9 +20,9 @@ object Version {
         return code
     }
 
-    fun packageName(context: Context): String? {
+    fun packageName(context: Context): String {
         val manager = context.packageManager
-        var name: String? = null
+        var name = ""
         try {
             val info = manager.getPackageInfo(context.packageName, 0)
             name = info.versionName

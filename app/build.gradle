@@ -4,6 +4,18 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+buildscript {
+
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.ximsfei:stark-gradle:0.0.4'
+    }
+}
+
+apply plugin: 'com.ximsfei.stark'
+
 android {
     compileSdkVersion 28
     defaultConfig {
@@ -11,8 +23,8 @@ android {
         minSdkVersion 19
         targetSdkVersion 28
         renderscriptSupportModeEnabled true
-        versionCode 12
-        versionName "1.4.0"
+        versionCode 13
+        versionName "1.5.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         javaCompileOptions {
             annotationProcessorOptions {
@@ -21,10 +33,19 @@ android {
         }
         multiDexEnabled true
     }
+    signingConfigs {
+        release {
+            storeFile file('/Users/jiangzilai/myKey')
+            storePassword 'jzljzljzl'
+            keyAlias 'key0'
+            keyPassword 'jzljzljzl'
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
@@ -44,7 +65,7 @@ dependencies {
     //ui
     implementation 'com.jaeger.statusbarutil:library:1.5.1'
     //paging
-    implementation "android.arch.paging:runtime:1.0.1"
+    implementation 'android.arch.paging:runtime:1.0.1'
     //64k
     implementation 'com.android.support:multidex:1.0.3'
     //image
@@ -66,7 +87,7 @@ dependencies {
     //toast
     implementation 'com.github.Zzzia:ToastEx:1.0.1'
     //EasyBook
-    implementation 'com.github.Zzzia:EasyBook:2.41'
+    implementation 'com.github.Zzzia:EasyBook:2.42'
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
     //viewModel & lifeCycle
     implementation 'android.arch.lifecycle:extensions:1.1.1'
@@ -74,4 +95,7 @@ dependencies {
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.2'
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.2'
     debugImplementation 'com.squareup.leakcanary:leakcanary-support-fragment:1.6.2'
+    //hotfix
+    implementation 'com.ximsfei:stark-core:0.0.4'
+    implementation 'io.sigpipe:jbsdiff:1.0'
 }

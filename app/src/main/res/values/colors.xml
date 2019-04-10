@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<color name="colorPrimary">#1296db</color>
-	<color name="colorPrimaryDark">#1296db</color>
-	<color name="colorAccent">#008577</color>
-	<color name="sourceColor">#1296db</color>
+	<color name="colorPrimary">#03A9F4</color>
+	<color name="colorPrimaryDark">#03A9F4</color>
+	<color name="colorAccent">#03A9F4</color>
+	<color name="sourceColor">#03A9F4</color>
 	<color name="subDecoration">#d6151515</color>
 	<color name="textColor">#be101010</color>
-	<color name="downloadColor">#008577</color>
+	<color name="downloadColor">#1A7BAC</color>
 	<color name="addFavorite">#d93c5b</color>
 	<color name="textWhite">#ffffff</color>
+	<color name="grey">#CCCCCC</color>
 	<color name="textBlack">#e2000000</color>
 	<color name="previewShadow">#de0d0d0d</color>
 	<color name="preview_theme_dark">#0B0B0A</color>
 	<color name="preview_theme_white">#EEE6CB</color>
+	<color name="white">#ffffff</color>
 </resources>

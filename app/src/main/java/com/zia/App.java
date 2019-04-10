@@ -1,16 +1,12 @@
 package com.zia;
 
-import android.app.Application;
 import android.content.Context;
-import android.graphics.Color;
 import android.support.multidex.MultiDexApplication;
 import com.facebook.stetho.Stetho;
 import com.squareup.leakcanary.LeakCanary;
 import com.tencent.bugly.crashreport.CrashReport;
+import com.ximsfei.stark.core.Stark;
 import com.zia.bookdownloader.R;
-import com.zia.easybookmodule.engine.EasyBook;
-import com.zia.easybookmodule.engine.Site;
-import com.zia.easybookmodule.engine.SiteCollection;
 import com.zia.toastex.ToastEx;
 import com.zia.util.threadPool.DefaultExecutorSupplier;
 
@@ -44,7 +40,13 @@ public class App extends MultiDexApplication {
         LeakCanary.install(this);
     }
 
-    private void configEasyBook(){
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        Stark.get().load(base);
+    }
+
+    private void configEasyBook() {
 //        for (Site site : SiteCollection.getInstance().getAllSites()) {
 //            if (site.getSiteName().equals("极点小说网")){
 //                SiteCollection.getInstance().getAllSites().remove(site);

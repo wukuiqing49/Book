@@ -1,14 +1,22 @@
-<android.support.v4.widget.SwipeRefreshLayout
-		android:id="@+id/bookRack_sl"
-		xmlns:android="http://schemas.android.com/apk/res/android"
-		xmlns:tools="http://schemas.android.com/tools"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		tools:context="com.zia.page.bookrack.BookRackFragment">
-	
-	<android.support.v7.widget.RecyclerView
-			android:id="@+id/bookRack_rv"
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"/>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context="com.zia.page.bookrack.BookRackFragment">
 
-</android.support.v4.widget.SwipeRefreshLayout>
+    <include layout="@layout/toolbar"/>
+
+    <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/bookRack_sl"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+                android:id="@+id/bookRack_rv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+</LinearLayout>

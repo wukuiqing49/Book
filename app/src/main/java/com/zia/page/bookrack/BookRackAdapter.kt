@@ -81,19 +81,27 @@ class BookRackAdapter(private val recyclerView: RecyclerView, private val onBook
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (getItemViewType(position)) {
             TYPE_TEXT_NET -> {
-                val size = if (netBookList == null) 0 else netBookList!!.size
-                holder.itemView.item_text_tv.text = "追更：${size}本"
+                if (netBookList == null || netBookList!!.isEmpty()) {
+                    holder.itemView.item_text_tv.text = "先在书城中添加图书~"
+
+                } else {
+                    holder.itemView.item_text_tv.text = "追更列表"
+                }
             }
             TYPE_TEXT_LOCAL -> {
-                val size = if (localBookList == null) 0 else localBookList!!.size
-                holder.itemView.item_text_tv.text = "已下载（请用其他阅读器打开）：${size}本"
+                if (localBookList == null || localBookList!!.isEmpty()) {
+                    holder.itemView.item_text_tv.visibility = View.GONE
+                } else {
+                    holder.itemView.item_text_tv.text = "下载列表（请用其他阅读器打开）"
+                    holder.itemView.item_text_tv.visibility = View.VISIBLE
+                }
             }
             TYPE_NET -> {
                 val book = netBookList!![position - 1]
                 val context = holder.itemView.context
                 if (book.lastCheckCount < book.currentCheckCount) {
                     holder.itemView.item_book_lastUpdateTime.background =
-                            context.resources.getDrawable(R.drawable.bg_new)
+                        context.resources.getDrawable(R.drawable.bg_new)
                     holder.itemView.item_book_lastUpdateTime.setTextColor(Color.WHITE)
                 }
                 holder.itemView.item_book_name.text = book.bookName

@@ -4,26 +4,26 @@ import android.Manifest
 import android.app.ProgressDialog
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.v7.app.AlertDialog
-import android.view.Menu
+import android.util.Log
 import android.view.MenuItem
 import com.tbruyelle.rxpermissions2.RxPermissions
+import com.ximsfei.stark.core.Stark
+import com.zia.App
 import com.zia.bookdownloader.R
 import com.zia.database.bean.Config
+import com.zia.easybookmodule.engine.EasyBook
 import com.zia.page.base.BaseActivity
 import com.zia.util.FileUtil
-import com.zia.util.QQUtil
 import com.zia.util.ToastUtil
 import com.zia.util.Version
+import com.zia.util.threadPool.DefaultExecutorSupplier
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.toolbar.*
 
 class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
 
@@ -45,8 +45,6 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        setSupportActionBar(toolbar)
-
         val goFragment = intent.getIntExtra("goFragment", 0)
 
         main_nav.setOnNavigationItemSelectedListener(this@MainActivity)
@@ -60,26 +58,63 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
         //请求磁盘权限
         requestPermission()
 
-        //更新版本
-        viewModel.checkApkVersion()
+        //提示更新解析版本
+        viewModel.checkVersion("easybookfix", TYPE_FIX)
 
         //添加shortcut
 //        viewModel.addSearchShortcut(this)
     }
 
+    private var firstCheck = true
+    val waitDialog by lazy {
+        val dialog = ProgressDialog(this@MainActivity)
+        dialog.setCancelable(false)
+        dialog.setTitle("正在修复...")
+        dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
+        dialog
+    }
+
     private fun initObserver() {
         viewModel.config.observe(this, Observer {
-            if (it == null || it.able != "true") {
+            if (it == null || it.data.able != "true") {
                 //服务器认证失败，无法访问
                 showErrorDialog("由于某些原因，软件不再提供使用")
-            } else if (it.version > Version.packageCode(this@MainActivity)) {
-                showUpdateDialog(it)
+                return@Observer
+            }
+            Log.e(javaClass.simpleName, it.type)
+            if (it.type == TYPE_APP) {
+                if (it.data.version > Version.packageCode(App.getContext())) {
+                    showUpdateDialog(it.data, "book.apk", TYPE_APP)
+                } else {
+                    if (firstCheck) {
+                        firstCheck = false
+                    } else {
+                        ToastUtil.onInfo(App.getContext(), "已经是最新了")
+                    }
+                }
+                return@Observer
+            }
+            if (it.type == TYPE_FIX) {
+                if (it.data.version > EasyBook.getVersion()) {
+                    showUpdateDialog(it.data, "easybookfix.apk", TYPE_FIX)
+                } else {
+                    if (firstCheck) {
+                        firstCheck = false
+                    } else {
+                        ToastUtil.onInfo(App.getContext(), "已经是最新了")
+                    }
+                }
+                return@Observer
             }
         })
 
+        //文件下载完成监听
         viewModel.file.observe(this, Observer {
             dialog.dismiss()
-            if (it != null) {
+            if (it == null) {
+                return@Observer
+            }
+            if (it.type == TYPE_APP) {
                 val intent = Intent(Intent.ACTION_VIEW)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
@@ -87,10 +122,32 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 }
                 intent.setDataAndType(
-                    FileUtil.getFileUri(this@MainActivity, it),
+                    FileUtil.getFileUri(this@MainActivity, it.data),
                     "application/vnd.android.package-archive"
                 )
                 this@MainActivity.startActivity(intent)
+            } else if (it.type == TYPE_FIX) {
+                DefaultExecutorSupplier.getInstance().forBackgroundTasks().execute {
+                    try {
+                        Log.e("MainActivity", it.data.path)
+                        val applied = Stark.get().applyPatch(App.getContext(), it.data.path)
+                        Log.d(javaClass.simpleName, "applied:$applied")
+                        if (applied) {
+                            Stark.get().load(App.getContext())
+                            runOnUiThread {
+                                ToastUtil.onSuccess(App.getContext(), "修复完成，重启生效")
+                            }
+                        }
+                    } catch (e: Exception) {
+                        runOnUiThread {
+                            ToastUtil.onSuccess(App.getContext(), "修复失败")
+                        }
+                    } finally {
+                        runOnUiThread {
+                            waitDialog.dismiss()
+                        }
+                    }
+                }
             }
         })
 
@@ -120,8 +177,9 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
 
     private fun setViewPager(position: Int = 0) {
         main_vp.adapter = mainPagerAdapter
-        main_vp.offscreenPageLimit = 2
+        main_vp.offscreenPageLimit = 1
         main_vp.currentItem = position
+        main_vp.setScrollable(false)
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -132,6 +190,10 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
             }
             R.id.search -> {
                 main_vp.currentItem = 1
+                return true
+            }
+            R.id.setting -> {
+                main_vp.currentItem = 2
                 return true
             }
         }
@@ -147,36 +209,17 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
             .show()
     }
 
-    private fun showUpdateDialog(config: Config) {
+    private fun showUpdateDialog(config: Config, fileName: String, type: String) {
         AlertDialog.Builder(this)
-            .setTitle("是否更新版本")
+            .setTitle("有新的网站解析可以更新~")
             .setMessage(config.message)
             .setNegativeButton("取消", null)
             .setPositiveButton("更新") { _, _ ->
-                viewModel.downloadApk(config.url)
+                waitDialog.show()
+                viewModel.download(config.url, fileName, type)
             }
             .setCancelable(true)
             .show()
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_toolbar, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when (item?.itemId) {
-            R.id.menu_toolbar_joinQQ -> {
-                if (!QQUtil.joinQQGroup("-yIvYqsrr3nJg2RVF2GWO1zhYf5QNvwO", this@MainActivity)) {
-                    val clipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
-                    val data = ClipData.newPlainText("QQ Group", "29527219")
-                    clipboard.primaryClip = data
-                    ToastUtil.onInfo(this@MainActivity, "无法唤起QQ...\n已复制29527219到粘贴板，麻烦手动加入")
-                }
-                return true
-            }
-        }
-        return super.onOptionsItemSelected(item)
     }
 
     override fun onDestroy() {

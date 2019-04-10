@@ -12,6 +12,12 @@
         <item name="colorControlNormal">@android:color/white</item>
         <!--<item name="android:screenOrientation">portrait</item>-->
     </style>
+
+    <style name="SplashTheme" parent="AppTheme">
+        <!-- 欢迎页背景 -->
+        <item name="android:windowBackground">@drawable/splash</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
     
     <style name="Translucent" parent="AppTheme">
         <item name="android:windowBackground">@android:color/transparent</item>
