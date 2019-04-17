@@ -36,6 +36,5 @@ public class BaseFragment extends Fragment {
     }
 
     protected void lazyLoadData() {
-        Log.e(getClass().getSimpleName(), "lazyLoad");
     }
 }

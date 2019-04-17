@@ -10,7 +10,6 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
-import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
@@ -102,7 +101,7 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
         book_favorite.setOnClickListener {
             if (canAddFav) {
                 if (adapter.itemCount == 0) {
-                    ToastUtil.onWarning(this@BookActivity, "需要解析目录后才能添加，请稍等")
+                    ToastUtil.onWarning("需要解析目录后才能添加，请稍等")
                     return@setOnClickListener
                 }
                 book_favorite.setBackgroundColor(Color.parseColor("#bfbfbf"))
@@ -149,9 +148,9 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
 
         viewModel.savedFile.observe(this, Observer {
             if (it != null) {
-                ToastUtil.onSuccess(this@BookActivity, "保存成功，路径为${it.path}")
+                ToastUtil.onSuccess("保存成功，路径为${it.path}")
             } else {
-                ToastUtil.onError(this@BookActivity, "保存失败")
+                ToastUtil.onError("保存失败")
             }
             hideDialog()
         })
@@ -172,7 +171,7 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
             }
         })
 
-        viewModel.toast.observe(this, Observer { ToastUtil.onNormal(this@BookActivity, it) })
+        viewModel.toast.observe(this, Observer { ToastUtil.onNormal(it) })
     }
 
     private fun chooseType() {

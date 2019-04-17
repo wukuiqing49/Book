@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+    <com.zia.widget.CircleProgress
+            android:id="@+id/item_loading_view"
+            android:layout_gravity="center"
+            android:layout_width="50dp"
+            android:layout_height="50dp"/>
+    <TextView
+            android:id="@+id/item_loading_tv"
+            android:text="@string/retry"
+            android:gravity="center"
+            android:textColor="@color/textBlack"
+            tools:text="重试"
+            android:visibility="invisible"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+</FrameLayout>

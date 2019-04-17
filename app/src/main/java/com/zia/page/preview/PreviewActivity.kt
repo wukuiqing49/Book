@@ -167,11 +167,11 @@ class PreviewActivity : BaseActivity() {
 
         viewModel.error.observe(this, Observer {
             it?.printStackTrace()
-            ToastUtil.onError(this@PreviewActivity, it?.message)
+            ToastUtil.onError(it?.message)
         })
 
         viewModel.toast.observe(this, Observer {
-            ToastUtil.onNormal(this@PreviewActivity, it)
+            ToastUtil.onNormal(it)
         })
     }
 

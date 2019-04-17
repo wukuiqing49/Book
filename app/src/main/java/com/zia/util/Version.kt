@@ -1,13 +1,12 @@
 package com.zia.util
 
-import android.content.Context
 import com.zia.bookdownloader.BuildConfig
 
 /**
  * Created by zia on 2018/11/2.
  */
 object Version {
-    fun packageCode(context: Context): Int {
+    fun packageCode(): Int {
         return BuildConfig.VERSION_CODE
 //        val manager = context.packageManager
 //        var code = 0
@@ -21,7 +20,7 @@ object Version {
 //        return code
     }
 
-    fun packageName(context: Context): String {
+    fun packageName(): String {
         return BuildConfig.VERSION_NAME
 //        val manager = context.packageManager
 //        var name = ""

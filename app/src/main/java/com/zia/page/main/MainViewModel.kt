@@ -11,9 +11,10 @@ import android.util.Log
 import com.google.gson.Gson
 import com.zia.bookdownloader.R
 import com.zia.database.bean.Config
+import com.zia.easybookmodule.engine.EasyBook
 import com.zia.easybookmodule.net.NetUtil
 import com.zia.page.base.ProgressViewModel
-import com.zia.util.ShortcutsUtil
+import com.zia.util.*
 import com.zia.util.downlaodUtil.DownloadRunnable
 import com.zia.util.threadPool.DefaultExecutorSupplier
 import okhttp3.*
@@ -33,6 +34,37 @@ class MainViewModel : ProgressViewModel() {
     val file = MutableLiveData<Data<File>>()
 
     class Data<T>(val data: T, val type: String)
+
+    fun getAllLatestVersion() {
+        DefaultExecutorSupplier.getInstance().forBackgroundTasks().execute {
+            try {
+                val appVersionRequest = Request.Builder()
+                    .url("http://zzzia.net:8080/version/get")
+                    .post(FormBody.Builder().add("key", "book").build())
+                    .build()
+                val appResponse = NetUtil.okHttpClient.newCall(appVersionRequest).execute()
+                val gson = Gson()
+                val appVersionString = appResponse.body()?.string()
+                Log.e(javaClass.simpleName, appVersionString)
+                val appVersion = gson.fromJson<Config>(appVersionString, Config::class.java).version
+                val fixVersionRequest = Request.Builder()
+                    .url("http://zzzia.net:8080/version/get")
+                    .post(FormBody.Builder().add("key", "easybookfix").build())
+                    .build()
+                val fixResponse = NetUtil.okHttpClient.newCall(fixVersionRequest).execute()
+                val fixVersion = gson.fromJson<Config>(fixResponse.body()?.string(), Config::class.java).version
+                defaultSharedPreferences().editor {
+                    putInt("appVersion", appVersion)
+                    putInt("fixVersion", fixVersion)
+                }
+                if (Version.packageCode() < appVersion || EasyBook.getVersion() < fixVersion) {
+                    ToastUtil.onInfo("有更新可用~")
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 
     fun checkVersion(key: String, type: String) {
         Log.e(javaClass.simpleName, "checkVersion $key $type")

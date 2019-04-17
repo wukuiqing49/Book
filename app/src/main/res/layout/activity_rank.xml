@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context="com.zia.page.bookstore.rank.RankActivity">
+
+    <include layout="@layout/toolbar"/>
+
+    <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        <android.support.v7.widget.RecyclerView
+                android:id="@+id/rank_rv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+        <com.zia.widget.CircleProgress
+                android:visibility="invisible"
+                android:id="@+id/rank_loadingView"
+                android:layout_gravity="center"
+                android:layout_width="60dp"
+                android:layout_height="60dp"/>
+    </FrameLayout>
+
+
+</LinearLayout>

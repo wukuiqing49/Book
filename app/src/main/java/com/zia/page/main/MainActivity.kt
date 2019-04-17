@@ -59,7 +59,8 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
         requestPermission()
 
         //提示更新解析版本
-        viewModel.checkVersion("easybookfix", TYPE_FIX)
+//        viewModel.checkVersion("easybookfix", TYPE_FIX)
+        viewModel.getAllLatestVersion()
 
         //添加shortcut
 //        viewModel.addSearchShortcut(this)
@@ -83,13 +84,13 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
             }
             Log.e(javaClass.simpleName, it.type)
             if (it.type == TYPE_APP) {
-                if (it.data.version > Version.packageCode(App.getContext())) {
+                if (it.data.version > Version.packageCode()) {
                     showUpdateDialog(it.data, "book.apk", TYPE_APP)
                 } else {
                     if (firstCheck) {
                         firstCheck = false
                     } else {
-                        ToastUtil.onInfo(App.getContext(), "已经是最新了")
+                        ToastUtil.onInfo("已经是最新了")
                     }
                 }
                 return@Observer
@@ -101,7 +102,7 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
                     if (firstCheck) {
                         firstCheck = false
                     } else {
-                        ToastUtil.onInfo(App.getContext(), "已经是最新了")
+                        ToastUtil.onInfo("已经是最新了")
                     }
                 }
                 return@Observer
@@ -135,12 +136,12 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
                         if (applied) {
                             Stark.get().load(App.getContext())
                             runOnUiThread {
-                                ToastUtil.onSuccess(App.getContext(), "修复完成，重启生效")
+                                ToastUtil.onSuccess("修复完成，重启生效")
                             }
                         }
                     } catch (e: Exception) {
                         runOnUiThread {
-                            ToastUtil.onSuccess(App.getContext(), "修复失败")
+                            ToastUtil.onSuccess("修复失败")
                         }
                     } finally {
                         runOnUiThread {
@@ -160,7 +161,7 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
         })
 
         viewModel.toast.observe(this, Observer {
-            ToastUtil.onNormal(this@MainActivity, it)
+            ToastUtil.onNormal(it)
         })
     }
 
@@ -169,7 +170,7 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
         disposal = rxPermissions.request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
             .subscribe { ok ->
                 if (!ok) {
-                    ToastUtil.onError(this@MainActivity, "需要磁盘读写权限")
+                    ToastUtil.onError("需要磁盘读写权限")
                     finish()
                 }
             }

@@ -8,6 +8,7 @@
 	<color name="textColor">#be101010</color>
 	<color name="downloadColor">#1A7BAC</color>
 	<color name="addFavorite">#d93c5b</color>
+	<color name="red">#d93c5b</color>
 	<color name="textWhite">#ffffff</color>
 	<color name="grey">#CCCCCC</color>
 	<color name="textBlack">#e2000000</color>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/item_bookstore_title_tv"
+        tools:text="VIP精品打赏榜"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:textColor="@color/textBlack"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="15dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+

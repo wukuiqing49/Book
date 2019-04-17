@@ -225,7 +225,7 @@
 
         <TextView
                 android:id="@+id/book_beginRead"
-                android:text="立即阅读"
+                android:text="继续阅读"
                 android:layout_weight="4"
                 android:layout_width="0dp"
                 android:textColor="@color/textWhite"

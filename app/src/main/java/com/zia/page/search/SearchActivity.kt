@@ -1,6 +1,5 @@
 package com.zia.page.search
 
-
 import android.app.ActivityOptions
 import android.app.ProgressDialog
 import android.arch.lifecycle.Observer
@@ -11,30 +10,23 @@ import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Pair
 import android.view.KeyEvent
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import com.zia.bookdownloader.R
 import com.zia.easybookmodule.bean.Book
-import com.zia.page.base.BaseFragment
+import com.zia.page.base.BaseActivity
 import com.zia.page.book.BookActivity
 import com.zia.util.Java2Kotlin
 import com.zia.util.KeyboardktUtils
 import com.zia.util.ToastUtil
-import kotlinx.android.synthetic.main.fragment_search.*
+import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.android.synthetic.main.item_book.view.*
 
-
-/**
- * Created by zzzia on 2018/11/2.
- * 搜索页面
- */
-class SearchFragment : BaseFragment(), BookAdapter.BookSelectListener {
+class SearchActivity : BaseActivity(), BookAdapter.BookSelectListener {
 
     private lateinit var bookAdapter: BookAdapter
     private lateinit var viewModel: SearchViewModel
     private val dialog by lazy {
-        val dialog = ProgressDialog(context)
+        val dialog = ProgressDialog(this)
         dialog.setCancelable(true)
         dialog.progress = 0
         dialog.setTitle("正在搜索")
@@ -47,13 +39,19 @@ class SearchFragment : BaseFragment(), BookAdapter.BookSelectListener {
         dialog
     }
 
-    override fun lazyLoadData() {
-        super.lazyLoadData()
+    private var searchKey: String? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_search)
+
+        searchKey = intent.getStringExtra("searchKey")
+
         viewModel = ViewModelProviders.of(this).get(SearchViewModel::class.java)
 
         viewModel.loadBooks.observe(this, Observer<List<Book>> {
             if (it != null) {
-                ToastUtil.onSuccess(context, "搜索到${it.size}本书籍")
+                ToastUtil.onSuccess("搜索到${it.size}本书籍")
                 bookAdapter.freshBooks(ArrayList(it))
                 searchRv.scrollToPosition(0)
                 hideDialog()
@@ -62,12 +60,12 @@ class SearchFragment : BaseFragment(), BookAdapter.BookSelectListener {
 
         viewModel.error.observe(this, Observer {
             it?.printStackTrace()
-            ToastUtil.onError(context, it?.message)
+            ToastUtil.onError(it?.message)
             hideDialog()
         })
 
         viewModel.toast.observe(this, Observer {
-            ToastUtil.onInfo(context, it)
+            ToastUtil.onInfo(it)
         })
 
         viewModel.dialogMessage.observe(this, Observer {
@@ -79,7 +77,7 @@ class SearchFragment : BaseFragment(), BookAdapter.BookSelectListener {
         })
 
         bookAdapter = BookAdapter(this)
-        searchRv.layoutManager = LinearLayoutManager(context)
+        searchRv.layoutManager = LinearLayoutManager(this)
         searchRv.adapter = bookAdapter
 
         searchEt.setOnEditorActionListener { _, actionId, event ->
@@ -95,6 +93,11 @@ class SearchFragment : BaseFragment(), BookAdapter.BookSelectListener {
 
         searchBt.setOnClickListener {
             search()
+        }
+
+        if (searchKey != null && searchKey!!.isNotEmpty()) {
+            searchEt.setText(searchKey)
+            viewModel.search(searchKey!!)
         }
     }
 
@@ -113,20 +116,12 @@ class SearchFragment : BaseFragment(), BookAdapter.BookSelectListener {
     }
 
     override fun onBookSelect(itemView: View, book: Book) {
-        val intent = Intent(context, BookActivity::class.java)
+        val intent = Intent(this, BookActivity::class.java)
         intent.putExtra("book", book)
         intent.putExtra("scroll", false)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val p = arrayListOf<Pair<View, String>>(
-//                Pair.create(itemView.item_book_layout, "book"),
-//                Pair.create(itemView.item_book_name, "book_name"),
-//                Pair.create(itemView.item_book_author, "book_author"),
-//                Pair.create(itemView.item_book_lastUpdateChapter, "book_lastUpdateChapter"),
-//                Pair.create(itemView.item_book_lastUpdateTime, "book_lastUpdateTime"),
-//                Pair.create(itemView.item_book_site, "book_site"),
-                Pair.create(itemView.item_book_image, "book_image")
-            )
-            val options = ActivityOptions.makeSceneTransitionAnimation(activity, *Java2Kotlin.getPairs(p))
+            val p = arrayListOf<Pair<View, String>>(Pair.create(itemView.item_book_image, "book_image"))
+            val options = ActivityOptions.makeSceneTransitionAnimation(this, *Java2Kotlin.getPairs(p))
             startActivity(intent, options.toBundle())
         } else {
             startActivity(intent)
@@ -153,9 +148,5 @@ class SearchFragment : BaseFragment(), BookAdapter.BookSelectListener {
 
     private fun hideDialog() {
         dialog.dismiss()
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_search, container, false)
     }
 }

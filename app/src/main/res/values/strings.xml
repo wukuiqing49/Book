@@ -11,4 +11,8 @@
     <string name="fix_easybook">解析修复</string>
     <string name="join_qq_group">加入反馈QQ群</string>
     <string name="search">搜索</string>
+    <string name="loading">加载中...</string>
+    <string name="cover">封面</string>
+    <string name="no_1">NO.1</string>
+    <string name="retry">点击重试</string>
 </resources>

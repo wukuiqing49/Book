@@ -13,31 +13,37 @@
     <uses-permission android:name="android.permission.READ_LOGS"/>
 
     <application
+            android:name="com.zia.App"
             android:allowBackup="true"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
-            android:name="com.zia.App"
+            android:largeHeap="true"
             android:networkSecurityConfig="@xml/network_security_config"
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             tools:ignore="GoogleAppIndexingWarning">
-        <!-- 配置APP ID -->
+        <activity android:name="com.zia.page.bookstore.rank.RankActivity">
+        </activity>
+        <activity android:name="com.zia.page.search.SearchActivity"
+                  android:theme="@style/Translucent">
+        </activity>
+        <activity android:name="com.zia.page.bookstore.detail.BookInfoActivity"
+                  android:theme="@style/FullScreen">
+        </activity> <!-- 配置APP ID -->
         <meta-data
                 android:name="BUGLY_APPID"
-                android:value="a7581ce042"/>
-        <!-- 配置APP版本号 -->
+                android:value="a7581ce042"/> <!-- 配置APP版本号 -->
         <meta-data
                 android:name="BUGLY_APP_VERSION"
-                android:value="13"/>
-        <!-- 配置APP渠道号 -->
+                android:value="14"/> <!-- 配置APP渠道号 -->
         <meta-data
                 android:name="BUGLY_APP_CHANNEL"
-                android:value="release"/>
-        <!-- 配置Bugly调试模式（true或者false）-->
+                android:value="release"/> <!-- 配置Bugly调试模式（true或者false） -->
         <meta-data
                 android:name="BUGLY_ENABLE_DEBUG"
                 android:value="false"/>
+
         <provider
                 android:name="android.support.v4.content.FileProvider"
                 android:authorities="com.zia.book.FileProvider"
@@ -54,10 +60,10 @@
                 android:name="com.tencent.bugly.beta.ui.BetaActivity"
                 android:configChanges="keyboardHidden|orientation|screenSize|locale"
                 android:theme="@android:style/Theme.Translucent"/>
-
-        <activity android:name="com.zia.page.main.MainActivity"
-                  android:theme="@style/SplashTheme"
-                  android:screenOrientation="portrait">
+        <activity
+                android:name="com.zia.page.main.MainActivity"
+                android:screenOrientation="portrait"
+                android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -68,10 +74,12 @@
                 android:name="com.zia.page.book.BookActivity"
                 android:theme="@style/Translucent">
         </activity>
-        <activity android:name="com.zia.page.preview.PreviewActivity"
-                  android:theme="@style/FullScreen">
+        <activity
+                android:name="com.zia.page.preview.PreviewActivity"
+                android:theme="@style/FullScreen">
         </activity>
-        <activity android:name="com.zia.page.blame.BlameActivity"/>
+        <activity
+                android:name="com.zia.page.blame.BlameActivity"/>
     </application>
 
 </manifest>

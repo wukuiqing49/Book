@@ -86,7 +86,7 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
             }
         })
 
-        viewModel.toast.observe(this, Observer { ToastUtil.onNormal(context, it) })
+        viewModel.toast.observe(this, Observer { ToastUtil.onNormal(it) })
     }
 
     /**
@@ -131,7 +131,7 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
      */
     override fun onLocalBookSelected(viewHolder: RecyclerView.ViewHolder, localBook: LocalBook, position: Int) {
         val index = localBook.filePath.indexOf("book")
-        ToastUtil.onInfo(context, "位置：${localBook.filePath.substring(index)}")
+        ToastUtil.onInfo("位置：${localBook.filePath.substring(index)}")
         val file = File(localBook.filePath)
         val intent = Intent(Intent.ACTION_VIEW)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -143,7 +143,7 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
             startActivity(intent)
         } catch (e: Exception) {
             e.printStackTrace()
-            ToastUtil.onError(context, "无法调用第三方阅读器")
+            ToastUtil.onError("无法调用第三方阅读器")
         }
     }
 
