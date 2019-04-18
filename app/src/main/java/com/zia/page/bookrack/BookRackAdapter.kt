@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import com.zia.bookdownloader.R
 import com.zia.database.bean.LocalBook
 import com.zia.database.bean.NetBook
+import com.zia.util.ColorConstants
 import com.zia.util.loadImage
 import kotlinx.android.synthetic.main.item_book.view.*
 import kotlinx.android.synthetic.main.item_text.view.*
@@ -103,13 +104,25 @@ class BookRackAdapter(private val recyclerView: RecyclerView, private val onBook
                     holder.itemView.item_book_lastUpdateTime.background =
                         context.resources.getDrawable(R.drawable.bg_new)
                     holder.itemView.item_book_lastUpdateTime.setTextColor(Color.WHITE)
+                    holder.itemView.item_book_update_flag.visibility = View.VISIBLE
+                } else {
+                    holder.itemView.item_book_lastUpdateTime.background = null
+                    holder.itemView.item_book_lastUpdateTime.setTextColor(ColorConstants.TEXT_BLACK_LIGHT)
+                    holder.itemView.item_book_update_flag.visibility = View.INVISIBLE
                 }
                 holder.itemView.item_book_name.text = book.bookName
                 holder.itemView.item_book_author.text = book.author
                 holder.itemView.item_book_lastUpdateChapter.text = "最新：${book.lastChapterName}"
                 holder.itemView.item_book_site.text = book.siteName
                 holder.itemView.item_book_lastUpdateTime.text = "更新：${book.lastUpdateTime}"
-                holder.itemView.context.loadImage(book.imageUrl, holder.itemView.item_book_image)
+                if (book.imageUrl.isNotEmpty()) {
+                    holder.itemView.item_book_cover_name.visibility = View.INVISIBLE
+                    holder.itemView.context.loadImage(book.imageUrl, holder.itemView.item_book_image)
+                } else {
+                    holder.itemView.item_book_cover_name.visibility = View.VISIBLE
+                    holder.itemView.item_book_cover_name.text = book.bookName
+                    holder.itemView.context.loadImage(R.drawable.ic_book_cover_default, holder.itemView.item_book_image)
+                }
 
                 holder.itemView.setOnClickListener { onBookRackSelect.onNetBookSelected(holder, book, position) }
                 holder.itemView.setOnLongClickListener {

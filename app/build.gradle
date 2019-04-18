@@ -4,17 +4,17 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
-buildscript {
-
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.ximsfei:stark-gradle:0.0.4'
-    }
-}
-
-apply plugin: 'com.ximsfei.stark'
+//buildscript {
+//
+//    repositories {
+//        jcenter()
+//    }
+//    dependencies {
+//        classpath 'com.ximsfei:stark-gradle:0.0.4'
+//    }
+//}
+//
+//apply plugin: 'com.ximsfei.stark'
 
 android {
     compileSdkVersion 28

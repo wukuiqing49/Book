@@ -6,13 +6,14 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.bumptech.glide.Glide
 import com.zia.bookdownloader.R
 import com.zia.easybookmodule.bean.rank.HottestRank
 import com.zia.easybookmodule.bean.rank.HottestRankClassify
 import com.zia.easybookmodule.bean.rank.RankBook
 import com.zia.easybookmodule.bean.rank.RankInfo
 import com.zia.page.bookstore.detail.BookInfoActivity
+import com.zia.util.ColorConstants
+import com.zia.util.loadImage
 import kotlinx.android.synthetic.main.item_bookstore_classify.view.*
 import kotlinx.android.synthetic.main.item_bookstore_first.view.*
 import kotlinx.android.synthetic.main.item_bookstore_normal.view.*
@@ -78,24 +79,30 @@ class BookStoreAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 holder.itemView.item_bookstore_first_bookName.text = rankBook.bookName
                 holder.itemView.item_bookstore_first_classify.text = rankBook.classify
                 holder.itemView.item_bookstore_first_viewInfo.text = rankBook.viewInfo
-                Glide.with(holder.itemView.context).load(rankBook.imgUrl)
-                    .into(holder.itemView.item_bookstore_first_cover)
+                holder.itemView.context.loadImage(rankBook.imgUrl, holder.itemView.item_bookstore_first_cover)
                 holder.itemView.setOnClickListener {
                     val intent = Intent(holder.itemView.context, BookInfoActivity::class.java)
                     intent.putExtra("bid", rankBook.data_bid)
-                    intent.putExtra("book_name", rankBook.bookName)
                     holder.itemView.context.startActivity(intent)
                 }
             }
             else -> {
                 val rankBook = multiList[position] as RankBook
+                val rankNum = getRankNum(position)
                 holder.itemView.item_bookstore_normal_bookName.text = rankBook.bookName
                 holder.itemView.item_bookstore_normal_viewInfo.text = rankBook.viewInfo
-                holder.itemView.item_bookstore_normal_rankNum.text = getRankNum(position).toString()
+                holder.itemView.item_bookstore_normal_rankNum.text = rankNum.toString()
+                when (rankNum) {
+                    2 -> {
+                        holder.itemView.item_bookstore_normal_rankNum.setBackgroundColor(ColorConstants.RANK_SECOND)
+                    }
+                    3 -> {
+                        holder.itemView.item_bookstore_normal_rankNum.setBackgroundColor(ColorConstants.RANK_THIRD)
+                    }
+                }
                 holder.itemView.setOnClickListener {
                     val intent = Intent(holder.itemView.context, BookInfoActivity::class.java)
                     intent.putExtra("bid", rankBook.data_bid)
-                    intent.putExtra("book_name", rankBook.bookName)
                     holder.itemView.context.startActivity(intent)
                 }
             }

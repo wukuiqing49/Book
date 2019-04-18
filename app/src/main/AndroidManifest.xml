@@ -23,14 +23,7 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name="com.zia.page.bookstore.rank.RankActivity">
-        </activity>
-        <activity android:name="com.zia.page.search.SearchActivity"
-                  android:theme="@style/Translucent">
-        </activity>
-        <activity android:name="com.zia.page.bookstore.detail.BookInfoActivity"
-                  android:theme="@style/FullScreen">
-        </activity> <!-- 配置APP ID -->
+        <!-- 配置APP ID -->
         <meta-data
                 android:name="BUGLY_APPID"
                 android:value="a7581ce042"/> <!-- 配置APP版本号 -->
@@ -60,10 +53,8 @@
                 android:name="com.tencent.bugly.beta.ui.BetaActivity"
                 android:configChanges="keyboardHidden|orientation|screenSize|locale"
                 android:theme="@android:style/Theme.Translucent"/>
-        <activity
-                android:name="com.zia.page.main.MainActivity"
-                android:screenOrientation="portrait"
-                android:theme="@style/SplashTheme">
+        <activity android:name="com.zia.page.SplashActivity"
+                  android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -71,15 +62,22 @@
             </intent-filter>
         </activity>
         <activity
+                android:name="com.zia.page.main.MainActivity"
+                android:screenOrientation="portrait"/>
+        <activity
                 android:name="com.zia.page.book.BookActivity"
-                android:theme="@style/Translucent">
-        </activity>
+                android:theme="@style/Translucent"/>
         <activity
                 android:name="com.zia.page.preview.PreviewActivity"
-                android:theme="@style/FullScreen">
-        </activity>
+                android:theme="@style/FullScreen"/>
+        <activity android:name="com.zia.page.blame.BlameActivity"/>
+        <activity android:name="com.zia.page.bookstore.rank.RankActivity"/>
         <activity
-                android:name="com.zia.page.blame.BlameActivity"/>
+                android:name="com.zia.page.search.SearchActivity"
+                android:theme="@style/Translucent"/>
+        <activity
+                android:name="com.zia.page.bookstore.detail.BookInfoActivity"
+                android:theme="@style/FullScreen"/>
     </application>
 
 </manifest>

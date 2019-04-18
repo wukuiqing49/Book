@@ -70,7 +70,9 @@ class BookStoreFragment : BaseFragment() {
                 book_store_loading.isClickable = false
             }
             if (it == 100) {
-                book_store_loading.startAnimation(AnimationUtil.getHideAlphaAnimation(800))
+                book_store_loading.startAnimation(AnimationUtil.getHideAlphaAnimation(800, endListener = Runnable {
+                    book_store_loading.visibility = View.INVISIBLE
+                }))
             }
             if (it == -1) {
                 book_store_loading.text = "加载失败，点击重试"

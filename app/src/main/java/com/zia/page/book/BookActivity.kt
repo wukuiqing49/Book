@@ -63,15 +63,18 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
         book_lastUpdateChapter.text = book.lastChapterName
         book_site.text = book.site.siteName
         book_lastUpdateTime.text = book.lastUpdateTime
+
         //加载图片、模糊图片
-        Glide.with(this).load(book.imageUrl).into(object : SimpleTarget<Drawable>() {
-            override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
-                book_image.background = resource
-                if (book.imageUrl.isNotEmpty()) {
+        if (book.imageUrl.isNotEmpty()) {
+            Glide.with(this).load(book.imageUrl).into(object : SimpleTarget<Drawable>() {
+                override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
+                    book_image.background = resource
                     book_blurImage.setImageBitmap(BlurUtil.blurBitmap(this@BookActivity, resource))
                 }
-            }
-        })
+            })
+        } else {
+            Glide.with(this).load(R.drawable.ic_book_cover_default).into(book_image)
+        }
 
         adapter = CatalogPagingAdapter(this)
         catalogRv.adapter = adapter
@@ -134,8 +137,9 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
 
         //加载完毕的监听
         viewModel.onCatalogUpdate.observe(this, Observer {
-            book_loading.startAnimation(AnimationUtil.getHideAlphaAnimation(500))
-            book_loading.visibility = View.GONE
+            book_loading.startAnimation(AnimationUtil.getHideAlphaAnimation(500, endListener = Runnable {
+                book_loading.visibility = View.GONE
+            }))
             book_sl.isRefreshing = false
             if (it != null) {
                 book_lastUpdateChapter.text = it

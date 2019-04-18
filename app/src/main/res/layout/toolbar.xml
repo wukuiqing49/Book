@@ -1,23 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:app="http://schemas.android.com/apk/res-auto"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent" android:layout_height="wrap_content">
-    <android.support.v7.widget.Toolbar
+<android.support.v7.widget.Toolbar
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        app:contentInsetStart="0dp"
+        android:elevation="1dp"
+        android:background="@color/colorPrimary"
+        android:gravity="center_vertical">
+    <TextView
+            android:id="@+id/toolbar"
+            android:gravity="center"
+            tools:text="书架"
+            android:textSize="20sp"
+            android:textColor="@color/textWhite"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:contentInsetStart="0dp"
-            app:elevation="1dp"
-            android:background="@color/colorPrimary"
-            android:gravity="center_vertical">
-        <TextView
-                android:id="@+id/toolbar"
-                android:gravity="center"
-                tools:text="书架"
-                android:textSize="20sp"
-                android:textColor="@color/textWhite"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-    </android.support.v7.widget.Toolbar>
-
-</FrameLayout>
+            android:layout_height="wrap_content"/>
+</android.support.v7.widget.Toolbar>

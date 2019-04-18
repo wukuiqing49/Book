@@ -49,10 +49,10 @@ class SettingFragment : BaseFragment() {
         toolbar.text = "设置"
         setting_appVersion_tv.text = "v${Version.packageName()}"
         setting_fixVersion_tv.text = "v${EasyBook.getVersionName()}"
-        if (Version.packageCode() < defaultSharedPreferences().getInt("appVersion", Int.MAX_VALUE)) {
+        if (Version.packageCode() < defaultSharedPreferences().getInt("appVersion", 0)) {
             setting_appVersion_alert.visibility = View.VISIBLE
         }
-        if (EasyBook.getVersion() < defaultSharedPreferences().getInt("fixVersion", Int.MAX_VALUE)) {
+        if (EasyBook.getVersion() < defaultSharedPreferences().getInt("fixVersion", 0)) {
             setting_fixVersion_alert.visibility = View.VISIBLE
         }
 

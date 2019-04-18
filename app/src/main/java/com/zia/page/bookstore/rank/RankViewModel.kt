@@ -31,6 +31,7 @@ class RankViewModel : ProgressViewModel() {
                     dialogProgress.value = 100
                     rankInfo.page = p0.currentPage + 1
                     maxPageSize = p0.maxPage
+                    //刷新adapter
                     rank.value = p0
                 }
 

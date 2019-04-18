@@ -6,10 +6,11 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.bumptech.glide.Glide
 import com.zia.bookdownloader.R
 import com.zia.easybookmodule.bean.rank.RankBook
 import com.zia.page.bookstore.detail.BookInfoActivity
+import com.zia.util.ColorConstants
+import com.zia.util.loadImage
 import kotlinx.android.synthetic.main.item_loading.view.*
 import kotlinx.android.synthetic.main.item_rank.view.*
 
@@ -25,12 +26,21 @@ class RankAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     var loadingHolder: LoadingHolder? = null
 
+    //加载更多
     fun addMoreData(rankBooks: List<RankBook>?) {
         if (rankBooks == null) return
         val lastPosition = itemCount
         list.addAll(rankBooks)
         notifyItemChanged(lastPosition - 1)
         notifyItemRangeInserted(lastPosition, list.size - lastPosition)
+    }
+
+    //第一次加载
+    fun refreshData(rankBooks: List<RankBook>?) {
+        if (rankBooks == null) return
+        list.clear()
+        list.addAll(rankBooks)
+        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(p0: ViewGroup, type: Int): RecyclerView.ViewHolder {
@@ -77,12 +87,25 @@ class RankAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 holder.itemView.item_rank_lastUpdateTime.text = rankBook.lastUpdateTime
                 holder.itemView.item_rank_clasify.text = rankBook.classify
                 holder.itemView.item_rank_status.text = rankBook.status
-                Glide.with(holder.itemView.context).load(rankBook.imgUrl)
-                    .into(holder.itemView.item_rank_cover)
+                holder.itemView.item_rank_rankNum.text = (position + 1).toString()
+                when {
+                    position >= 3 -> {
+                        holder.itemView.item_rank_rankNum.setBackgroundColor(ColorConstants.RANK_NORMAL)
+                    }
+                    position == 2 -> {
+                        holder.itemView.item_rank_rankNum.setBackgroundColor(ColorConstants.RANK_THIRD)
+                    }
+                    position == 1 -> {
+                        holder.itemView.item_rank_rankNum.setBackgroundColor(ColorConstants.RANK_SECOND)
+                    }
+                    position == 0 -> {
+                        holder.itemView.item_rank_rankNum.setBackgroundColor(ColorConstants.RANK_FIRST)
+                    }
+                }
+                holder.itemView.context.loadImage(rankBook.imgUrl, holder.itemView.item_rank_cover)
                 holder.itemView.setOnClickListener {
                     val intent = Intent(holder.itemView.context, BookInfoActivity::class.java)
                     intent.putExtra("bid", rankBook.data_bid)
-                    intent.putExtra("book_name", rankBook.bookName)
                     holder.itemView.context.startActivity(intent)
                 }
             }
