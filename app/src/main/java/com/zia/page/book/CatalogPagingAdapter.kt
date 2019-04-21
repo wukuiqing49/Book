@@ -5,6 +5,7 @@ import android.support.v7.util.DiffUtil
 import android.view.View
 import android.view.ViewGroup
 import com.zia.database.bean.BookCache
+import com.zia.util.ColorConstants
 import kotlinx.android.synthetic.main.item_catalog.view.*
 
 /**
@@ -13,14 +14,18 @@ import kotlinx.android.synthetic.main.item_catalog.view.*
 class CatalogPagingAdapter(private val catalogSelectListener: CatalogSelectListener) :
     PagedListAdapter<BookCache, CatalogPagingVH>(diffCallback) {
 
+    private val TAG = "CatalogPagingAdapter"
+
+    private var history = 0
+
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): CatalogPagingVH = CatalogPagingVH(p0)
 
     override fun onBindViewHolder(holder: CatalogPagingVH, position: Int) {
-//        if (position == history) {
-//            holder.itemView.item_catalog_mark.visibility = View.VISIBLE
-//        } else {
-//            holder.itemView.item_catalog_mark.visibility = View.INVISIBLE
-//        }
+        if (position == history) {
+            holder.itemView.item_catalog_name.setTextColor(ColorConstants.RED)
+        } else {
+            holder.itemView.item_catalog_name.setTextColor(ColorConstants.TEXT_BLACK_LIGHT)
+        }
         val cache = getItem(position)
         holder.itemView.item_catalog_name.text = cache?.chapterName
         holder.itemView.setOnClickListener {
@@ -28,6 +33,13 @@ class CatalogPagingAdapter(private val catalogSelectListener: CatalogSelectListe
                 catalogSelectListener.onCatalogSelect(holder.itemView, cache.index)
             }
         }
+    }
+
+    fun freshHistory(newHistory: Int?) {
+        if (newHistory == null && newHistory != history) return
+        notifyItemChanged(history)
+        notifyItemChanged(newHistory)
+        history = newHistory
     }
 
 

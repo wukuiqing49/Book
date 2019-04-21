@@ -3,21 +3,21 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="wrap_content"
         android:background="?android:attr/selectableItemBackground"
         android:clickable="true"
         android:focusable="true">
     <TextView
             android:id="@+id/item_bookstore_normal_rankNum"
             tools:text="2"
-            android:layout_margin="5dp"
+            android:layout_margin="8dp"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/white"
             android:gravity="center"
             android:background="@color/grey"
-            android:layout_width="30dp"
-            android:layout_height="30dp"/>
+            android:layout_width="25dp"
+            android:layout_height="25dp"/>
 
     <TextView
             android:id="@+id/item_bookstore_normal_bookName"

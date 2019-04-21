@@ -6,7 +6,7 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         app:contentInsetStart="0dp"
-        android:elevation="1dp"
+        android:elevation="2dp"
         android:background="@color/colorPrimary"
         android:gravity="center_vertical">
     <TextView

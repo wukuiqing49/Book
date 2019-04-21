@@ -1,116 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<android.support.constraint.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="vertical"
         tools:context="com.zia.page.preview.PreviewActivity"
-        android:clickable="true"
-        android:focusable="true"
         android:id="@+id/preview_bg"
         android:background="@color/preview_theme_white">
 
-    <LinearLayout
-            android:orientation="vertical"
-            android:layout_marginTop="25dp"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-
-        <ScrollView
-                android:id="@+id/preview_scrollView"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:fillViewport="true">
-
-            <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-                <TextView
-                        android:paddingLeft="25dp"
-                        android:paddingRight="25dp"
-                        android:paddingTop="8dp"
-                        android:id="@+id/preview_tv"
-                        android:textSize="20sp"
-                        android:lineSpacingMultiplier="1.4"
-                        android:textColor="@color/textBlack"
-                        android:text="\u3000加载中..."
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
-
-                <TextView
-                        android:id="@+id/preview_tv_next"
-                        android:text="下一章"
-                        android:textSize="20sp"
-                        android:paddingTop="10dp"
-                        android:paddingBottom="20dp"
-                        android:gravity="center"
-                        android:textColor="@color/textBlack"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
-            </LinearLayout>
-        </ScrollView>
-    </LinearLayout>
-
     <TextView
             android:id="@+id/preview_title_inside"
-            android:layout_width="wrap_content"
-            tools:text="第一章 陨落的天才"
-            android:layout_marginTop="5dp"
-            android:layout_marginStart="15dp"
+            android:layout_width="150dp"
+            tools:text="第一章 陨落的天才陨落的天才陨落的天才"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:textColor="@color/textBlack"
-            android:layout_height="20dp"/>
+            android:layout_height="20dp" app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" android:layout_marginTop="4dp" android:layout_marginStart="8dp"/>
 
     <TextView
             android:id="@+id/preview_currentTime"
             tools:text="19:20"
-            android:layout_marginEnd="45dp"
-            android:layout_marginTop="5dp"
             android:layout_gravity="end"
             android:textColor="@color/textBlack"
             android:layout_width="wrap_content"
-            android:layout_height="20dp"/>
+            android:layout_height="20dp"
+            app:layout_constraintTop_toTopOf="@+id/preview_title_inside"
+            android:layout_marginEnd="8dp" app:layout_constraintEnd_toEndOf="parent"/>
 
     <com.zia.widget.BatteryView
             android:id="@+id/preview_battery"
             android:layout_gravity="end"
-            android:layout_marginEnd="15dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginEnd="8dp"
             android:layout_width="22dp"
-            android:layout_height="10dp"/>
+            android:layout_height="10dp" app:layout_constraintEnd_toStartOf="@+id/preview_currentTime"
+            app:layout_constraintBottom_toBottomOf="@+id/preview_currentTime"
+            app:layout_constraintTop_toTopOf="@+id/preview_currentTime"/>
 
-    <FrameLayout
-            android:id="@+id/preview_controlLayout"
-            android:visibility="gone"
+    <ScrollView
+            android:id="@+id/preview_scrollView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="0dp"
+            android:fillViewport="true" tools:layout_editor_absoluteX="0dp"
+            app:layout_constraintTop_toBottomOf="@+id/preview_title_inside"
+            app:layout_constraintBottom_toBottomOf="parent">
+
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:background="@color/previewShadow">
-            <ImageView
-                    android:id="@+id/preview_back"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:padding="10dp"
-                    android:layout_margin="8dp"
-                    android:layout_gravity="center_vertical"
-                    android:src="@drawable/ic_back"/>
+                android:fillViewport="true"
+                android:orientation="vertical">
+            <TextView
+                    android:paddingLeft="25dp"
+                    android:paddingRight="25dp"
+                    android:paddingTop="8dp"
+                    android:id="@+id/preview_tv"
+                    android:textSize="20sp"
+                    android:lineSpacingMultiplier="1.4"
+                    android:textColor="@color/textBlack"
+                    android:text="\u3000加载中..."
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
 
             <TextView
-                    android:id="@+id/preview_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="大结局"
-                    android:textColor="@color/textWhite"
-                    android:textSize="16sp"
-                    android:layout_gravity="center_vertical"/>
+                    android:id="@+id/preview_tv_next"
+                    android:text="@string/next_chapter"
+                    android:textSize="20sp"
+                    android:gravity="center"
+                    android:textColor="@color/textBlack"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"/>
         </LinearLayout>
+    </ScrollView>
+
+    <com.zia.widget.SlideLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="invisible"
+            tools:visibility="visible"
+            android:id="@+id/preview_control_top"
+            android:background="@color/previewShadow">
+
+        <ImageView
+                android:id="@+id/preview_back"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="10dp"
+                android:layout_margin="8dp"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ic_back"/>
+
+        <TextView
+                android:id="@+id/preview_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:layout_marginStart="48dp"
+                tools:text="大结局大结局大结局大结局大结局大结局大结局结局大结局"
+                android:textColor="@color/textWhite"
+                android:textSize="16sp"
+                android:layout_gravity="center_vertical"/>
+    </com.zia.widget.SlideLayout>
+
+
+    <com.zia.widget.SlideLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            tools:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" android:id="@+id/preview_control_bottom">
 
         <LinearLayout
                 android:layout_width="match_parent"
@@ -218,14 +225,6 @@
 
             </LinearLayout>
         </LinearLayout>
-    </FrameLayout>
+    </com.zia.widget.SlideLayout>
 
-    <FrameLayout
-            android:id="@+id/preview_click"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-    </FrameLayout>
-
-
-</FrameLayout>
+</android.support.constraint.ConstraintLayout>

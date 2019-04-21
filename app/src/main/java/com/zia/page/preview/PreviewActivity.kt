@@ -1,6 +1,5 @@
 package com.zia.page.preview
 
-import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
@@ -8,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.animation.TranslateAnimation
 import android.widget.ScrollView
 import com.zia.bookdownloader.R
 import com.zia.page.base.BaseActivity
@@ -25,8 +25,12 @@ class PreviewActivity : BaseActivity() {
     private val themeSP = "theme"
     private val theme_white = 0
     private val theme_dark = 1
-    private var isControll = true
+    private var showControl = true
     private var shouldLoadProgress = true
+
+    private var topAnimation: TranslateAnimation? = null
+    private var bottomAnimation: TranslateAnimation? = null
+    private val animateDuration = 300L
 
     private lateinit var viewModel: PreviewModel
     private lateinit var bookName: String
@@ -66,6 +70,7 @@ class PreviewActivity : BaseActivity() {
         }
 
         preview_tv_next.setOnClickListener {
+            Log.e("PreviewActivity", "click preview_tv_next")
             viewModel.goNext()
         }
 
@@ -108,26 +113,15 @@ class PreviewActivity : BaseActivity() {
             setTvTheme(theme_white)
         }
 
-        val fadeInAnimation = ObjectAnimator.ofFloat(preview_controlLayout, "alpha", 0f, 1f)
-        fadeInAnimation.duration = 400
-
-        val fadeOutAnimation = ObjectAnimator.ofFloat(preview_controlLayout, "alpha", 1f, 0f)
-        fadeOutAnimation.duration = 400
-
         preview_tv.setOnClickListener {
-            preview_controlLayout.visibility = View.VISIBLE
-            if (fadeInAnimation.isRunning) {
-                fadeInAnimation.cancel()
-            }
-            if (fadeOutAnimation.isRunning) {
-                fadeOutAnimation.cancel()
-            }
-            if (isControll) {
-                fadeInAnimation.start()
+            if (showControl) {
+                preview_control_top.slideDownIn()
+                preview_control_bottom.slideUpIn()
             } else {
-                fadeOutAnimation.start()
+                preview_control_top.slideUpOut()
+                preview_control_bottom.slideDownOut()
             }
-            isControll = !isControll
+            showControl = !showControl
         }
 
     }
@@ -228,6 +222,12 @@ class PreviewActivity : BaseActivity() {
     override fun onPause() {
         super.onPause()
         viewModel.saveReadProgress(preview_scrollView.scrollY)
+    }
+
+    override fun onDestroy() {
+        preview_control_top.clearSlideAnimation()
+        preview_control_bottom.clearSlideAnimation()
+        super.onDestroy()
     }
 
     private fun setTvTheme(themeId: Int) {

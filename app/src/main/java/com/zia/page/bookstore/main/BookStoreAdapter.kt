@@ -99,6 +99,9 @@ class BookStoreAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                     3 -> {
                         holder.itemView.item_bookstore_normal_rankNum.setBackgroundColor(ColorConstants.RANK_THIRD)
                     }
+                    else -> {
+                        holder.itemView.item_bookstore_normal_rankNum.setBackgroundColor(ColorConstants.GREY)
+                    }
                 }
                 holder.itemView.setOnClickListener {
                     val intent = Intent(holder.itemView.context, BookInfoActivity::class.java)

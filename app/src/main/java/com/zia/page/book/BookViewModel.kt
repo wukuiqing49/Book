@@ -39,9 +39,9 @@ class BookViewModel(private val book: Book) : ProgressViewModel() {
     val dao: BookCacheDao = AppDatabase.getAppDatabase().bookCacheDao()
     val catalogStrings = LivePagedListBuilder(
         dao.getCachesFactory(book.bookName, book.siteName), PagedList.Config.Builder()
-            .setPageSize(30)
-            .setPrefetchDistance(10)
-            .setInitialLoadSizeHint(60)
+            .setPageSize(50)
+            .setPrefetchDistance(20)
+            .setInitialLoadSizeHint(100)
             .setEnablePlaceholders(false)
             .build()
     ).build()
@@ -102,7 +102,7 @@ class BookViewModel(private val book: Book) : ProgressViewModel() {
     fun freshHistory() {
         DefaultExecutorSupplier.getInstance().forLightWeightBackgroundTasks()
             .execute {
-                history.postValue(BookMarkUtil.getMarkPosition(book.bookName, book.siteName) + 1)
+                history.postValue(BookMarkUtil.getMarkPosition(book.bookName, book.siteName))
             }
     }
 
@@ -180,6 +180,7 @@ class BookViewModel(private val book: Book) : ProgressViewModel() {
     }
 
     fun shutDown() {
+        catalogDisposable?.dispose()
         catalogDisposable?.dispose()
     }
 }

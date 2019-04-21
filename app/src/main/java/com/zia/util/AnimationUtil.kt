@@ -23,11 +23,11 @@ object AnimationUtil {
     }
 
     private fun getAlphaAnimation(
-        startAlpht: Float, endAlpha: Float, duration: Long, startListener: Runnable? = null,
+        startAlpha: Float, endAlpha: Float, duration: Long, startListener: Runnable? = null,
         endListener: Runnable? = null,
         repeatListener: Runnable? = null
     ): AlphaAnimation {
-        val alphaAnimation = AlphaAnimation(startAlpht, endAlpha)
+        val alphaAnimation = AlphaAnimation(startAlpha, endAlpha)
         alphaAnimation.duration = duration
         alphaAnimation.fillAfter = true
         alphaAnimation.setAnimationListener(object : Animation.AnimationListener {

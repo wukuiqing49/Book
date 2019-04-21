@@ -6,7 +6,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
-import com.facebook.stetho.common.LogUtil;
+import android.util.Log;
 
 public class FastScrollLinearLayoutManager extends LinearLayoutManager {
     public FastScrollLinearLayoutManager(Context context) {
@@ -57,10 +57,7 @@ public class FastScrollLinearLayoutManager extends LinearLayoutManager {
                     }
                 }
 
-                int time = super.calculateTimeForScrolling(dx);
-                LogUtil.d(time + "");//打印时间看下
-
-                return time;
+                return super.calculateTimeForScrolling(dx);
             }
         };
 

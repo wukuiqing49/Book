@@ -15,4 +15,12 @@
     <string name="cover">封面</string>
     <string name="no_1">NO.1</string>
     <string name="retry">点击重试</string>
+    <string name="recommend">猜你喜欢</string>
+    <string name="search_history">搜索历史</string>
+    <string name="shuffle">换一换</string>
+    <string name="delete_all">全部删除</string>
+    <string name="next_chapter">下一章</string>
+    <string name="download">下载</string>
+    <string name="continue_read">继续阅读</string>
+    <string name="insert_bookrack">加入书架</string>
 </resources>

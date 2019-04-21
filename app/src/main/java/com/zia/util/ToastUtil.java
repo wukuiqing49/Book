@@ -1,11 +1,10 @@
 package com.zia.util;
 
-import android.content.Context;
+import android.support.annotation.Nullable;
 import android.widget.Toast;
 import com.zia.App;
 import com.zia.toastex.ToastEx;
 
-import javax.annotation.Nullable;
 
 public class ToastUtil {
 

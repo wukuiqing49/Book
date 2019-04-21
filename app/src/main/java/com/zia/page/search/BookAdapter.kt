@@ -43,7 +43,14 @@ class BookAdapter(private val bookSelectListener: BookSelectListener) :
                 holder.itemView.item_book_site.text = book.site.siteName
                 holder.itemView.item_book_lastUpdateTime.text = "更新：${book.lastUpdateTime}"
                 holder.itemView.setOnClickListener { bookSelectListener.onBookSelect(holder.itemView, book) }
-                holder.itemView.context.loadImage(book.imageUrl, holder.itemView.item_book_image)
+                if (book.url.isNotEmpty()) {
+                    holder.itemView.context.loadImage(book.imageUrl, holder.itemView.item_book_image)
+                    holder.itemView.item_book_cover_name.visibility = View.INVISIBLE
+                } else {
+                    holder.itemView.context.loadImage(R.drawable.ic_book_cover_default, holder.itemView.item_book_image)
+                    holder.itemView.item_book_cover_name.visibility = View.VISIBLE
+                    holder.itemView.item_book_cover_name.text = book.bookName
+                }
             }
         }
     }

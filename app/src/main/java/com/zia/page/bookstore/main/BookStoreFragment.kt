@@ -27,7 +27,7 @@ import kotlinx.android.synthetic.main.fragment_book_store.*
  */
 class BookStoreFragment : BaseFragment() {
 
-    private lateinit var viewModel: BookStoreViewModel
+    private var viewModel: BookStoreViewModel? = null
     private val adapter = BookStoreAdapter()
 
     override fun lazyLoadData() {
@@ -43,7 +43,8 @@ class BookStoreFragment : BaseFragment() {
             val intent = Intent(context, SearchActivity::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 val p = arrayListOf<Pair<View, String>>(
-                    Pair.create(bg_searchEt, "transition_search")
+                    Pair.create(bg_searchEt, "transition_search_bg"),
+                    Pair.create(bookstore_search_icon, "transition_search")
                 )
                 val options = ActivityOptions.makeSceneTransitionAnimation(activity, *Java2Kotlin.getPairs(p))
                 startActivity(intent, options.toBundle())
@@ -53,17 +54,17 @@ class BookStoreFragment : BaseFragment() {
         }
 
         //开始加载排行榜
-        viewModel.initData()
+        viewModel?.initData()
     }
 
     private fun initObservers() {
-        viewModel.toast.observe(this, Observer {
+        viewModel?.toast?.observe(this, Observer {
             ToastUtil.onNormal(it)
         })
-        viewModel.error.observe(this, Observer {
+        viewModel?.error?.observe(this, Observer {
             ToastUtil.onError(it?.message)
         })
-        viewModel.dialogProgress.observe(this, Observer {
+        viewModel?.dialogProgress?.observe(this, Observer {
             if (it == 0) {
                 book_store_loading.text = "正在加载..."
                 book_store_loading.visibility = View.VISIBLE
@@ -78,11 +79,11 @@ class BookStoreFragment : BaseFragment() {
                 book_store_loading.text = "加载失败，点击重试"
                 book_store_loading.isClickable = true
                 book_store_loading.setOnClickListener {
-                    viewModel.initData()
+                    viewModel?.initData()
                 }
             }
         })
-        viewModel.hottestRank.observe(this, Observer {
+        viewModel?.hottestRank?.observe(this, Observer {
             adapter.freshRankData(it)
         })
     }
@@ -93,7 +94,7 @@ class BookStoreFragment : BaseFragment() {
     }
 
     override fun onDestroy() {
-        viewModel.shutdown()
+        viewModel?.shutdown()
         super.onDestroy()
     }
 }

@@ -12,8 +12,6 @@ import android.support.v7.app.AlertDialog
 import android.util.Log
 import android.view.MenuItem
 import com.tbruyelle.rxpermissions2.RxPermissions
-import com.ximsfei.stark.core.Stark
-import com.zia.App
 import com.zia.bookdownloader.R
 import com.zia.database.bean.Config
 import com.zia.easybookmodule.engine.EasyBook
@@ -21,7 +19,6 @@ import com.zia.page.base.BaseActivity
 import com.zia.util.FileUtil
 import com.zia.util.ToastUtil
 import com.zia.util.Version
-import com.zia.util.threadPool.DefaultExecutorSupplier
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -128,27 +125,27 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
                 )
                 this@MainActivity.startActivity(intent)
             } else if (it.type == TYPE_FIX) {
-                DefaultExecutorSupplier.getInstance().forBackgroundTasks().execute {
-                    try {
-                        Log.e("MainActivity", it.data.path)
-                        val applied = Stark.get().applyPatch(App.getContext(), it.data.path)
-                        Log.d(javaClass.simpleName, "applied:$applied")
-                        if (applied) {
-                            Stark.get().load(App.getContext())
-                            runOnUiThread {
-                                ToastUtil.onSuccess("修复完成，重启生效")
-                            }
-                        }
-                    } catch (e: Exception) {
-                        runOnUiThread {
-                            ToastUtil.onSuccess("修复失败")
-                        }
-                    } finally {
-                        runOnUiThread {
-                            waitDialog.dismiss()
-                        }
-                    }
-                }
+//                DefaultExecutorSupplier.getInstance().forBackgroundTasks().execute {
+//                    try {
+//                        Log.e("MainActivity", it.data.path)
+//                        val applied = Stark.get().applyPatch(App.getContext(), it.data.path)
+//                        Log.d(javaClass.simpleName, "applied:$applied")
+//                        if (applied) {
+//                            Stark.get().load(App.getContext())
+//                            runOnUiThread {
+//                                ToastUtil.onSuccess("修复完成，重启生效")
+//                            }
+//                        }
+//                    } catch (e: Exception) {
+//                        runOnUiThread {
+//                            ToastUtil.onSuccess("修复失败")
+//                        }
+//                    } finally {
+//                        runOnUiThread {
+//                            waitDialog.dismiss()
+//                        }
+//                    }
+//                }
             }
         })
 

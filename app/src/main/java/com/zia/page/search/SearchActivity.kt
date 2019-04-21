@@ -1,30 +1,31 @@
 package com.zia.page.search
 
-import android.app.ActivityOptions
 import android.app.ProgressDialog
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
-import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
-import android.util.Pair
+import android.support.v4.app.Fragment
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.KeyEvent
 import android.view.View
+import android.widget.AdapterView
+import com.donkingliang.labels.LabelsView
 import com.zia.bookdownloader.R
 import com.zia.easybookmodule.bean.Book
 import com.zia.page.base.BaseActivity
-import com.zia.page.book.BookActivity
-import com.zia.util.Java2Kotlin
 import com.zia.util.KeyboardktUtils
 import com.zia.util.ToastUtil
 import kotlinx.android.synthetic.main.activity_search.*
-import kotlinx.android.synthetic.main.item_book.view.*
+import kotlinx.android.synthetic.main.item_catalog.view.*
 
-class SearchActivity : BaseActivity(), BookAdapter.BookSelectListener {
+class SearchActivity : BaseActivity() {
 
-    private lateinit var bookAdapter: BookAdapter
     private lateinit var viewModel: SearchViewModel
+
+    private val searchFragment = SearchResultFragment()
+    private val recommendFragment = RecommendFragment()
+
     private val dialog by lazy {
         val dialog = ProgressDialog(this)
         dialog.setCancelable(true)
@@ -49,11 +50,34 @@ class SearchActivity : BaseActivity(), BookAdapter.BookSelectListener {
 
         viewModel = ViewModelProviders.of(this).get(SearchViewModel::class.java)
 
+        addFragment(searchFragment)
+        addFragment(recommendFragment)
+
+        recommendFragment.labelClickListener = LabelsView.OnLabelClickListener { label, data, position ->
+            searchEt.setText(label.text)
+        }
+
+        recommendFragment.itemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
+            searchEt.setText(view.item_catalog_name.text)
+        }
+
+        initObservers()
+
+        initSearchLayout()
+
+        if (searchKey != null && searchKey!!.isNotEmpty()) {
+            searchEt.setText(searchKey)
+            viewModel.search(searchKey!!)
+        }
+    }
+
+    private fun initObservers() {
         viewModel.loadBooks.observe(this, Observer<List<Book>> {
             if (it != null) {
+                hideFragment(recommendFragment)
                 ToastUtil.onSuccess("搜索到${it.size}本书籍")
-                bookAdapter.freshBooks(ArrayList(it))
-                searchRv.scrollToPosition(0)
+                searchFragment.bookAdapter?.freshBooks(ArrayList(it))
+                searchFragment.searchRv?.scrollToPosition(0)
                 hideDialog()
             }
         })
@@ -75,10 +99,22 @@ class SearchActivity : BaseActivity(), BookAdapter.BookSelectListener {
         viewModel.dialogProgress.observe(this, Observer {
             updateDialog(it)
         })
+    }
 
-        bookAdapter = BookAdapter(this)
-        searchRv.layoutManager = LinearLayoutManager(this)
-        searchRv.adapter = bookAdapter
+    private fun search() {
+        viewModel.shutDown()
+        val bookName = searchEt.text?.toString()
+        if (bookName != null && bookName.isNotEmpty()) {
+            recommendFragment.addHistory(bookName)
+            initDialog()
+            viewModel.search(bookName)
+        }
+    }
+
+    private fun initSearchLayout() {
+        search_edit_cancel.setOnClickListener {
+            searchEt.setText("")
+        }
 
         searchEt.setOnEditorActionListener { _, actionId, event ->
             if ((actionId == KeyEvent.KEYCODE_UNKNOWN || actionId == KeyEvent.KEYCODE_SEARCH || actionId == KeyEvent.KEYCODE_HOME)
@@ -86,27 +122,31 @@ class SearchActivity : BaseActivity(), BookAdapter.BookSelectListener {
             ) {
                 search()
                 KeyboardktUtils.hideKeyboard(searchBt)
+                search_edit_cancel.visibility = View.INVISIBLE
                 return@setOnEditorActionListener true
             }
             false
         }
 
+        searchEt.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                if (!searchEt.text?.toString().isNullOrEmpty()) {
+                    search_edit_cancel.visibility = View.VISIBLE
+                } else {
+                    search_edit_cancel.visibility = View.INVISIBLE
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            }
+
+        })
+
         searchBt.setOnClickListener {
             search()
-        }
-
-        if (searchKey != null && searchKey!!.isNotEmpty()) {
-            searchEt.setText(searchKey)
-            viewModel.search(searchKey!!)
-        }
-    }
-
-    private fun search() {
-        viewModel.shutDown()
-        val bookName = searchEt.text?.toString()
-        if (bookName != null && bookName.isNotEmpty()) {
-            initDialog()
-            viewModel.search(bookName)
         }
     }
 
@@ -115,17 +155,22 @@ class SearchActivity : BaseActivity(), BookAdapter.BookSelectListener {
         updateDialog("")
     }
 
-    override fun onBookSelect(itemView: View, book: Book) {
-        val intent = Intent(this, BookActivity::class.java)
-        intent.putExtra("book", book)
-        intent.putExtra("scroll", false)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val p = arrayListOf<Pair<View, String>>(Pair.create(itemView.item_book_image, "book_image"))
-            val options = ActivityOptions.makeSceneTransitionAnimation(this, *Java2Kotlin.getPairs(p))
-            startActivity(intent, options.toBundle())
-        } else {
-            startActivity(intent)
-        }
+    private fun replaceFragment(fragment: Fragment) {
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.search_fragmentLayout, fragment)
+        transaction.commit()
+    }
+
+    private fun addFragment(fragment: Fragment) {
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.add(R.id.search_fragmentLayout, fragment)
+        transaction.commit()
+    }
+
+    private fun hideFragment(fragment: Fragment) {
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.hide(fragment)
+        transaction.commit()
     }
 
     private fun updateDialog(progress: Int?) {

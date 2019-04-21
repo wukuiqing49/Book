@@ -5,11 +5,14 @@ import android.app.ProgressDialog
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
+import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
@@ -21,9 +24,7 @@ import com.zia.easybookmodule.bean.Type
 import com.zia.page.base.BaseActivity
 import com.zia.page.preview.PreviewActivity
 import com.zia.toastex.ToastEx
-import com.zia.util.AnimationUtil
-import com.zia.util.BlurUtil
-import com.zia.util.ToastUtil
+import com.zia.util.*
 import com.zia.widget.FastScrollLinearLayoutManager
 import kotlinx.android.synthetic.main.activity_book.*
 
@@ -76,11 +77,7 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
             Glide.with(this).load(R.drawable.ic_book_cover_default).into(book_image)
         }
 
-        adapter = CatalogPagingAdapter(this)
-        catalogRv.adapter = adapter
-
-        val layoutManager = FastScrollLinearLayoutManager(this)
-        catalogRv.layoutManager = layoutManager
+        initRv()
 
         viewModel = ViewModelProviders.of(this, BookViewModelFactory(book)).get(BookViewModel::class.java)
         initObservers()
@@ -99,7 +96,7 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
 
         //添加到书架
         if (!canAddFav) {//从书架打开
-            book_favorite.setBackgroundColor(Color.parseColor("#bfbfbf"))
+            book_favorite.setTextColor(ColorConstants.GREY)
         }
         book_favorite.setOnClickListener {
             if (canAddFav) {
@@ -107,7 +104,7 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
                     ToastUtil.onWarning("需要解析目录后才能添加，请稍等")
                     return@setOnClickListener
                 }
-                book_favorite.setBackgroundColor(Color.parseColor("#bfbfbf"))
+                book_favorite.setTextColor(ColorConstants.GREY)
                 canAddFav = false
                 viewModel.insertBookIntoBookRack()
                 Glide.with(this).load(book.imageUrl).into(object : SimpleTarget<Drawable>() {
@@ -126,6 +123,36 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
 
         //加载目录
         viewModel.loadCatalog()
+    }
+
+    private fun initRv() {
+        adapter = CatalogPagingAdapter(this)
+        catalogRv.adapter = adapter
+
+        val layoutManager = FastScrollLinearLayoutManager(this)
+        catalogRv.layoutManager = layoutManager
+
+        val paint = Paint()
+        paint.color = ColorConstants.GREY
+        val padding = DisplayUtil.dip2px(this, 8f).toFloat()
+
+        catalogRv.addItemDecoration(object : RecyclerView.ItemDecoration() {
+            override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
+                if (parent.layoutManager != null) {
+                    for (i in 0 until parent.childCount - 1) {
+                        val child = parent.getChildAt(i)
+                        val y = child.bottom.toFloat()
+                        c.drawLine(padding, y, child.right - 10f, y, paint)
+                    }
+                }
+            }
+        })
+
+        catalogRv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+            }
+        })
     }
 
     @SuppressLint("SetTextI18n")
@@ -147,7 +174,10 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
         })
 
         viewModel.history.observe(this, Observer {
-            book_history.text = "第${it}章"
+            if (it != null) {
+                book_history.text = "第${(it + 1)}章"
+                adapter.freshHistory(it)
+            }
         })
 
         viewModel.savedFile.observe(this, Observer {
@@ -208,6 +238,7 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
     override fun onCatalogSelect(itemView: View, position: Int) {
         //更新书签
         viewModel.insertBookMark(position)
+        adapter.freshHistory(position)
         //跳转到阅读界面
         val intent = Intent(this@BookActivity, PreviewActivity::class.java)
         intent.putExtra("bookName", book.bookName)

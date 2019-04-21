@@ -18,5 +18,10 @@ class ColorConstants {
         val GREY = App.getContext().resources.getColor(R.color.grey)
 
         val TEXT_BLACK_LIGHT = App.getContext().resources.getColor(R.color.textBlack_light)
+
+        val CLASSIFY1 = App.getContext().resources.getColor(R.color.classify_1)
+        val CLASSIFY2 = App.getContext().resources.getColor(R.color.classify_2)
+        val CLASSIFY3 = App.getContext().resources.getColor(R.color.classify_3)
+        val CLASSIFY4 = App.getContext().resources.getColor(R.color.classify_4)
     }
 }

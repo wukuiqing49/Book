@@ -63,6 +63,11 @@ class BookInfoActivity : AppCompatActivity() {
 
                 override fun onPageFinished(view: WebView?, url: String?) {
                     webSettings.blockNetworkImage = false
+                    if (loading) {
+                        book_info_loadingView.reset()
+                        book_info_loadingView.visibility = View.INVISIBLE
+                        loading = false
+                    }
                 }
 
                 override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
@@ -79,7 +84,7 @@ class BookInfoActivity : AppCompatActivity() {
                         runOnUiThread {
                             val bookName = book_info_webView.title.split("_")[0]
                             AlertDialog.Builder(this@BookInfoActivity)
-                                .setTitle("即将搜索$bookName？")
+                                .setTitle("即将搜索$bookName")
                                 .setNegativeButton("取消", null)
                                 .setPositiveButton("搜索") { _, _ ->
                                     val intent = Intent(this@BookInfoActivity, SearchActivity::class.java)
@@ -100,11 +105,6 @@ class BookInfoActivity : AppCompatActivity() {
                 }
 
                 override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                    if (loading) {
-                        book_info_loadingView.reset()
-                        book_info_loadingView.visibility = View.INVISIBLE
-                        loading = false
-                    }
                     webSettings.blockNetworkImage = true
                 }
             }
