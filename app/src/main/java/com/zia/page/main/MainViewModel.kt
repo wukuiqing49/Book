@@ -103,6 +103,7 @@ class MainViewModel : ProgressViewModel() {
         Log.e(javaClass.simpleName, "savePath:$savePath")
         val downloadRunnable = DownloadRunnable(url, savePath, fileName) { ratio, part, total ->
             if (ratio == 100F) {
+                dialogProgress.postValue(100)
                 file.postValue(Data(File(savePath + File.separator + fileName), type))
                 return@DownloadRunnable
             }

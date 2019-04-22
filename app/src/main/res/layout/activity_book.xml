@@ -157,7 +157,7 @@
             android:id="@+id/book_sl"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:background="@color/white_grey"
+            android:background="@color/white"
             style="@style/Theme.Design.Light"
             app:layout_constraintTop_toBottomOf="@+id/book_blurImage"
             app:layout_constraintStart_toStartOf="parent"
@@ -188,7 +188,7 @@
 
     <LinearLayout
             android:background="@color/white"
-            android:elevation="2dp"
+            android:elevation="3dp"
             android:layout_width="match_parent"
             android:orientation="horizontal"
             android:layout_height="60dp" app:layout_constraintEnd_toEndOf="parent"

@@ -64,13 +64,6 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
     }
 
     private var firstCheck = true
-    val waitDialog by lazy {
-        val dialog = ProgressDialog(this@MainActivity)
-        dialog.setCancelable(false)
-        dialog.setTitle("正在修复...")
-        dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
-        dialog
-    }
 
     private fun initObserver() {
         viewModel.config.observe(this, Observer {
@@ -91,8 +84,7 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
                     }
                 }
                 return@Observer
-            }
-            if (it.type == TYPE_FIX) {
+            } else if (it.type == TYPE_FIX) {
                 if (it.data.version > EasyBook.getVersion()) {
                     showUpdateDialog(it.data, "easybookfix.apk", TYPE_FIX)
                 } else {
@@ -208,12 +200,17 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
     }
 
     private fun showUpdateDialog(config: Config, fileName: String, type: String) {
+        val title = if (type == TYPE_APP) {
+            "有新的版本可以更新~"
+        } else {
+            "有新的网站解析可以更新~"
+        }
         AlertDialog.Builder(this)
-            .setTitle("有新的网站解析可以更新~")
+            .setTitle(title)
             .setMessage(config.message)
             .setNegativeButton("取消", null)
             .setPositiveButton("更新") { _, _ ->
-                waitDialog.show()
+                dialog.show()
                 viewModel.download(config.url, fileName, type)
             }
             .setCancelable(true)
