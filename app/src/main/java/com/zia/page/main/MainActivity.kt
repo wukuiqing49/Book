@@ -67,7 +67,8 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
 
     private fun initObserver() {
         viewModel.config.observe(this, Observer {
-            if (it == null || it.data.able != "true") {
+            if (it == null) return@Observer
+            if (it.data.able != "true") {
                 //服务器认证失败，无法访问
                 showErrorDialog("由于某些原因，软件不再提供使用")
                 return@Observer
