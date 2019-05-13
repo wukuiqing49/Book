@@ -1,14 +1,8 @@
 package com.zia.page.preview
 
 import android.arch.lifecycle.MutableLiveData
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.util.Log
-import com.zia.App
 import com.zia.database.AppDatabase
-import com.zia.easybookmodule.bean.Chapter
+import com.zia.database.bean.BookCache
 import com.zia.easybookmodule.net.NetUtil
 import com.zia.easybookmodule.rx.Disposable
 import com.zia.page.base.BaseViewModel
@@ -17,11 +11,7 @@ import com.zia.util.BookUtil
 import com.zia.util.defaultSharedPreferences
 import com.zia.util.editor
 import com.zia.util.threadPool.DefaultExecutorSupplier
-import java.text.SimpleDateFormat
-import java.util.*
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.TimeUnit
+import com.zia.widget.reader.StringAdapter
 
 
 /**
@@ -29,154 +19,151 @@ import java.util.concurrent.TimeUnit
  */
 class PreviewModel(private val bookName: String, private val siteName: String) : BaseViewModel() {
 
-    val result = MutableLiveData<String>()
-    val title = MutableLiveData<String>()
-    val progress = MutableLiveData<String>()
-    val readProgress = MutableLiveData<Int>()
-    val currentTime = MutableLiveData<String>()
-    val battery = MutableLiveData<Float>()
+    val requestLoadPage = MutableLiveData<Int>()
 
-    private val contentStrategy = MyContentStrategy()
+    val readerAdapter = ReadAdapter()
+
     private var disposable: Disposable? = null
-    private var position = 0
-    private var cacheSize = -1
+    var position = 0
     private val cacheDao by lazy {
         AppDatabase.getAppDatabase().bookCacheDao()
     }
 
-    private var timeExecutor: ScheduledExecutorService? = null
-    private val timeFormatter = SimpleDateFormat("HH:mm", Locale.CHINA)
-    private val batteryReceiver = BatteryReceiver()
+    inner class ReadAdapter : StringAdapter() {
 
-    fun initTime() {
-        timeExecutor?.shutdownNow()
-        timeExecutor = Executors.newSingleThreadScheduledExecutor()
-        timeExecutor!!.scheduleAtFixedRate({
-            val timeText = timeFormatter.format(Date())
-            currentTime.postValue(timeText)
-        }, 0, 1, TimeUnit.MINUTES)
-    }
-
-    fun registerBattery() {
-        val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-        App.getContext().registerReceiver(batteryReceiver, filter)
-    }
-
-    inner class BatteryReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            val current = intent.extras!!.getInt("level")// 获得当前电量
-            val total = intent.extras!!.getInt("scale")// 获得总电量
-            val percent = current / total.toFloat()
-            battery.postValue(percent)
+        val size by lazy {
+            cacheDao.getChapterNames(bookName, siteName).size
         }
+
+        override fun hasPreviousSection(currentSection: Int): Boolean {
+            return currentSection > 0
+        }
+
+        override fun getSectionCount(): Int {
+            return size
+        }
+
+        override fun hasNextSection(currentSection: Int): Boolean {
+            return currentSection < size - 1
+        }
+
+        override fun getPageSource(section: Int): List<String> {
+            return getCache(section).contents
+        }
+
+        override fun getSectionName(section: Int): String {
+            return getCache(section).chapterName
+        }
+
     }
 
-    fun loadContent(index: Int?) {
-        DefaultExecutorSupplier.getInstance()
-            .forBackgroundTasks()
-            .execute {
-                if (cacheSize == -1) {
-                    cacheSize = cacheDao.getChapterNames(bookName, siteName).size
-                }
-                //获取位置
-                if (index != null) {//传入了新的位置，插入数据库
-                    this.position = index
-                    BookMarkUtil.insertOrUpdate(position, bookName, siteName)
-                } else {
-                    this.position = BookMarkUtil.getMarkPosition(bookName, siteName)
-                }
-                val bookCache = cacheDao.getBookCache(bookName, siteName, position)
-                //设置阅读信息
-                progress.postValue("${position + 1} / $cacheSize")
-                title.postValue(bookCache.chapterName)
+    private var currentCache: BookCache? = null
 
-                if (bookCache.contents.size != 0) {//如果数据库有小说内容的缓存，直接使用
-                    val content =
-                        contentStrategy.parseTxtContent(Chapter(bookCache.chapterName, position, bookCache.contents))
-                    result.postValue(content)
-                    return@execute
-                }
-                //下载后面五章的内容
-                val site = BookUtil.getSite(siteName)
-                for (i in position..position + 5) {
-                    val cache = cacheDao.getBookCache(bookName, siteName, i)
-                    if (cache == null || cache.contents.isNotEmpty()) {
-                        //有缓存或者没有该章节，跳过
-                        continue
-                    }
-                    try {
-                        val html = NetUtil.getHtml(cache.url, site.encodeType)
-                        val contents = site.parseContent(html)
-                        //将当前章节解析成String传出去
-                        if (i == position) {
-                            val chapter = Chapter(bookCache.chapterName, i, contents)
-                            val contentResult = contentStrategy.parseTxtContent(chapter)
-                            result.postValue(contentResult)
-                        }
-                        //插入数据库
-                        if (contents.isNotEmpty()) {
-                            cache.contents = contents
-                            cacheDao.insert(cache)
-                        }
-                    } catch (e: Exception) {
-                        toast.postValue("${e.message}\n错误章节:${cache.chapterName}")
-                        if (i == position) {
-                            result.postValue("解析错误，可以尝试重新打开该章节")
-                        }
-                    }
-                }
+    fun getCache(section: Int): BookCache {
+        if (currentCache != null && currentCache?.index == section) {
+            return currentCache!!
+        }
+        //从数据库中读取当前章节数据
+        val bookCache = cacheDao.getBookCache(bookName, siteName, section)
+
+        //在数据库中找到缓存，直接加载
+        if (bookCache!!.contents.size != 0) {
+            return bookCache
+        }
+
+        //从网络加载缓存，并重新加载这章内容
+        DefaultExecutorSupplier.getInstance().forBackgroundTasks().execute {
+            //加载完成，重新显示
+            if(loadSingleContent(section).contents.isNotEmpty()){
+                requestLoadPage.postValue(section)
             }
+//            loadContent(section + 1, section + 3)
+        }
+//            }
+        return bookCache
     }
 
-    fun loadReadProgress() {
-        DefaultExecutorSupplier.getInstance()
-            .forLightWeightBackgroundTasks()
-            .execute {
-                val p = defaultSharedPreferences()
-                    .getInt(BookUtil.buildId(bookName, siteName), 0)
-                readProgress.postValue(p)
+    fun loadSingleContent(section: Int): BookCache {
+        val site = BookUtil.getSite(siteName)
+        val cache = cacheDao.getBookCache(bookName, siteName, section)
+        if (cache.contents.size != 0) {
+            //有缓存或者没有该章节，跳过
+            return cache
+        }
+        try {
+            val html = NetUtil.getHtml(cache.url, site.encodeType)
+            val contents = site.parseContent(html)
+            //插入数据库
+            if (contents.isNotEmpty()) {
+                cache.contents = contents
+                cacheDao.insert(cache)
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            toast.postValue("解析错误，可以尝试重新打开该章节")
+        }
+        return cache
     }
 
-    fun goNext() {
-        if (position >= cacheSize - 1) {
-            toast("没有下一章了")
-            return
+    fun loadContent(from: Int, to: Int) {
+        //下载后面五章的内容
+        val site = BookUtil.getSite(siteName)
+        for (i in from..to) {
+            val cache = cacheDao.getBookCache(bookName, siteName, i)
+            if (cache == null || cache.contents.isNotEmpty()) {
+                //有缓存或者没有该章节，跳过
+                continue
+            }
+            try {
+                val html = NetUtil.getHtml(cache.url, site.encodeType)
+                val contents = site.parseContent(html)
+                //插入数据库
+                if (contents.isNotEmpty()) {
+                    cache.contents = contents
+                    cacheDao.insert(cache)
+                }
+            } catch (e: Exception) {
+                toast.postValue("预加载错误:${cache.chapterName}\n${e.message}")
+            }
         }
-        result.postValue("加载中..")
-        loadContent(position + 1)
     }
 
-    fun goPrevious() {
-        if (position <= 0) {
-            toast("没有上一章了")
-            return
+    fun saveBookMark(section: Int) {
+        DefaultExecutorSupplier.getInstance().forLightWeightBackgroundTasks().execute {
+            BookMarkUtil.insertOrUpdate(section, bookName, siteName)
         }
-        result.postValue("加载中..")
-        loadContent(position - 1)
+    }
+
+    fun getBookMark(): Int {
+        return BookMarkUtil.getMarkPosition(bookName, siteName)
+    }
+
+
+    fun getTitle(section: Int): String {
+        return cacheDao.getBookCache(bookName, siteName, section).chapterName
     }
 
     /**
      * 增加阅读进度
      * 需要在Preview的onPause添加，在删除书籍时归零
      */
-    fun saveReadProgress(progress: Int = 0) {
+    fun saveReadProgress(progress: Int) {
         DefaultExecutorSupplier.getInstance()
-            .forBackgroundTasks()
+            .forLightWeightBackgroundTasks()
             .execute {
                 defaultSharedPreferences()
                     .editor {
-                        Log.e(javaClass.simpleName, "progress:$progress")
                         putInt(BookUtil.buildId(bookName, siteName), progress)
                     }
             }
     }
 
+    fun getReadProgress(): Int {
+        return defaultSharedPreferences().getInt(BookUtil.buildId(bookName, siteName), 0)
+    }
+
     override fun onCleared() {
         disposable?.dispose()
-        timeExecutor?.shutdownNow()
-        timeExecutor = null
-        App.getContext().unregisterReceiver(batteryReceiver)
         super.onCleared()
     }
 }

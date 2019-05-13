@@ -9,7 +9,7 @@ android {
     defaultConfig {
         applicationId "com.zia.bookdownloader"
         minSdkVersion 19
-        targetSdkVersion 28
+        targetSdkVersion 27
         renderscriptSupportModeEnabled true
         versionCode 16
         versionName "1.5.4"
