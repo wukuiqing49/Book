@@ -27,4 +27,10 @@
     <string name="slide">滑动</string>
     <string name="tocover">覆盖</string>
     <string name="sim">模拟</string>
+    <string name="catalog">目录</string>
+    <string name="cache">缓存</string>
+    <string name="more">更多</string>
+    <string name="system">系统</string>
+    <string name="none">无</string>
+    <string name="font_style">字体</string>
 </resources>

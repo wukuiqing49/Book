@@ -26,6 +26,9 @@ public interface BookCacheDao {
     @Query("select chapterName from bookCache where bookName = :bookName and siteName = :siteName order by `index` asc")
     List<String> getChapterNames(String bookName, String siteName);
 
+    @Query("select chapterName from bookCache where bookName = :bookName and siteName = :siteName and `index` = :index")
+    String getChapterName(int index, String bookName, String siteName);
+
     @Query("select chapterName from bookCache where bookName = :bookName and siteName = :siteName order by `index` asc")
     DataSource.Factory<Integer, String> getChapterNamesFactory(String bookName, String siteName);
 

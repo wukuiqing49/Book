@@ -42,7 +42,7 @@ class BookViewModel(private val book: Book) : ProgressViewModel() {
             .setPageSize(50)
             .setPrefetchDistance(20)
             .setInitialLoadSizeHint(100)
-            .setEnablePlaceholders(false)
+            .setEnablePlaceholders(true)
             .build()
     ).build()
 

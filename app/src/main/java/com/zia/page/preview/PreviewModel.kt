@@ -21,12 +21,17 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
 
     val requestLoadPage = MutableLiveData<Int>()
 
-    val readerAdapter = ReadAdapter()
+    var readerAdapter = ReadAdapter()
 
     private var disposable: Disposable? = null
-    var position = 0
     private val cacheDao by lazy {
         AppDatabase.getAppDatabase().bookCacheDao()
+    }
+
+    //新建一个adapter，防止数据错乱
+    fun newAdapter(): ReadAdapter {
+        readerAdapter = ReadAdapter()
+        return readerAdapter
     }
 
     inner class ReadAdapter : StringAdapter() {
@@ -74,7 +79,7 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
         //从网络加载缓存，并重新加载这章内容
         DefaultExecutorSupplier.getInstance().forBackgroundTasks().execute {
             //加载完成，重新显示
-            if(loadSingleContent(section).contents.isNotEmpty()){
+            if (loadSingleContent(section).contents.isNotEmpty()) {
                 requestLoadPage.postValue(section)
             }
 //            loadContent(section + 1, section + 3)

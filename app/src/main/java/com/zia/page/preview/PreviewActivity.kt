@@ -3,56 +3,72 @@ package com.zia.page.preview
 import android.annotation.SuppressLint
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Intent
+import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
+import android.widget.SeekBar
 import com.zia.bookdownloader.R
+import com.zia.database.AppDatabase
 import com.zia.page.base.BaseActivity
+import com.zia.page.book.BookActivity
 import com.zia.toastex.ToastEx
-import com.zia.util.ToastUtil
-import com.zia.util.defaultSharedPreferences
-import com.zia.util.editor
+import com.zia.util.*
 import com.zia.util.threadPool.DefaultExecutorSupplier
 import com.zia.widget.reader.OnPageChangeListener
 import com.zia.widget.reader.PageView
 import kotlinx.android.synthetic.main.activity_preview.*
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 
 class PreviewActivity : BaseActivity() {
 
-    private val textSizeSP = "textSize"
+    private val textSizeSP = "textSize_new"
     private val themeSP = "theme"
     private val pageModeSP = "pageMode"
     private val theme_white = 0
     private val theme_dark = 1
+
+    private var animMode: Int = 0
+
     private var showControl = true
 
-    private val defaultTextSize = 52
+    private val defaultTextSize = 48
 
     private lateinit var viewModel: PreviewModel
-    private lateinit var bookName: String
-    private lateinit var siteName: String
+    private var bookName: String = ""
+    private var siteName: String = ""
+
+    private lateinit var selectedDrawable: Drawable
+    private lateinit var unSelectedDrawable: Drawable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setNavigationColor()
 
-        bookName = intent.getStringExtra("bookName")
-        siteName = intent.getStringExtra("siteName")
-
         setContentView(R.layout.activity_preview)
+
+        init()
 
         //适配刘海屏
         readerView.post {
             fixWindow()
         }
 
-        setTextSize(defaultSharedPreferences.getFloat(textSizeSP, defaultTextSize.toFloat()))
+        setTextSize(defaultSharedPreferences.getInt(textSizeSP, defaultTextSize))
         setTvTheme(defaultSharedPreferences.getInt(themeSP, 0))
 
         viewModel = ViewModelProviders.of(this, PreviewModelFactory(bookName, siteName)).get(PreviewModel::class.java)
+
+        //设置控件属性
+        initView()
 
         //设置页面的监听
         setPanelClick()
@@ -63,12 +79,46 @@ class PreviewActivity : BaseActivity() {
         setReaderView()
 
         //开始加载
+        load()
+    }
+
+    private fun init() {
+        bookName = intent.getStringExtra("bookName")
+        siteName = intent.getStringExtra("siteName")
+    }
+
+    private fun load() {
         DefaultExecutorSupplier.getInstance().forBackgroundTasks().execute {
+            animMode = defaultSharedPreferences.getInt(pageModeSP, PageView.PAGE_MODE_SIMULATION)
+            useAnimMode(animMode)
             val pos = viewModel.getBookMark()
+            preview_progress.max = viewModel.readerAdapter.size
+            preview_progress.progress = pos + 1
             viewModel.loadSingleContent(pos)
-            readerView.setPageAnimMode(defaultSharedPreferences.getInt(pageModeSP, PageView.PAGE_MODE_SIMULATION))
+            readerView.setPageAnimMode(animMode)
             readerView.openSection(pos, viewModel.getReadProgress())
         }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        if (intent != null) {
+            init()
+
+            //重置
+            readerView.pageLoader.newAdapter(viewModel.newAdapter())
+
+            //加载
+            load()
+        }
+    }
+
+    private fun initView() {
+        preview_light_sb.max = 255
+        preview_light_sb.progress = LightUtil.getScreenBrightness(this)
+
+        selectedDrawable = resources.getDrawable(R.drawable.bg_source)
+        unSelectedDrawable = resources.getDrawable(R.drawable.bg_source_white)
     }
 
     private fun initObserver() {
@@ -86,6 +136,77 @@ class PreviewActivity : BaseActivity() {
                 readerView.openSection(it)
             }
         })
+
+        preview_light_sb.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+
+
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.System.canWrite(this@PreviewActivity)) {
+                    //是否有Settings写入权限
+                    // 以下是请求写入系统设置权限逻辑
+                    val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS)
+                    intent.data = Uri.parse("package:$packageName")
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) //开启一个新activity
+                    startActivity(intent)
+                } else {
+                    //有了权限，具体的动作
+                    LightUtil.autoBrightness(this@PreviewActivity, false)
+                    if (progress == 0) {
+                        LightUtil.setBrightness(this@PreviewActivity, 1)
+                    } else {
+                        LightUtil.setBrightness(this@PreviewActivity, progress)
+                    }
+                    preview_light_system.background = unSelectedDrawable
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                preview_light_system.background = unSelectedDrawable
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+
+            }
+
+        })
+
+        preview_progress.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+
+            val pool by lazy {
+                val pool = ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, ArrayBlockingQueue<Runnable>(1))
+                pool.rejectedExecutionHandler = ThreadPoolExecutor.DiscardPolicy()
+                pool
+            }
+
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                pool.execute {
+                    val name = AppDatabase.getAppDatabase().bookCacheDao().getChapterName(progress, bookName, siteName)
+                    runOnUiThread {
+                        preview_tv_sb_catalog.text = name
+                    }
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                if (preview_tv_sb_catalog.visibility != View.VISIBLE) {
+                    preview_tv_sb_catalog.visibility = View.VISIBLE
+                }
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                if (seekBar != null) {
+                    //更换书签
+                    BookMarkUtil.insertOrUpdate(seekBar.progress, bookName, siteName)
+                    //重置
+                    readerView.pageLoader.newAdapter(viewModel.newAdapter())
+                    //加载
+                    load()
+
+                    preview_tv_sb_catalog.visibility = View.INVISIBLE
+                }
+            }
+
+        })
     }
 
     private fun setReaderView() {
@@ -94,10 +215,11 @@ class PreviewActivity : BaseActivity() {
         readerView.setOnPageChangeListener(object : OnPageChangeListener {
             @SuppressLint("SetTextI18n")
             override fun onChapterChange(pos: Int) {
+                Log.e("onChapterChange", "$pos")
                 viewModel.saveBookMark(pos)
                 runOnUiThread {
                     preview_title.text = viewModel.getTitle(pos)
-                    preview_progress.text = "$pos / ${viewModel.readerAdapter.size}"
+                    preview_progress.progress = pos + 1
                 }
             }
 
@@ -118,6 +240,7 @@ class PreviewActivity : BaseActivity() {
                 } else {
                     preview_control_top.slideUpOut()
                     preview_control_bottom.slideDownOut()
+                    hideSecondControl()
                 }
                 showControl = !showControl
             }
@@ -140,59 +263,132 @@ class PreviewActivity : BaseActivity() {
             readerView.pageLoader.skipNextChapter()
         }
 
+        preview_control_setting.setOnClickListener {
+            showSecondControl()
+        }
 
-        preview_increase.setOnClickListener {
-            var size = defaultSharedPreferences.getFloat(textSizeSP, defaultTextSize.toFloat())
+
+        preview_expand.setOnClickListener {
+            var size = defaultSharedPreferences.getInt(textSizeSP, defaultTextSize)
             if (size > 100) {
                 ToastEx.info(this@PreviewActivity, "不能再放大了").show()
                 return@setOnClickListener
             }
             size += 4
             defaultSharedPreferences.editor {
-                putFloat(textSizeSP, size)
+                putInt(textSizeSP, size)
             }
             setTextSize(size)
         }
 
         preview_narrow.setOnClickListener {
-            var size = defaultSharedPreferences.getFloat(textSizeSP, defaultTextSize.toFloat())
+            var size = defaultSharedPreferences.getInt(textSizeSP, defaultTextSize)
             if (size < 12) {
                 ToastEx.info(this@PreviewActivity, "不能再缩小了").show()
                 return@setOnClickListener
             }
             size -= 4
             defaultSharedPreferences.editor {
-                putFloat(textSizeSP, size)
+                putInt(textSizeSP, size)
             }
             setTextSize(size)
         }
 
+        preview_text_default.setOnClickListener {
+            defaultSharedPreferences.editor {
+                putInt(textSizeSP, defaultTextSize)
+            }
+            setTextSize(defaultTextSize)
+        }
+
         preview_theme_dark.setOnClickListener {
             defaultSharedPreferences.editor { putInt(themeSP, 1) }
-//            preview_tv_next.setTextColor(resources.getColor(R.color.textWhite))
             setTvTheme(theme_dark)
         }
 
         preview_theme_white.setOnClickListener {
             defaultSharedPreferences.editor { putInt(themeSP, 0) }
-//            preview_tv_next.setTextColor(resources.getColor(R.color.textBlack))
             setTvTheme(theme_white)
         }
 
         preview_anim_vertical.setOnClickListener {
-            readerView.setPageAnimMode(PageView.PAGE_MODE_SCROLL)
-            defaultSharedPreferences.editor { putInt(pageModeSP, PageView.PAGE_MODE_SCROLL) }
+            useAnimMode(PageView.PAGE_MODE_SCROLL)
         }
 
         preview_anim_cover.setOnClickListener {
-            readerView.setPageAnimMode(PageView.PAGE_MODE_COVER)
-            defaultSharedPreferences.editor { putInt(pageModeSP, PageView.PAGE_MODE_COVER) }
+            useAnimMode(PageView.PAGE_MODE_COVER)
         }
 
         preview_anim_sim.setOnClickListener {
-            readerView.setPageAnimMode(PageView.PAGE_MODE_SIMULATION)
-            defaultSharedPreferences.editor { putInt(pageModeSP, PageView.PAGE_MODE_SIMULATION) }
+            useAnimMode(PageView.PAGE_MODE_SIMULATION)
         }
+
+        preview_anim_none.setOnClickListener {
+            useAnimMode(PageView.PAGE_MODE_NONE)
+        }
+
+        preview_light_system.setOnClickListener {
+            preview_light_system.background = selectedDrawable
+            val brightness = LightUtil.getScreenBrightness(this)
+            preview_light_sb.progress = brightness
+            LightUtil.setBrightness(this, brightness)
+            LightUtil.autoBrightness(this, true)
+        }
+
+        preview_bookRack.setOnClickListener {
+            goCatalog()
+        }
+
+        preview_control_catalog.setOnClickListener {
+            goCatalog()
+        }
+    }
+
+    private fun goCatalog() {
+        val intent = Intent(this@PreviewActivity, BookActivity::class.java)
+        intent.putExtra("book", AppDatabase.getAppDatabase().netBookDao().getNetBook(bookName, siteName).rawBook)
+        intent.putExtra("canAddFav", false)
+        startActivity(intent)
+    }
+
+    private fun useAnimMode(mode: Int) {
+        readerView.post {
+            getAnimModeTv(animMode)?.background = unSelectedDrawable
+            getAnimModeTv(mode)?.background = selectedDrawable
+            animMode = mode
+            readerView.setPageAnimMode(mode)
+        }
+        defaultSharedPreferences.editor { putInt(pageModeSP, mode) }
+    }
+
+    private fun getAnimModeTv(mode: Int): View? {
+        when (mode) {
+            PageView.PAGE_MODE_COVER -> {
+                return preview_anim_cover
+            }
+            PageView.PAGE_MODE_NONE -> {
+                return preview_anim_none
+            }
+            PageView.PAGE_MODE_SCROLL -> {
+                return preview_anim_vertical
+            }
+            PageView.PAGE_MODE_SIMULATION -> {
+                return preview_anim_sim
+            }
+            else -> {
+                return null
+            }
+        }
+    }
+
+    private fun showSecondControl() {
+        preview_control_setting_layout.visibility = View.VISIBLE
+        preview_control_base_layout.visibility = View.INVISIBLE
+    }
+
+    private fun hideSecondControl() {
+        preview_control_setting_layout.visibility = View.INVISIBLE
+        preview_control_base_layout.visibility = View.VISIBLE
     }
 
     private fun fixWindow() {
@@ -229,9 +425,9 @@ class PreviewActivity : BaseActivity() {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun setTextSize(textSize: Float) {
-        readerView.textSize = textSize.toInt()
-        preview_textSize.text = "字号：${textSize.toInt()}"
+    private fun setTextSize(textSize: Int) {
+        readerView.textSize = textSize
+        preview_textSize.text = "$textSize"
     }
 
     override fun onResume() {
@@ -248,21 +444,16 @@ class PreviewActivity : BaseActivity() {
     private fun setTvTheme(themeId: Int) {
         when (themeId) {
             theme_white -> {
-                preview_bg.setBackgroundColor(resources.getColor(R.color.preview_theme_white))
-//                preview_tv.setTextColor(resources.getColor(R.color.textBlack))
-//                preview_tv_next.setTextColor(resources.getColor(R.color.textBlack))
-//                preview_title_inside.setTextColor(resources.getColor(R.color.textBlack))
-//                preview_currentTime.setTextColor(resources.getColor(R.color.textBlack))
-//                preview_battery.setColor(resources.getColor(R.color.textBlack))
+                readerView.pageBackground = resources.getColor(R.color.preview_theme_white)
+                readerView.textColor = resources.getColor(R.color.textBlack)
             }
             theme_dark -> {
-                preview_bg.setBackgroundColor(resources.getColor(R.color.preview_theme_dark))
-//                preview_tv.setTextColor(resources.getColor(R.color.textWhite))
-//                preview_tv_next.setTextColor(resources.getColor(R.color.textWhite))
-//                preview_title_inside.setTextColor(resources.getColor(R.color.textWhite))
-//                preview_currentTime.setTextColor(resources.getColor(R.color.textWhite))
-//                preview_battery.setColor(resources.getColor(R.color.textWhite))
+                readerView.pageBackground = resources.getColor(R.color.preview_theme_dark)
+                readerView.textColor = resources.getColor(R.color.textWhite)
             }
+        }
+        readerView.post {
+            readerView.drawCurPage(false)
         }
     }
 

@@ -11,7 +11,6 @@ import android.support.design.widget.BottomNavigationView
 import android.support.v7.app.AlertDialog
 import android.util.Log
 import android.view.MenuItem
-import com.tbruyelle.rxpermissions2.RxPermissions
 import com.zia.bookdownloader.R
 import com.zia.database.bean.Config
 import com.zia.easybookmodule.engine.EasyBook
@@ -19,12 +18,13 @@ import com.zia.page.base.BaseActivity
 import com.zia.util.FileUtil
 import com.zia.util.ToastUtil
 import com.zia.util.Version
-import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_main.*
+import pub.devrel.easypermissions.AfterPermissionGranted
+import pub.devrel.easypermissions.EasyPermissions
 
-class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
 
-    private lateinit var disposal: Disposable
+class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelectedListener,EasyPermissions.PermissionCallbacks {
+
     private lateinit var mainPagerAdapter: MainPagerAdapter
     private lateinit var viewModel: MainViewModel
 
@@ -52,7 +52,7 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
         viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
         initObserver()
 
-        //请求磁盘权限
+        //请求权限
         requestPermission()
 
         //提示更新解析版本
@@ -155,15 +155,17 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
         })
     }
 
+    @AfterPermissionGranted(1)
     private fun requestPermission() {
-        val rxPermissions = RxPermissions(this)
-        disposal = rxPermissions.request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            .subscribe { ok ->
-                if (!ok) {
-                    ToastUtil.onError("需要磁盘读写权限")
-                    finish()
-                }
-            }
+        if (!EasyPermissions.hasPermissions(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+        ) {
+            EasyPermissions.requestPermissions(
+                this, "需要磁盘读写权限，系统设置写入权限（亮度调节）", 1, Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+        }
     }
 
     private fun setViewPager(position: Int = 0) {
@@ -218,8 +220,19 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
             .show()
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
+    }
+
+    override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
+        finish()
+    }
+
+    override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        disposal.dispose()
     }
 }

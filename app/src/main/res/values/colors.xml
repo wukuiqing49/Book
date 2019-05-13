@@ -13,7 +13,7 @@
 	<color name="grey">#99CCCCCC</color>
 	<color name="textBlack">#E21F1F1F</color>
 	<color name="textBlack_light">#E2313131</color>
-	<color name="previewShadow">#de0d0d0d</color>
+	<color name="previewShadow">#DE1D1D1D</color>
 	<color name="preview_theme_dark">#0B0B0A</color>
 	<color name="preview_theme_white">#EEE6CB</color>
 	<color name="white">#ffffff</color>

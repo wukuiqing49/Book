@@ -9,27 +9,27 @@ import android.view.animation.Animation
 object AnimationUtil {
     fun getShowAlphaAnimation(
         duration: Long, startListener: Runnable? = null, endListener: Runnable? = null,
-        repeatListener: Runnable? = null
+        repeatListener: Runnable? = null, fillAfter: Boolean = true
     ): AlphaAnimation {
-        return getAlphaAnimation(0f, 1f, duration, startListener, endListener, repeatListener)
+        return getAlphaAnimation(0f, 1f, duration, startListener, endListener, repeatListener, fillAfter)
 
     }
 
     fun getHideAlphaAnimation(
         duration: Long, startListener: Runnable? = null, endListener: Runnable? = null,
-        repeatListener: Runnable? = null
+        repeatListener: Runnable? = null, fillAfter: Boolean = true
     ): AlphaAnimation {
-        return getAlphaAnimation(1f, 0f, duration, startListener, endListener, repeatListener)
+        return getAlphaAnimation(1f, 0f, duration, startListener, endListener, repeatListener, fillAfter)
     }
 
     private fun getAlphaAnimation(
         startAlpha: Float, endAlpha: Float, duration: Long, startListener: Runnable? = null,
         endListener: Runnable? = null,
-        repeatListener: Runnable? = null
+        repeatListener: Runnable? = null, fillAfter: Boolean = true
     ): AlphaAnimation {
         val alphaAnimation = AlphaAnimation(startAlpha, endAlpha)
         alphaAnimation.duration = duration
-        alphaAnimation.fillAfter = true
+        alphaAnimation.fillAfter = fillAfter
         alphaAnimation.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation) {
                 startListener?.run()

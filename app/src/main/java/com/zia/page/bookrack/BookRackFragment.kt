@@ -1,8 +1,6 @@
 package com.zia.page.bookrack
 
 
-import android.app.Activity
-import android.app.ActivityOptions
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
@@ -12,7 +10,6 @@ import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Pair
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,8 +18,7 @@ import com.zia.database.bean.LocalBook
 import com.zia.database.bean.NetBook
 import com.zia.event.FreshEvent
 import com.zia.page.base.BaseFragment
-import com.zia.page.book.BookActivity
-import com.zia.util.Java2Kotlin
+import com.zia.page.preview.PreviewActivity
 import com.zia.util.ReaderUtil
 import com.zia.util.ToastUtil
 import kotlinx.android.synthetic.main.fragment_book_rack.*
@@ -104,26 +100,33 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
             netBook.lastCheckCount = netBook.currentCheckCount
         }
         viewModel.readNetBook(netBook)
-        val intent = Intent(context, BookActivity::class.java)
-        intent.putExtra("book", netBook.rawBook)
-        intent.putExtra("canAddFav", false)
-        //动画
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val p = arrayListOf<Pair<View, String>>(
-//                Pair.create(viewHolder.itemView.item_book_layout, "book"),
-//                Pair.create(viewHolder.itemView.item_book_name, "book_name"),
-//                Pair.create(viewHolder.itemView.item_book_author, "book_author"),
-//                Pair.create(viewHolder.itemView.item_book_lastUpdateChapter, "book_lastUpdateChapter"),
-//                Pair.create(viewHolder.itemView.item_book_lastUpdateTime, "book_lastUpdateTime"),
-//                Pair.create(viewHolder.itemView.item_book_site, "book_site"),
-                Pair.create(viewHolder.itemView.item_book_image, "book_image")
-            )
-            val options =
-                ActivityOptions.makeSceneTransitionAnimation(context as Activity, *Java2Kotlin.getPairs(p))
-            startActivity(intent, options.toBundle())
-        } else {
-            startActivity(intent)
-        }
+//        val intent = Intent(context, BookActivity::class.java)
+//        intent.putExtra("book", netBook.rawBook)
+//        intent.putExtra("canAddFav", false)
+//        //动画
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            val p = arrayListOf<Pair<View, String>>(
+////                Pair.create(viewHolder.itemView.item_book_layout, "book"),
+////                Pair.create(viewHolder.itemView.item_book_name, "book_name"),
+////                Pair.create(viewHolder.itemView.item_book_author, "book_author"),
+////                Pair.create(viewHolder.itemView.item_book_lastUpdateChapter, "book_lastUpdateChapter"),
+////                Pair.create(viewHolder.itemView.item_book_lastUpdateTime, "book_lastUpdateTime"),
+////                Pair.create(viewHolder.itemView.item_book_site, "book_site"),
+//                Pair.create(viewHolder.itemView.item_book_image, "book_image")
+//            )
+//            val options =
+//                ActivityOptions.makeSceneTransitionAnimation(context as Activity, *Java2Kotlin.getPairs(p))
+//            startActivity(intent, options.toBundle())
+//        } else {
+//            startActivity(intent)
+//        }
+
+        val intent = Intent(context, PreviewActivity::class.java)
+
+        intent.putExtra("bookName", netBook.bookName)
+        intent.putExtra("siteName", netBook.siteName)
+
+        startActivity(intent)
     }
 
     /**

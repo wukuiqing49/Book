@@ -78,7 +78,7 @@ class BookRackAdapter(private val recyclerView: RecyclerView, private val onBook
         return count
     }
 
-    @SuppressLint("SetTextI18n")
+    @SuppressLint("SetTextI18n", "ResourceType")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (getItemViewType(position)) {
             TYPE_TEXT_NET -> {

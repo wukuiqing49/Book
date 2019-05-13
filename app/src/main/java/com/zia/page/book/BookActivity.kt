@@ -6,7 +6,6 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.drawable.Drawable
 import android.os.Build
@@ -177,6 +176,10 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
             if (it != null) {
                 book_history.text = "第${(it + 1)}章"
                 adapter.freshHistory(it)
+                catalogRv.post {
+                    val p = if (adapter.itemCount - 1 <= it + 5) (adapter.itemCount - 1) else (it + 5)
+                    catalogRv.smoothScrollToPosition(p)
+                }
             }
         })
 

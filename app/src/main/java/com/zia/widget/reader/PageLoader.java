@@ -95,6 +95,19 @@ public class PageLoader {
     //书本是否打开
     protected boolean isBookOpen = false;
 
+    public void newAdapter(PageLoaderAdapter adapter) {
+        mStatus = STATUS_LOADING;
+        mAdapter = adapter;
+        mCancelPage = null;
+        mCurPage = null;
+        mWeakPrePageList = null;
+        mCurPageList = null;
+        mNextPageList = null;
+        mLastChapter = 0;
+        mCurChapterPos = 0;
+        isBookOpen = false;
+    }
+
 
     public PageLoader(PageView pageView) {
         mPageView = pageView;
@@ -105,8 +118,6 @@ public class PageLoader {
         initPaint();
         //初始化PageView
         initPageView();
-
-
     }
 
     public void setAdapter(PageLoaderAdapter adapter) {
@@ -368,7 +379,6 @@ public class PageLoader {
     public void openChapter(int section, int page) {
         mCurChapterPos = section;
         int pageCount = mAdapter.getPageCount(mCurChapterPos, new PageProperty(mTextPaint, mVisibleWidth, mVisibleHeight, mIntervalSize, mParagraphSize));
-        Log.e(TAG, "openChapter: pageCount:" + pageCount + "  page:" + page);
         if (page >= pageCount || page < 0) {
             page = 0;
         }

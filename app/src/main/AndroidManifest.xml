@@ -11,6 +11,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.READ_LOGS"/>
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
 
     <application
             android:name="com.zia.App"
@@ -69,7 +70,8 @@
                 android:theme="@style/Translucent"/>
         <activity
                 android:name="com.zia.page.preview.PreviewActivity"
-                android:theme="@style/FullScreen"/>
+                android:theme="@style/FullScreen"
+                android:launchMode="singleTask"/>
         <activity android:name="com.zia.page.blame.BlameActivity"/>
         <activity android:name="com.zia.page.bookstore.rank.RankActivity"/>
         <activity
