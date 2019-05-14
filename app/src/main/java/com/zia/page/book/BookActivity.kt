@@ -147,11 +147,11 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
             }
         })
 
-        catalogRv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-            }
-        })
+//        catalogRv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+//            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+//                super.onScrollStateChanged(recyclerView, newState)
+//            }
+//        })
     }
 
     @SuppressLint("SetTextI18n")
@@ -175,15 +175,15 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
         viewModel.history.observe(this, Observer {
             if (it != null) {
                 book_history.text = "第${(it + 1)}章"
-                adapter.freshHistory(it)
-                val p = if (adapter.itemCount - 1 <  it + 5) {
-                    adapter.itemCount - 1
+                val count = adapter.itemCount
+                val p = if (count - 1 < it + 5) {
+                    val pp = count - 1
+                    if (pp < 0) 0 else pp
                 } else {
                     it + 5
                 }
-                catalogRv.post {
-                    catalogRv.scrollToPosition(p)
-                }
+                catalogRv.scrollToPosition(p)
+                adapter.freshHistory(it)
             }
         })
 
@@ -287,7 +287,8 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
 
     override fun onResume() {
         super.onResume()
-        book_loading.visibility = View.VISIBLE
-        viewModel.freshHistory()
+//        book_loading.visibility = View.VISIBLE
+//        viewModel.freshHistory()
+
     }
 }

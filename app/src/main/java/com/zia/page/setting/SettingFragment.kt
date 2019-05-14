@@ -77,6 +77,7 @@ class SettingFragment : BaseFragment() {
             dialog.show()
             viewModel.checkVersion("easybookfix", TYPE_FIX)
         }
+        setting_checkFix.isClickable = false
 
         viewModel.config.observe(this, Observer {
             dialog.dismiss()

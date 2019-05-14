@@ -100,10 +100,7 @@ class BookViewModel(private val book: Book) : ProgressViewModel() {
     }
 
     fun freshHistory() {
-        DefaultExecutorSupplier.getInstance().forLightWeightBackgroundTasks()
-            .execute {
-                history.postValue(BookMarkUtil.getMarkPosition(book.bookName, book.siteName))
-            }
+        history.postValue(BookMarkUtil.getMarkPosition(book.bookName, book.siteName))
     }
 
     fun insertBookIntoBookRack() {
