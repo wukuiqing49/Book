@@ -68,7 +68,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:visibility="invisible"
-            tools:visibility="visible"
+            tools:visibility="invisible"
             android:clipChildren="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -167,7 +167,7 @@
                     android:textSize="12sp"
                     android:textColor="@color/textWhite"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:id="@+id/preview_tv_download"
+                    android:layout_height="wrap_content" android:id="@+id/preview_download_progress"
                     app:layout_constraintStart_toStartOf="@+id/preview_control_download"
                     app:layout_constraintEnd_toEndOf="@+id/preview_control_download"
                     android:layout_marginBottom="8dp"
@@ -394,5 +394,17 @@
             app:layout_constraintBottom_toTopOf="@+id/preview_control_bottom" android:layout_marginStart="8dp"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginEnd="8dp"
             app:layout_constraintEnd_toEndOf="parent" android:layout_marginBottom="48dp"/>
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/default_text_color"
+            tools:text="正在下载 第1章"
+            tools:visibility="visible"
+            android:visibility="gone"
+            android:id="@+id/preview_tv_download_progress"
+            app:layout_constraintBottom_toBottomOf="parent" android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp" android:layout_marginBottom="8dp"/>
 
 </android.support.constraint.ConstraintLayout>

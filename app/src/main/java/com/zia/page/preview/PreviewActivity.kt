@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.support.v7.app.AlertDialog
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
@@ -49,6 +50,14 @@ class PreviewActivity : BaseActivity() {
     private lateinit var selectedDrawable: Drawable
     private lateinit var unSelectedDrawable: Drawable
 
+    val pool by lazy {
+        val pool = ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, ArrayBlockingQueue<Runnable>(1))
+        pool.rejectedExecutionHandler = ThreadPoolExecutor.DiscardPolicy()
+        pool
+    }
+
+    private var downloadDialog: AlertDialog? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setNavigationColor()
@@ -56,11 +65,6 @@ class PreviewActivity : BaseActivity() {
         setContentView(R.layout.activity_preview)
 
         init()
-
-        //适配刘海屏
-        readerView.post {
-            fixWindow()
-        }
 
         setTextSize(defaultSharedPreferences.getInt(textSizeSP, defaultTextSize))
         setTvTheme(defaultSharedPreferences.getInt(themeSP, 0))
@@ -96,7 +100,11 @@ class PreviewActivity : BaseActivity() {
             preview_progress.progress = pos + 1
             viewModel.loadSingleContent(pos)
             readerView.setPageAnimMode(animMode)
-            readerView.openSection(pos, viewModel.getReadProgress())
+            readerView.post {
+                //适配刘海屏
+                fixWindow()
+                readerView.openSection(pos, viewModel.getReadProgress())
+            }
         }
     }
 
@@ -137,6 +145,16 @@ class PreviewActivity : BaseActivity() {
             }
         })
 
+        viewModel.downloadProgress.observe(this, Observer {
+            if (it == null || it.isEmpty()) {
+                preview_tv_download_progress.text = ""
+                preview_tv_download_progress.visibility = View.INVISIBLE
+            } else {
+                preview_tv_download_progress.visibility = View.VISIBLE
+                preview_tv_download_progress.text = it
+            }
+        })
+
         preview_light_sb.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
 
 
@@ -171,12 +189,6 @@ class PreviewActivity : BaseActivity() {
         })
 
         preview_progress.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-
-            val pool by lazy {
-                val pool = ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, ArrayBlockingQueue<Runnable>(1))
-                pool.rejectedExecutionHandler = ThreadPoolExecutor.DiscardPolicy()
-                pool
-            }
 
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 pool.execute {
@@ -342,6 +354,33 @@ class PreviewActivity : BaseActivity() {
         preview_control_catalog.setOnClickListener {
             goCatalog()
         }
+
+        preview_control_download.setOnClickListener {
+            val items = arrayOf("后50章", "后100章", "后200章", "全部")
+            downloadDialog = AlertDialog.Builder(this).setTitle("选择缓存章节").setItems(items) { dialog, which ->
+                val cur = BookMarkUtil.getMarkPosition(bookName, siteName)
+                val size = viewModel.readerAdapter.size
+                when (which) {
+                    0 -> {
+                        val to = if (cur + 50 < size - 1) cur + 50 else size - 1
+                        viewModel.download(cur, to)
+                    }
+                    1 -> {
+                        val to = if (cur + 100 < size - 1) cur + 100 else size - 1
+                        viewModel.download(cur, to)
+                    }
+                    2 -> {
+                        val to = if (cur + 200 < size - 1) cur + 200 else size - 1
+                        viewModel.download(cur, to)
+                    }
+                    else -> {
+                        viewModel.download(0, size - 1)
+                    }
+                }
+                downloadDialog?.hide()
+            }.create()
+            downloadDialog?.show()
+        }
     }
 
     private fun goCatalog() {
@@ -400,9 +439,10 @@ class PreviewActivity : BaseActivity() {
             if (rects.isNotEmpty()) {
                 //是刘海屏
                 Log.d("PreviewActivity", "刘海屏")
-                readerView.post {
-                    readerView.setPadding(0, displayCutout.safeInsetTop, 0, 0)
+                preview_control_top.post {
+                    preview_control_top.setPadding(0, displayCutout.safeInsetTop, 0, 0)
                 }
+                readerView.pageLoader.setHairHeight(displayCutout.safeInsetTop)
             }
 
         }
@@ -438,6 +478,7 @@ class PreviewActivity : BaseActivity() {
     override fun onDestroy() {
         preview_control_top.clearSlideAnimation()
         preview_control_bottom.clearSlideAnimation()
+        pool.shutdownNow()
         super.onDestroy()
     }
 
@@ -474,11 +515,19 @@ class PreviewActivity : BaseActivity() {
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
         return when (keyCode) {
             KeyEvent.KEYCODE_VOLUME_DOWN -> {
+//                if (readerView.pageAnim is HorizonPageAnim){
+//                    (readerView.pageAnim as HorizonPageAnim).runAnim(true)
+//                }else{
                 readerView.pageLoader.next()
+//                }
                 true
             }
             KeyEvent.KEYCODE_VOLUME_UP -> {
+//                if (readerView.pageAnim is HorizonPageAnim){
+//                    (readerView.pageAnim as HorizonPageAnim).runAnim(false)
+//                }else{
                 readerView.pageLoader.prev()
+//                }
                 true
             }
             else -> super.onKeyUp(keyCode, event)

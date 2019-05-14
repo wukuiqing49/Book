@@ -56,6 +56,8 @@ public abstract class StringAdapter implements PageLoaderAdapter {
     @Override
     public abstract String getSectionName(int section);
 
+    private static final String space = String.valueOf((char) 12288) + (char) 12288;
+
     public static SparseArray<ArrayList<String>> loadPages(List<String> source, Paint textPaint, int visibleHeight,
                                                            int visibleWidth, int intervalSize, int paragraphSize) {
         SparseArray<ArrayList<String>> pageArray = new SparseArray<>();
@@ -68,8 +70,9 @@ public abstract class StringAdapter implements PageLoaderAdapter {
                 //如果只有换行符，那么就不执行
                 if (StringUtils.isBlank(paragraph)) continue;
                 //重置段落
-                paragraph = StringUtils.halfToFull("  " + paragraph + "\n");
-                paragraph = StringUtils.trimBeforeReplace(paragraph, "　　");
+//                paragraph = StringUtils.halfToFull("  " + paragraph + "\n");
+                paragraph = space + paragraph + "\n";
+//                paragraph = StringUtils.trimBeforeReplace(paragraph, "　　");
                 while (paragraph.length() > 0) {
 
 

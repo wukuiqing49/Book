@@ -3,8 +3,11 @@ package com.zia.page.preview
 import android.arch.lifecycle.MutableLiveData
 import com.zia.database.AppDatabase
 import com.zia.database.bean.BookCache
+import com.zia.easybookmodule.bean.Chapter
+import com.zia.easybookmodule.engine.EasyBook
 import com.zia.easybookmodule.net.NetUtil
 import com.zia.easybookmodule.rx.Disposable
+import com.zia.easybookmodule.rx.Subscriber
 import com.zia.page.base.BaseViewModel
 import com.zia.util.BookMarkUtil
 import com.zia.util.BookUtil
@@ -20,6 +23,7 @@ import com.zia.widget.reader.StringAdapter
 class PreviewModel(private val bookName: String, private val siteName: String) : BaseViewModel() {
 
     val requestLoadPage = MutableLiveData<Int>()
+    val downloadProgress = MutableLiveData<String>()
 
     var readerAdapter = ReadAdapter()
 
@@ -40,6 +44,10 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
             cacheDao.getChapterNames(bookName, siteName).size
         }
 
+        val site by lazy {
+            BookUtil.getSite(siteName)
+        }
+
         override fun hasPreviousSection(currentSection: Int): Boolean {
             return currentSection > 0
         }
@@ -49,7 +57,14 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
         }
 
         override fun hasNextSection(currentSection: Int): Boolean {
-            return currentSection < size - 1
+            val has = currentSection + 1 < size
+            if (has) {
+                //预加载
+                DefaultExecutorSupplier.getInstance().forBackgroundTasks().execute {
+                    loadSingleContent(currentSection + 1)
+                }
+            }
+            return has
         }
 
         override fun getPageSource(section: Int): List<String> {
@@ -64,6 +79,7 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
 
     private var currentCache: BookCache? = null
 
+    //查找缓存、下载、重新显示
     fun getCache(section: Int): BookCache {
         if (currentCache != null && currentCache?.index == section) {
             return currentCache!!
@@ -82,22 +98,20 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
             if (loadSingleContent(section).contents.isNotEmpty()) {
                 requestLoadPage.postValue(section)
             }
-//            loadContent(section + 1, section + 3)
         }
-//            }
         return bookCache
     }
 
+    //仅同步下载
     fun loadSingleContent(section: Int): BookCache {
-        val site = BookUtil.getSite(siteName)
         val cache = cacheDao.getBookCache(bookName, siteName, section)
         if (cache.contents.size != 0) {
             //有缓存或者没有该章节，跳过
             return cache
         }
         try {
-            val html = NetUtil.getHtml(cache.url, site.encodeType)
-            val contents = site.parseContent(html)
+            val html = NetUtil.getHtml(cache.url, readerAdapter.site.encodeType)
+            val contents = readerAdapter.site.parseContent(html)
             //插入数据库
             if (contents.isNotEmpty()) {
                 cache.contents = contents
@@ -105,30 +119,62 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            toast.postValue("解析错误，可以尝试重新打开该章节")
+            toast.postValue("第${section}章解析错误")
         }
         return cache
     }
 
-    fun loadContent(from: Int, to: Int) {
-        //下载后面五章的内容
-        val site = BookUtil.getSite(siteName)
-        for (i in from..to) {
-            val cache = cacheDao.getBookCache(bookName, siteName, i)
-            if (cache == null || cache.contents.isNotEmpty()) {
-                //有缓存或者没有该章节，跳过
-                continue
-            }
-            try {
-                val html = NetUtil.getHtml(cache.url, site.encodeType)
-                val contents = site.parseContent(html)
-                //插入数据库
-                if (contents.isNotEmpty()) {
-                    cache.contents = contents
-                    cacheDao.insert(cache)
+
+    fun download(from: Int, to: Int) {
+        //先检查是否已经缓存了
+        DefaultExecutorSupplier.getInstance().forBackgroundTasks().execute {
+            var needDownload = false
+            for (section in from..to) {
+                if (AppDatabase.getAppDatabase().bookCacheDao().getBookCache(
+                        bookName,
+                        siteName,
+                        section
+                    ).contents.size == 0
+                ) {
+                    needDownload = true
+                    break
                 }
-            } catch (e: Exception) {
-                toast.postValue("预加载错误:${cache.chapterName}\n${e.message}")
+            }
+            if (needDownload) {
+                disposable?.dispose()
+                val book = AppDatabase.getAppDatabase().netBookDao().getNetBook(bookName, siteName).parseBook()
+                disposable = EasyBook.downloadPart(book, from, to).setThreadCount(30)
+                    .subscribe(object :
+                        Subscriber<ArrayList<Chapter>> {
+                        override fun onFinish(p0: ArrayList<Chapter>) {
+                            //将下载的数据存入数据库
+                            DefaultExecutorSupplier.getInstance().forBackgroundTasks().execute {
+                                p0.forEach { chapter ->
+                                    val cache = cacheDao.getBookCache(bookName, siteName, chapter.index)
+                                    cache.contents = chapter.contents
+                                    cacheDao.insert(cache)
+                                }
+                                downloadProgress.postValue("")
+                            }
+                        }
+
+                        override fun onMessage(p0: String) {
+                            //传递下载进度
+                            downloadProgress.postValue(p0)
+                        }
+
+                        override fun onProgress(p0: Int) {
+
+                        }
+
+                        override fun onError(p0: java.lang.Exception) {
+                            downloadProgress.postValue("")
+                            toast.postValue(p0.message)
+                        }
+
+                    })
+            }else{
+                toast.postValue("已全部缓存")
             }
         }
     }

@@ -48,6 +48,10 @@ public class NetBook implements Serializable {
     @ColumnInfo(name = "time")
     private long time = new Date().getTime();
 
+    public Book parseBook() {
+        return new Book(bookName, author, url, imageUrl, "", lastUpdateTime, lastChapterName, siteName);
+    }
+
     public NetBook() {
     }
 

@@ -183,6 +183,29 @@ public abstract class HorizonPageAnim extends PageAnimation{
         return true;
     }
 
+    public void runAnim(boolean isNext){
+        if (isNext) {
+            //判断是否下一页存在
+            boolean hasNext = mListener.hasNext();
+            //设置动画方向
+            setDirection(Direction.NEXT);
+            if (!hasNext) {
+                return;
+            }
+        } else {
+            boolean hasPrev = mListener.hasPrev();
+            setDirection(Direction.PRE);
+            if (!hasPrev) {
+                return;
+            }
+        }
+        if (!noNext) {
+            isRunning = true;
+            startAnim();
+            mView.invalidate();
+        }
+    }
+
     @Override
     public void draw(Canvas canvas) {
         if (isRunning) {

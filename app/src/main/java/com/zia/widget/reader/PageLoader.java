@@ -12,6 +12,7 @@ import com.zia.widget.reader.utils.ToastUtils;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 
 /**
@@ -29,7 +30,7 @@ public class PageLoader {
     public static final int STATUS_PARSE = 5;    //正在解析 (一般用于本地数据加载)
     public static final int STATUS_PARSE_ERROR = 6; //本地文件解析错误(暂未被使用)
 
-    static final int DEFAULT_MARGIN_HEIGHT = 30;
+    static final int DEFAULT_MARGIN_HEIGHT = 24;
     static final int DEFAULT_MARGIN_WIDTH = 16;
 
     //默认的显示参数配置
@@ -56,6 +57,8 @@ public class PageLoader {
     //当前的状态
     protected int mStatus = STATUS_LOADING;
 
+    //刘海高度
+    private int hairHeight = 0;
     //书籍绘制区域的宽高
     private int mVisibleWidth;
     private int mVisibleHeight;
@@ -142,6 +145,7 @@ public class PageLoader {
         mTipPaint.setColor(mPageView.getTextColor());
         mTipPaint.setTextAlign(Paint.Align.LEFT);//绘制的起始点
         mTipPaint.setTextSize(ScreenUtils.spToPx(mContext, DEFAULT_TIP_SIZE));//Tip默认的字体大小
+        mTipPaint.setAlpha(200);
         mTipPaint.setAntiAlias(true);
         mTipPaint.setSubpixelText(true);
 
@@ -150,6 +154,9 @@ public class PageLoader {
         mTextPaint.setColor(mPageView.getTextColor());
         mTextPaint.setTextSize(mPageView.getTextSize());
         mTextPaint.setAntiAlias(true);
+        mTextPaint.setDither(true);
+        mTextPaint.setStrokeJoin(Paint.Join.ROUND);
+        mTextPaint.setTextLocale(Locale.CHINA);
 
         mBgPaint = new Paint();
         mBgPaint.setColor(mPageView.getPageBackground());
@@ -157,6 +164,7 @@ public class PageLoader {
         mBatteryPaint = new Paint();
         mBatteryPaint.setAntiAlias(true);
         mBatteryPaint.setDither(true);
+        mBatteryPaint.setAlpha(200);
         mBatteryPaint.setColor(mPageView.getTextColor());
 
     }
@@ -322,7 +330,6 @@ public class PageLoader {
         return mCurPage.position;
     }
 
-    //TODO 保存阅读记录
     public void saveRecord() {
         //书没打开，就没有记录
         if (!isBookOpen) return;
@@ -433,6 +440,10 @@ public class PageLoader {
 
         //需要注意的是:绘制text的y的起始点是text的基准线的位置，而不是从text的头部的位置
         float tipTop = tipMarginHeight - mTipPaint.getFontMetrics().top;
+        int left = mMarginWidth;
+        if (hasFixedHair) {
+            left += (mMarginWidth / 2);
+        }
         if (!isUpdate) {
             /****绘制背景****/
             canvas.drawColor(mPageView.getPageBackground());
@@ -442,10 +453,10 @@ public class PageLoader {
             if (mStatus != STATUS_FINISH) {
                 if (mAdapter != null && mAdapter.getSectionCount() != 0) {
                     canvas.drawText(mAdapter.getSectionName(mCurChapterPos)
-                            , mMarginWidth, tipTop, mTipPaint);
+                            , left, tipTop, mTipPaint);
                 }
             } else {
-                canvas.drawText(mAdapter.getSectionName(mCurChapterPos), mMarginWidth, tipTop, mTipPaint);
+                canvas.drawText(mAdapter.getSectionName(mCurChapterPos), left, tipTop, mTipPaint);
             }
 
             /******绘制页码********/
@@ -454,7 +465,8 @@ public class PageLoader {
             //只有finish的时候采用页码
             if (mStatus == STATUS_FINISH) {
                 String percent = (mCurPage.position + 1) + "/" + mCurPageList.size();
-                canvas.drawText(percent, mMarginWidth, y, mTipPaint);
+
+                canvas.drawText(percent, left, y, mTipPaint);
             }
         } else {
             //擦除区域
@@ -483,6 +495,9 @@ public class PageLoader {
         float tipTop = tipMarginHeight - mTipPaint.getFontMetrics().top;
         int outFrameLeft =
                 mDisplayWidth - mMarginWidth - ScreenUtils.dpToPx(mContext, 2) - (int) mTipPaint.measureText("xxx");
+        if (hasFixedHair) {
+            outFrameLeft -= (mMarginWidth / 2);
+        }
         //底部的字显示的位置Y
 //        float y = mDisplayHeight - mTipPaint.getFontMetrics().bottom - tipMarginHeight;
         String time = StringUtils.dateConvert(System.currentTimeMillis(), "HH:mm");
@@ -507,6 +522,10 @@ public class PageLoader {
 
         float tipTop = tipMarginHeight + mTipPaint.getFontMetrics().bottom + ScreenUtils.dpToPx(mContext, 1);
         int visibleRight = mDisplayWidth - mMarginWidth;
+
+        if (hasFixedHair) {
+            visibleRight -= (mMarginWidth / 2);
+        }
 
         int outFrameWidth = (int) mTipPaint.measureText("xxx");
         int outFrameHeight = (int) (mTipPaint.getTextSize() / 4f * 3);
@@ -591,6 +610,8 @@ public class PageLoader {
                 top = mMarginHeight - mTextPaint.getFontMetrics().top;
             }
 
+            top += hairHeight;
+
             int interval = mIntervalSize + (int) mTextPaint.getTextSize();
             for (int i = 0; i < mCurPage.lines.size(); ++i) {
                 String str = mCurPage.lines.get(i);
@@ -604,6 +625,16 @@ public class PageLoader {
         }
     }
 
+    private boolean hasFixedHair = false;
+
+    public void setHairHeight(int hairHeight) {
+        if (!hasFixedHair) {
+            this.hairHeight = hairHeight;
+            mVisibleHeight -= hairHeight;
+            mMarginHeight /= 2;
+            hasFixedHair = true;
+        }
+    }
 
     void setDisplaySize(int w, int h) {
         //获取PageView的宽高
@@ -787,12 +818,14 @@ public class PageLoader {
 
     //预加载下一章
     private void preLoadNextChapter() {
+        //需要在这个调用的地方预加载
+        mAdapter.hasNextSection(mCurChapterPos);
         //判断是否存在下一章
-        if (mCurChapterPos + 1 >= mAdapter.getSectionCount()) {
-            return;
-        }
-        //判断下一章的文件是否存在
-        int nextChapter = mCurChapterPos + 1;
+//        if (!mAdapter.hasNextSection(mCurChapterPos)) {
+//            return;
+//        }
+//        //判断下一章的文件是否存在
+//        int nextChapter = mCurChapterPos + 1;
 
     }
 

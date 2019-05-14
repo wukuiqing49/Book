@@ -11,6 +11,7 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
+import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.bumptech.glide.Glide
@@ -24,7 +25,6 @@ import com.zia.page.base.BaseActivity
 import com.zia.page.preview.PreviewActivity
 import com.zia.toastex.ToastEx
 import com.zia.util.*
-import com.zia.widget.FastScrollLinearLayoutManager
 import kotlinx.android.synthetic.main.activity_book.*
 
 
@@ -128,7 +128,7 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
         adapter = CatalogPagingAdapter(this)
         catalogRv.adapter = adapter
 
-        val layoutManager = FastScrollLinearLayoutManager(this)
+        val layoutManager = LinearLayoutManager(this)
         catalogRv.layoutManager = layoutManager
 
         val paint = Paint()
@@ -176,9 +176,13 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
             if (it != null) {
                 book_history.text = "第${(it + 1)}章"
                 adapter.freshHistory(it)
+                val p = if (adapter.itemCount - 1 <  it + 5) {
+                    adapter.itemCount - 1
+                } else {
+                    it + 5
+                }
                 catalogRv.post {
-                    val p = if (adapter.itemCount - 1 <= it + 5) (adapter.itemCount - 1) else (it + 5)
-                    catalogRv.smoothScrollToPosition(p)
+                    catalogRv.scrollToPosition(p)
                 }
             }
         })
