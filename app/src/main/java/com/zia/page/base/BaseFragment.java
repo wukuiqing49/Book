@@ -11,7 +11,7 @@ import android.util.Log;
 public class BaseFragment extends Fragment {
     private boolean isPrepared;
 
-    private boolean isLazyLoaded;
+    protected boolean isLazyLoaded;
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {

@@ -78,12 +78,14 @@ class RecommendFragment : BaseFragment() {
     }
 
     fun addHistory(str: String) {
-        if (historyList != null && !historyList!!.contains(str)) {
-            historyList!!.add(str)
-            setAdapter(historyList!!)
-            defaultSharedPreferences().editor {
-                Log.e("RecommendFragment", "addHistory:$historyList")
-                putString(SearchContants.SP_HISTORY, gson.toJson(historyList))
+        if (isLazyLoaded && historyList != null && !historyList!!.contains(str)) {
+            recommend_historyListView.post {
+                historyList!!.add(str)
+                setAdapter(historyList!!)
+                defaultSharedPreferences().editor {
+                    Log.e("RecommendFragment", "addHistory:$historyList")
+                    putString(SearchContants.SP_HISTORY, gson.toJson(historyList))
+                }
             }
         }
     }

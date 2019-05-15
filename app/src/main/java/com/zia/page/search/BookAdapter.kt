@@ -1,6 +1,7 @@
 package com.zia.page.search
 
 import android.annotation.SuppressLint
+import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +10,9 @@ import com.zia.bookdownloader.R
 import com.zia.easybookmodule.bean.Book
 import com.zia.util.loadImage
 import kotlinx.android.synthetic.main.item_book.view.*
+import java.util.*
+import kotlin.collections.ArrayList
+
 
 /**
  * Created by zia on 2018/11/1.
@@ -20,6 +24,47 @@ class BookAdapter(private val bookSelectListener: BookSelectListener) :
 
     fun freshBooks(books: ArrayList<Book>) {
         this.books = books
+        notifyDataSetChanged()
+    }
+
+    fun addBooks(bookName: String, newDatas: List<Book>) {
+        val l = mergeBooks(bookName, newDatas)
+        val diffResult = DiffUtil.calculateDiff(DiffCallBack(books, l), true)
+        books = l
+        diffResult.dispatchUpdatesTo(this)
+    }
+
+    private fun mergeBooks(bookName: String, newDatas: List<Book>): ArrayList<Book> {
+        val result = ArrayList<Book>(books)
+        result.addAll(newDatas)
+        result.sortWith(Comparator { o1, o2 ->
+            Book.compare(bookName, o1, o2)
+        })
+        return result
+    }
+
+    inner class DiffCallBack(private val oldDatas: List<Book>, private val newDatas: List<Book>) : DiffUtil.Callback() {
+
+        override fun areItemsTheSame(p0: Int, p1: Int): Boolean {
+            return oldDatas[p0].bookName == newDatas[p1].bookName && oldDatas[p0].siteName == newDatas[p1].siteName
+        }
+
+        override fun getOldListSize(): Int {
+            return oldDatas.size
+        }
+
+        override fun getNewListSize(): Int {
+            return newDatas.size
+        }
+
+        override fun areContentsTheSame(p0: Int, p1: Int): Boolean {
+            return oldDatas[p0].bookName == newDatas[p1].bookName && oldDatas[p0].siteName == newDatas[p1].siteName
+        }
+
+    }
+
+    fun clear() {
+        books.clear()
         notifyDataSetChanged()
     }
 

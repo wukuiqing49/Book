@@ -1,6 +1,5 @@
 package com.zia.page.search
 
-import android.app.ProgressDialog
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
@@ -26,19 +25,19 @@ class SearchActivity : BaseActivity() {
     private val searchFragment = SearchResultFragment()
     private val recommendFragment = RecommendFragment()
 
-    private val dialog by lazy {
-        val dialog = ProgressDialog(this)
-        dialog.setCancelable(true)
-        dialog.progress = 0
-        dialog.setTitle("正在搜索")
-        dialog.setMessage("")
-        dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
-        dialog.show()
-        dialog.setOnCancelListener {
-            viewModel.shutDown()
-        }
-        dialog
-    }
+//    private val dialog by lazy {
+//        val dialog = ProgressDialog(this)
+//        dialog.setCancelable(true)
+//        dialog.progress = 0
+//        dialog.setTitle("正在搜索")
+//        dialog.setMessage("")
+//        dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
+//        dialog.show()
+//        dialog.setOnCancelListener {
+//            viewModel.shutDown()
+//        }
+//        dialog
+//    }
 
     private var searchKey: String? = null
 
@@ -67,47 +66,58 @@ class SearchActivity : BaseActivity() {
 
         if (searchKey != null && searchKey!!.isNotEmpty()) {
             searchEt.setText(searchKey)
-            viewModel.search(searchKey!!)
+            search(searchKey)
         }
     }
 
     private fun initObservers() {
         viewModel.loadBooks.observe(this, Observer<List<Book>> {
             if (it != null) {
-                hideFragment(recommendFragment)
+//                hideFragment(recommendFragment)
                 ToastUtil.onSuccess("搜索到${it.size}本书籍")
-                searchFragment.bookAdapter?.freshBooks(ArrayList(it))
-                searchFragment.searchRv?.scrollToPosition(0)
-                hideDialog()
+//                searchFragment.bookAdapter?.freshBooks(ArrayList(it))
+//                searchFragment.searchRv?.scrollToPosition(0)
+//                hideDialog()
+            }
+        })
+
+        viewModel.partBooks.observe(this, Observer {
+            if (it != null && searchKey != null) {
+                searchFragment.searchRv?.post {
+                    searchFragment.bookAdapter?.addBooks(searchKey!!, it)
+                    searchFragment.searchRv?.scrollToPosition(0)
+                }
+//                hideDialog()
             }
         })
 
         viewModel.error.observe(this, Observer {
             it?.printStackTrace()
             ToastUtil.onError(it?.message)
-            hideDialog()
+//            hideDialog()
         })
 
         viewModel.toast.observe(this, Observer {
             ToastUtil.onInfo(it)
         })
 
-        viewModel.dialogMessage.observe(this, Observer {
-            updateDialog(it)
-        })
-
-        viewModel.dialogProgress.observe(this, Observer {
-            updateDialog(it)
-        })
+//        viewModel.dialogMessage.observe(this, Observer {
+//            updateDialog(it)
+//        })
+//
+//        viewModel.dialogProgress.observe(this, Observer {
+//            updateDialog(it)
+//        })
     }
 
-    private fun search() {
+    private fun search(name: String?) {
         viewModel.shutDown()
-        val bookName = searchEt.text?.toString()
-        if (bookName != null && bookName.isNotEmpty()) {
-            recommendFragment.addHistory(bookName)
-            initDialog()
-            viewModel.search(bookName)
+        if (name != null && name.isNotEmpty()) {
+            recommendFragment.addHistory(name)
+            searchFragment.bookAdapter?.clear()
+            searchKey = name
+            viewModel.search(name)
+            hideFragment(recommendFragment)
         }
     }
 
@@ -120,7 +130,7 @@ class SearchActivity : BaseActivity() {
             if ((actionId == KeyEvent.KEYCODE_UNKNOWN || actionId == KeyEvent.KEYCODE_SEARCH || actionId == KeyEvent.KEYCODE_HOME)
                 && event != null && event.action == KeyEvent.ACTION_DOWN
             ) {
-                search()
+                search(searchEt.text.toString())
                 KeyboardktUtils.hideKeyboard(searchBt)
                 search_edit_cancel.visibility = View.INVISIBLE
                 return@setOnEditorActionListener true
@@ -146,14 +156,14 @@ class SearchActivity : BaseActivity() {
         })
 
         searchBt.setOnClickListener {
-            search()
+            search(searchEt.text.toString())
         }
     }
 
-    private fun initDialog() {
-        updateDialog(0)
-        updateDialog("")
-    }
+//    private fun initDialog() {
+//        updateDialog(0)
+//        updateDialog("")
+//    }
 
     private fun replaceFragment(fragment: Fragment) {
         val transaction = supportFragmentManager.beginTransaction()
@@ -173,25 +183,25 @@ class SearchActivity : BaseActivity() {
         transaction.commit()
     }
 
-    private fun updateDialog(progress: Int?) {
-        if (progress != null) {
-            dialog.progress = progress
-        }
-        if (!dialog.isShowing) {
-            dialog.show()
-        }
-    }
-
-    private fun updateDialog(msg: String?) {
-        if (msg != null) {
-            dialog.setMessage(msg)
-        }
-        if (!dialog.isShowing) {
-            dialog.show()
-        }
-    }
-
-    private fun hideDialog() {
-        dialog.dismiss()
-    }
+//    private fun updateDialog(progress: Int?) {
+//        if (progress != null) {
+//            dialog.progress = progress
+//        }
+//        if (!dialog.isShowing) {
+//            dialog.show()
+//        }
+//    }
+//
+//    private fun updateDialog(msg: String?) {
+//        if (msg != null) {
+//            dialog.setMessage(msg)
+//        }
+//        if (!dialog.isShowing) {
+//            dialog.show()
+//        }
+//    }
+//
+//    private fun hideDialog() {
+//        dialog.dismiss()
+//    }
 }

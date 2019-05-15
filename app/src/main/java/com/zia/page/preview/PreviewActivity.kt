@@ -96,14 +96,20 @@ class PreviewActivity : BaseActivity() {
             animMode = defaultSharedPreferences.getInt(pageModeSP, PageView.PAGE_MODE_SIMULATION)
             useAnimMode(animMode)
             val pos = viewModel.getBookMark()
-            preview_progress.max = viewModel.readerAdapter.size
-            preview_progress.progress = pos + 1
-            viewModel.loadSingleContent(pos)
+            preview_progress.max = viewModel.readerAdapter.size - 1
+            //防止并修复越界
+            val fixSection = if (pos >= viewModel.readerAdapter.size){
+                viewModel.readerAdapter.size - 1
+            }else{
+                pos
+            }
+            preview_progress.progress = fixSection
+            viewModel.loadSingleContent(fixSection)
             readerView.setPageAnimMode(animMode)
             readerView.post {
                 //适配刘海屏
                 fixWindow()
-                readerView.openSection(pos, viewModel.getReadProgress())
+                readerView.openSection(fixSection, viewModel.getReadProgress())
             }
         }
     }
