@@ -71,6 +71,18 @@ public abstract class StringAdapter implements PageLoaderAdapter {
                 if (StringUtils.isBlank(paragraph)) continue;
                 //重置段落
 //                paragraph = StringUtils.halfToFull("  " + paragraph + "\n");
+                //删除最开始的空格
+                int i = 0;
+                for (; i < paragraph.length(); ) {
+                    char c = paragraph.charAt(i);
+                    if (c == 12288 || c == 32) {
+                        i++;
+                    } else {
+                        break;
+                    }
+                }
+                paragraph = paragraph.substring(i);
+                //添加首行缩进
                 paragraph = space + paragraph + "\n";
 //                paragraph = StringUtils.trimBeforeReplace(paragraph, "　　");
                 while (paragraph.length() > 0) {

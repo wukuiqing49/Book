@@ -6,12 +6,15 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.bumptech.glide.Glide
 import com.zia.bookdownloader.R
 import com.zia.easybookmodule.bean.Book
 import com.zia.util.loadImage
 import kotlinx.android.synthetic.main.item_book.view.*
 import java.util.*
 import kotlin.collections.ArrayList
+
+
 
 
 /**
@@ -88,14 +91,26 @@ class BookAdapter(private val bookSelectListener: BookSelectListener) :
                 holder.itemView.item_book_site.text = book.site.siteName
                 holder.itemView.item_book_lastUpdateTime.text = "更新：${book.lastUpdateTime}"
                 holder.itemView.setOnClickListener { bookSelectListener.onBookSelect(holder.itemView, book) }
+
+                val tag = holder.itemView.item_book_image.getTag(R.id.item_book_image)
+                if (tag != null && tag as Int != position) {
+                    //如果tag不是Null,并且同时tag不等于当前的position。
+                    //说明当前的viewHolder是复用来的
+                    //Cancel any pending loads Glide may have for the view
+                    //and free any resources that may have been loaded for the view.
+                    Glide.with(holder.itemView.context).clear(holder.itemView.item_book_image)
+                }
+
                 if (book.url.isNotEmpty()) {
                     holder.itemView.context.loadImage(book.imageUrl, holder.itemView.item_book_image)
                     holder.itemView.item_book_cover_name.visibility = View.INVISIBLE
                 } else {
+                    Glide.with(holder.itemView.context).clear(holder.itemView.item_book_image)
                     holder.itemView.context.loadImage(R.drawable.ic_book_cover_default, holder.itemView.item_book_image)
                     holder.itemView.item_book_cover_name.visibility = View.VISIBLE
                     holder.itemView.item_book_cover_name.text = book.bookName
                 }
+                holder.itemView.item_book_image.setTag(R.id.item_book_image, position)
             }
         }
     }

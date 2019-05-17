@@ -44,7 +44,7 @@ class BookRackModel : BaseViewModel() {
                             val site = book.site
                             try {
                                 val html = NetUtil.getHtml(book.url, site.encodeType)
-                                val catalogs = netBook.rawBook.site.parseCatalog(html, book.url)
+                                val catalogs = site.parseCatalog(html, book.url)
                                 val cacheDao = AppDatabase.getAppDatabase().bookCacheDao()
                                 val cacheSize = cacheDao.getBookCacheSize(book.bookName, book.siteName)
                                 for (i in cacheSize until catalogs.size) {

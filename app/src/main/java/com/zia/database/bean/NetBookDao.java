@@ -2,6 +2,7 @@ package com.zia.database.bean;
 
 import android.arch.persistence.room.*;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -13,6 +14,7 @@ public interface NetBookDao {
     List<NetBook> getNetBooks();
 
     @Query("select * from netBook where bookName = :bkName and siteName = :stName")
+    @Nullable
     NetBook getNetBook(String bkName, String stName);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

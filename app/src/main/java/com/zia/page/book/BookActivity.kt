@@ -86,6 +86,10 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
         book_download.setOnClickListener { chooseType() }
 
         book_beginRead.setOnClickListener {
+            if (adapter.itemCount == 0) {
+                ToastUtil.onWarning("需要解析目录后才能添加，请稍等")
+                return@setOnClickListener
+            }
             //跳转到阅读界面
             val intent = Intent(this@BookActivity, PreviewActivity::class.java)
             intent.putExtra("bookName", book.bookName)
@@ -244,7 +248,7 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
 
     override fun onCatalogSelect(itemView: View, position: Int) {
         //更新书签
-        viewModel.insertBookMark(position)
+        BookMarkUtil.insertOrUpdate(position, book.bookName, book.site.siteName)
         adapter.freshHistory(position)
         //跳转到阅读界面
         val intent = Intent(this@BookActivity, PreviewActivity::class.java)

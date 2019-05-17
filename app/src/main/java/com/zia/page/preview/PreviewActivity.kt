@@ -16,6 +16,8 @@ import android.view.View
 import android.widget.SeekBar
 import com.zia.bookdownloader.R
 import com.zia.database.AppDatabase
+import com.zia.database.bean.NetBook
+import com.zia.easybookmodule.bean.Book
 import com.zia.page.base.BaseActivity
 import com.zia.page.book.BookActivity
 import com.zia.toastex.ToastEx
@@ -83,7 +85,7 @@ class PreviewActivity : BaseActivity() {
         setReaderView()
 
         //开始加载
-        load()
+        load(usePageHistory = true)
     }
 
     private fun init() {
@@ -91,16 +93,20 @@ class PreviewActivity : BaseActivity() {
         siteName = intent.getStringExtra("siteName")
     }
 
-    private fun load() {
+    private fun load(usePageHistory: Boolean = false) {
         DefaultExecutorSupplier.getInstance().forBackgroundTasks().execute {
             animMode = defaultSharedPreferences.getInt(pageModeSP, PageView.PAGE_MODE_SIMULATION)
             useAnimMode(animMode)
             val pos = viewModel.getBookMark()
             preview_progress.max = viewModel.readerAdapter.size - 1
             //防止并修复越界
-            val fixSection = if (pos >= viewModel.readerAdapter.size){
-                viewModel.readerAdapter.size - 1
-            }else{
+            val fixSection = if (pos >= viewModel.readerAdapter.size) {
+                if (viewModel.readerAdapter.size <= 0) {
+                    0
+                } else {
+                    viewModel.readerAdapter.size - 1
+                }
+            } else {
                 pos
             }
             preview_progress.progress = fixSection
@@ -109,7 +115,11 @@ class PreviewActivity : BaseActivity() {
             readerView.post {
                 //适配刘海屏
                 fixWindow()
-                readerView.openSection(fixSection, viewModel.getReadProgress())
+                if (usePageHistory) {
+                    readerView.openSection(fixSection, viewModel.getReadProgress())
+                } else {
+                    readerView.openSection(fixSection)
+                }
             }
         }
     }
@@ -123,7 +133,7 @@ class PreviewActivity : BaseActivity() {
             readerView.pageLoader.newAdapter(viewModel.newAdapter())
 
             //加载
-            load()
+            load(usePageHistory = false)
         }
     }
 
@@ -218,7 +228,7 @@ class PreviewActivity : BaseActivity() {
                     //重置
                     readerView.pageLoader.newAdapter(viewModel.newAdapter())
                     //加载
-                    load()
+                    load(usePageHistory = false)
 
                     preview_tv_sb_catalog.visibility = View.INVISIBLE
                 }
@@ -390,8 +400,14 @@ class PreviewActivity : BaseActivity() {
     }
 
     private fun goCatalog() {
+        val netBook: NetBook? = AppDatabase.getAppDatabase().netBookDao().getNetBook(bookName, siteName)
+        //还没有添加到书架，说明现在在
+        if (netBook == null) {
+            onBackPressed()
+            return
+        }
         val intent = Intent(this@PreviewActivity, BookActivity::class.java)
-        intent.putExtra("book", AppDatabase.getAppDatabase().netBookDao().getNetBook(bookName, siteName).rawBook)
+        intent.putExtra("book", netBook.rawBook)
         intent.putExtra("canAddFav", false)
         startActivity(intent)
     }

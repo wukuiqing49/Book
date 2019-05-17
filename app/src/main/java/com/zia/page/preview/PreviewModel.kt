@@ -25,6 +25,7 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
     val requestLoadPage = MutableLiveData<Int>()
     val downloadProgress = MutableLiveData<String>()
 
+    @Volatile
     var readerAdapter = ReadAdapter()
 
     private var disposable: Disposable? = null
@@ -142,7 +143,8 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
             }
             if (needDownload) {
                 disposable?.dispose()
-                val book = AppDatabase.getAppDatabase().netBookDao().getNetBook(bookName, siteName).parseBook()
+                val book = AppDatabase.getAppDatabase().netBookDao().getNetBook(bookName, siteName)?.parseBook()
+                    ?: return@execute
                 disposable = EasyBook.downloadPart(book, from, to).setThreadCount(30)
                     .subscribe(object :
                         Subscriber<ArrayList<Chapter>> {
@@ -173,7 +175,7 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
                         }
 
                     })
-            }else{
+            } else {
                 toast.postValue("已全部缓存")
             }
         }
