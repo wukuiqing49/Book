@@ -11,8 +11,8 @@ android {
         minSdkVersion 19
         targetSdkVersion 27
         renderscriptSupportModeEnabled true
-        versionCode 17
-        versionName "1.5.6"
+        versionCode 19
+        versionName "1.5.9"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         javaCompileOptions {
             annotationProcessorOptions {
@@ -76,7 +76,7 @@ dependencies {
     implementation 'com.github.Zzzia:ToastEx:1.0.1'
     //EasyBook
     //由于使用热修复，直接引入jar至libs会方便一些
-    //    implementation 'com.github.Zzzia:EasyBook:2.42'
+    implementation 'com.github.Zzzia:EasyBook:2.48'
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
     //viewModel & lifeCycle
     implementation 'android.arch.lifecycle:extensions:1.1.1'

@@ -20,6 +20,7 @@ import com.zia.util.threadPool.DefaultExecutorSupplier
 import okhttp3.*
 import java.io.File
 import java.io.IOException
+import java.nio.charset.Charset
 
 /**
  * Created by zia on 2018/11/21.
@@ -70,7 +71,7 @@ class MainViewModel : ProgressViewModel() {
         Log.e(javaClass.simpleName, "checkVersion $key $type")
         val versionRequest = Request.Builder()
             .url("http://zzzia.net:8080/version/get")
-            .post(FormBody.Builder().add("key", key).build())
+            .post(FormBody.Builder(Charset.defaultCharset()).add("key", key).build())
             .build()
 
         NetUtil.okHttpClient.newCall(versionRequest).enqueue(object : Callback {

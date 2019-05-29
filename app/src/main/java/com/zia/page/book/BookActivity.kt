@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.View
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
@@ -32,6 +33,7 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
 
     private lateinit var book: Book
     private var scroll = true
+    private var introduceExpand = false
     private lateinit var adapter: CatalogPagingAdapter
 
     private lateinit var viewModel: BookViewModel
@@ -66,12 +68,7 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
 
         //加载图片、模糊图片
         if (book.imageUrl.isNotEmpty()) {
-            Glide.with(this).load(book.imageUrl).into(object : SimpleTarget<Drawable>() {
-                override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
-                    book_image.background = resource
-                    book_blurImage.setImageBitmap(BlurUtil.blurBitmap(this@BookActivity, resource))
-                }
-            })
+            loadImage()
         } else {
             Glide.with(this).load(R.drawable.ic_book_cover_default).into(book_image)
         }
@@ -95,6 +92,15 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
             intent.putExtra("bookName", book.bookName)
             intent.putExtra("siteName", book.siteName)
             startActivity(intent)
+        }
+
+        book_introduce.setOnClickListener {
+            if (introduceExpand) {
+                book_introduce.maxLines = 4
+            } else {
+                book_introduce.maxLines = 15
+            }
+            introduceExpand = !introduceExpand
         }
 
         //添加到书架
@@ -173,6 +179,13 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
             book_sl.isRefreshing = false
             if (it != null) {
                 book_lastUpdateChapter.text = it
+            }
+            if (book.introduce.isNotBlank()) {
+                Log.e("BookActivity", book.introduce)
+                book_introduce.text = book.introduce
+            }
+            if (book.imageUrl.isNotEmpty()) {
+                loadImage()
             }
         })
 
@@ -255,6 +268,17 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
         intent.putExtra("bookName", book.bookName)
         intent.putExtra("siteName", book.siteName)
         startActivity(intent)
+    }
+
+    private fun loadImage() {
+        Glide.with(this).load(book.imageUrl).into(object : SimpleTarget<Drawable>() {
+            override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
+//                book_image.background = null
+//                book_image.background = resource
+                book_image.setImageDrawable(resource)
+                book_blurImage.setImageBitmap(BlurUtil.blurBitmap(this@BookActivity, resource))
+            }
+        })
     }
 
     private fun updateDialog(progress: Int?) {

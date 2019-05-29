@@ -26,6 +26,7 @@ import com.zia.page.base.ProgressViewModel
 import com.zia.util.BookMarkUtil
 import com.zia.util.ShortcutsUtil
 import com.zia.util.threadPool.DefaultExecutorSupplier
+import com.zia.widget.reader.StringAdapter
 import org.greenrobot.eventbus.EventBus
 import java.io.File
 
@@ -81,6 +82,15 @@ class BookViewModel(private val book: Book) : ProgressViewModel() {
                                             )
                                         )
                                     }
+                                    val lines = book.introduce.split(12288.toChar())
+                                    val sb = StringBuilder()
+                                    lines.forEach {
+                                        if (it.isNotBlank()) {
+                                            sb.append(StringAdapter.space).append(it).append("\n")
+                                        }
+                                    }
+                                    sb.delete(sb.length - 1, sb.length)
+                                    book.introduce = sb.toString()
                                     onCatalogUpdate.postValue(p0.last().chapterName)
                                     freshHistory()
                                 }

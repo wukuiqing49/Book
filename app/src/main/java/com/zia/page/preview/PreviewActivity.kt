@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
@@ -17,11 +18,13 @@ import android.widget.SeekBar
 import com.zia.bookdownloader.R
 import com.zia.database.AppDatabase
 import com.zia.database.bean.NetBook
-import com.zia.easybookmodule.bean.Book
 import com.zia.page.base.BaseActivity
 import com.zia.page.book.BookActivity
 import com.zia.toastex.ToastEx
 import com.zia.util.*
+import com.zia.util.notchtools.NotchTools
+import com.zia.util.notchtools.core.NotchProperty
+import com.zia.util.notchtools.core.OnNotchCallBack
 import com.zia.util.threadPool.DefaultExecutorSupplier
 import com.zia.widget.reader.OnPageChangeListener
 import com.zia.widget.reader.PageView
@@ -38,6 +41,8 @@ class PreviewActivity : BaseActivity() {
     private val pageModeSP = "pageMode"
     private val theme_white = 0
     private val theme_dark = 1
+    private val theme_green = 2
+    private val theme_paper = 3
 
     private var animMode: Int = 0
 
@@ -69,7 +74,7 @@ class PreviewActivity : BaseActivity() {
         init()
 
         setTextSize(defaultSharedPreferences.getInt(textSizeSP, defaultTextSize))
-        setTvTheme(defaultSharedPreferences.getInt(themeSP, 0))
+        setTvTheme(defaultSharedPreferences.getInt(themeSP, theme_white))
 
         viewModel = ViewModelProviders.of(this, PreviewModelFactory(bookName, siteName)).get(PreviewModel::class.java)
 
@@ -330,14 +335,24 @@ class PreviewActivity : BaseActivity() {
         }
 
         preview_theme_dark.setOnClickListener {
-            defaultSharedPreferences.editor { putInt(themeSP, 1) }
+            defaultSharedPreferences.editor { putInt(themeSP, theme_dark) }
             setTvTheme(theme_dark)
         }
 
         preview_theme_white.setOnClickListener {
-            defaultSharedPreferences.editor { putInt(themeSP, 0) }
+            defaultSharedPreferences.editor { putInt(themeSP, theme_white) }
             setTvTheme(theme_white)
         }
+
+        preview_theme_green.setOnClickListener {
+            defaultSharedPreferences.editor { putInt(themeSP, theme_green) }
+            setTvTheme(theme_green)
+        }
+
+//        preview_theme_paper.setOnClickListener {
+//            defaultSharedPreferences.editor { putInt(themeSP, theme_paper) }
+//            setTvTheme(theme_paper)
+//        }
 
         preview_anim_vertical.setOnClickListener {
             useAnimMode(PageView.PAGE_MODE_SCROLL)
@@ -356,11 +371,22 @@ class PreviewActivity : BaseActivity() {
         }
 
         preview_light_system.setOnClickListener {
-            preview_light_system.background = selectedDrawable
-            val brightness = LightUtil.getScreenBrightness(this)
-            preview_light_sb.progress = brightness
-            LightUtil.setBrightness(this, brightness)
-            LightUtil.autoBrightness(this, true)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.System.canWrite(this@PreviewActivity)) {
+                //是否有Settings写入权限
+                // 以下是请求写入系统设置权限逻辑
+                val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS)
+                intent.data = Uri.parse("package:$packageName")
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) //开启一个新activity
+                startActivity(intent)
+            } else {
+                //有了权限，具体的动作
+                preview_light_system.background = selectedDrawable
+                val brightness = LightUtil.getScreenBrightness(this)
+                preview_light_sb.progress = brightness
+                LightUtil.setBrightness(this, brightness)
+                LightUtil.autoBrightness(this, true)
+                preview_light_system.background = selectedDrawable
+            }
         }
 
         preview_bookRack.setOnClickListener {
@@ -453,21 +479,32 @@ class PreviewActivity : BaseActivity() {
     }
 
     private fun fixWindow() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            val decorView = window.decorView
-            val displayCutout = decorView.rootWindowInsets?.displayCutout
-            val rects = displayCutout?.boundingRects ?: return
-
-            if (rects.isNotEmpty()) {
-                //是刘海屏
-                Log.d("PreviewActivity", "刘海屏")
-                preview_control_top.post {
-                    preview_control_top.setPadding(0, displayCutout.safeInsetTop, 0, 0)
+        NotchTools.getFullScreenTools().fullScreenUseStatus(this, object : OnNotchCallBack {
+            override fun onNotchPropertyCallback(notchProperty: NotchProperty?) {
+                if (notchProperty != null && notchProperty.isNotch){
+                    preview_control_top.post {
+                        preview_control_top.setPadding(0, notchProperty.marginTop, 0, 0)
+                    }
+                    readerView.pageLoader.setHairHeight(notchProperty.marginTop)
                 }
-                readerView.pageLoader.setHairHeight(displayCutout.safeInsetTop)
             }
 
-        }
+        })
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+//            val decorView = window.decorView
+//            val displayCutout = decorView.rootWindowInsets?.displayCutout
+//            val rects = displayCutout?.boundingRects ?: return
+//
+//            if (rects.isNotEmpty()) {
+//                //是刘海屏
+//                Log.d("PreviewActivity", "刘海屏")
+//                preview_control_top.post {
+//                    preview_control_top.setPadding(0, displayCutout.safeInsetTop, 0, 0)
+//                }
+//                readerView.pageLoader.setHairHeight(displayCutout.safeInsetTop)
+//            }
+//
+//        }
     }
 
     private fun setNavigationColor() {
@@ -508,11 +545,20 @@ class PreviewActivity : BaseActivity() {
         when (themeId) {
             theme_white -> {
                 readerView.pageBackground = resources.getColor(R.color.preview_theme_white)
+//                readerView.pageBackground = Color.parseColor("#E5DECF")
                 readerView.textColor = resources.getColor(R.color.textBlack)
             }
             theme_dark -> {
                 readerView.pageBackground = resources.getColor(R.color.preview_theme_dark)
-                readerView.textColor = resources.getColor(R.color.textWhite)
+                readerView.textColor = Color.parseColor("#7F7D7F")
+            }
+            theme_green -> {
+                readerView.pageBackground = resources.getColor(R.color.preview_theme_green)
+                readerView.textColor = resources.getColor(R.color.textBlack)
+            }
+            theme_paper -> {
+                readerView.pageBackground = Color.parseColor("#E5DECF")
+                readerView.textColor = resources.getColor(R.color.textBlack)
             }
         }
         readerView.post {
@@ -528,7 +574,6 @@ class PreviewActivity : BaseActivity() {
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             //什么都不做
             true
-
         } else
             super.onKeyDown(keyCode, event)
     }
@@ -540,6 +585,7 @@ class PreviewActivity : BaseActivity() {
 //                if (readerView.pageAnim is HorizonPageAnim){
 //                    (readerView.pageAnim as HorizonPageAnim).runAnim(true)
 //                }else{
+                readerView.clearAnimation()
                 readerView.pageLoader.next()
 //                }
                 true
@@ -548,6 +594,7 @@ class PreviewActivity : BaseActivity() {
 //                if (readerView.pageAnim is HorizonPageAnim){
 //                    (readerView.pageAnim as HorizonPageAnim).runAnim(false)
 //                }else{
+                readerView.clearAnimation()
                 readerView.pageLoader.prev()
 //                }
                 true

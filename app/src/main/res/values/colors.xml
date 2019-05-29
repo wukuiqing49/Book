@@ -14,8 +14,9 @@
 	<color name="textBlack">#E21F1F1F</color>
 	<color name="textBlack_light">#E2313131</color>
 	<color name="previewShadow">#DE1D1D1D</color>
-	<color name="preview_theme_dark">#0B0B0A</color>
+	<color name="preview_theme_dark">#2D2C2E</color>
 	<color name="preview_theme_white">#EEE6CB</color>
+	<color name="preview_theme_green">#C7EDCC</color>
 	<color name="white">#ffffff</color>
 	<color name="white_grey">#8AFFFFFF</color>
 	<color name="rank_first">#d93c5b</color>

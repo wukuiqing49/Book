@@ -3,6 +3,7 @@ package com.zia.widget.reader;
 import android.graphics.Paint;
 import android.util.LruCache;
 import android.util.SparseArray;
+import com.zia.easybookmodule.util.TextUtil;
 import com.zia.widget.reader.utils.StringUtils;
 
 import java.util.ArrayList;
@@ -56,7 +57,7 @@ public abstract class StringAdapter implements PageLoaderAdapter {
     @Override
     public abstract String getSectionName(int section);
 
-    private static final String space = String.valueOf((char) 12288) + (char) 12288;
+    public static final String space = String.valueOf((char) 12288) + (char) 12288;
 
     public static SparseArray<ArrayList<String>> loadPages(List<String> source, Paint textPaint, int visibleHeight,
                                                            int visibleWidth, int intervalSize, int paragraphSize) {
@@ -72,16 +73,7 @@ public abstract class StringAdapter implements PageLoaderAdapter {
                 //重置段落
 //                paragraph = StringUtils.halfToFull("  " + paragraph + "\n");
                 //删除最开始的空格
-                int i = 0;
-                for (; i < paragraph.length(); ) {
-                    char c = paragraph.charAt(i);
-                    if (c == 12288 || c == 32) {
-                        i++;
-                    } else {
-                        break;
-                    }
-                }
-                paragraph = paragraph.substring(i);
+//                paragraph = TextUtil.removeSpaceStart(paragraph);
                 //添加首行缩进
                 paragraph = space + paragraph + "\n";
 //                paragraph = StringUtils.trimBeforeReplace(paragraph, "　　");

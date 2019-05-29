@@ -11,7 +11,7 @@
 * 书籍追更，收藏小说自动更新最新章节
 * 并发搜索下载，支持生成EPUB和TXT格式，下载速度5M/s，快速导入kindle阅读。
 
-[Android下载](http://qiniu.zzzia.net/book_v1.5.5.apk)
+[Android下载](http://qiniu.zzzia.net/book_latest.apk)
 
 <img src="https://github.com/Zzzia/Book/blob/master/screenshot/1.jpg"
 width="280"><img
@@ -26,6 +26,15 @@ width="280">
 
 
 ~~~
+v1.5.9
+增加小说简介
+优化翻页效果
+修复一些bug
+
+v1.5.6
+分步搜索
+修复最后一张闪退bug
+
 v1.5.5
 更改阅读界面
 增加缓存功能以及修复bug

@@ -80,6 +80,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:padding="20dp"
+                android:clickable="true"
+                android:focusable="true"
                 android:id="@+id/preview_control_base_layout"
                 android:background="@color/previewShadow" tools:visibility="visible">
             <TextView
@@ -191,7 +193,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:padding="20dp"
-                android:background="@color/previewShadow" tools:visibility="gone" android:visibility="gone">
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@color/previewShadow" tools:visibility="visible" android:visibility="gone">
 
             <ImageView
                     android:id="@+id/preview_light_decrease"
@@ -379,6 +383,28 @@
                     app:layout_constraintStart_toEndOf="@+id/preview_theme_white" android:layout_marginStart="16dp"
                     app:layout_constraintTop_toTopOf="@+id/preview_theme_white"
                     app:layout_constraintBottom_toBottomOf="@+id/preview_theme_white"/>
+
+            <android.support.v7.widget.CardView
+                    android:id="@+id/preview_theme_green"
+                    app:cardCornerRadius="5dp"
+                    app:cardElevation="0dp"
+                    app:cardBackgroundColor="@color/preview_theme_green"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    app:layout_constraintStart_toEndOf="@+id/preview_theme_dark" android:layout_marginStart="16dp"
+                    app:layout_constraintTop_toTopOf="@+id/preview_theme_white"
+                    app:layout_constraintBottom_toBottomOf="@+id/preview_theme_white"/>
+
+<!--            <android.support.v7.widget.CardView-->
+<!--                    android:id="@+id/preview_theme_paper"-->
+<!--                    app:cardCornerRadius="5dp"-->
+<!--                    app:cardElevation="0dp"-->
+<!--                    app:cardBackgroundColor="@color/preview_theme_dark"-->
+<!--                    android:layout_width="30dp"-->
+<!--                    android:layout_height="30dp"-->
+<!--                    app:layout_constraintStart_toEndOf="@+id/preview_theme_green" android:layout_marginStart="16dp"-->
+<!--                    app:layout_constraintTop_toTopOf="@+id/preview_theme_white"-->
+<!--                    app:layout_constraintBottom_toBottomOf="@+id/preview_theme_white"/>-->
         </android.support.constraint.ConstraintLayout>
     </com.zia.widget.SlideLayout>
     <TextView

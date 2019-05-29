@@ -56,7 +56,7 @@ class MainActivity : BaseActivity(), BottomNavigationView.OnNavigationItemSelect
         requestPermission()
 
         //提示更新解析版本
-//        viewModel.checkVersion("easybookfix", TYPE_FIX)
+        viewModel.checkVersion("easybookfix", TYPE_APP)
         viewModel.getAllLatestVersion()
 
         //添加shortcut

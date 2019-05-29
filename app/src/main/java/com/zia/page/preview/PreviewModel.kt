@@ -5,6 +5,7 @@ import com.zia.database.AppDatabase
 import com.zia.database.bean.BookCache
 import com.zia.easybookmodule.bean.Chapter
 import com.zia.easybookmodule.engine.EasyBook
+import com.zia.easybookmodule.engine.Site
 import com.zia.easybookmodule.net.NetUtil
 import com.zia.easybookmodule.rx.Disposable
 import com.zia.easybookmodule.rx.Subscriber
@@ -45,7 +46,7 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
             cacheDao.getChapterNames(bookName, siteName).size
         }
 
-        val site by lazy {
+        val site: Site by lazy {
             BookUtil.getSite(siteName)
         }
 
@@ -73,7 +74,11 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
         }
 
         override fun getSectionName(section: Int): String {
-            return getCache(section).chapterName
+            val name = getCache(section).chapterName
+            if (name.indexOf(" ") > 0) {
+                return name.substring(name.indexOf(" "))
+            }
+            return name
         }
 
     }
