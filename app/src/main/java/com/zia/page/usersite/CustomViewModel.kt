@@ -32,7 +32,7 @@ class CustomViewModel : BaseViewModel() {
                 val json = NetUtil.getHtml(url, "utf-8")
                 val rulesTemp = getRulesFromJson(json)
                 toast.postValue("获取成功")
-                localRules.postValue(rulesTemp)
+                netRules.postValue(rulesTemp)
             } catch (e: java.lang.Exception) {
                 e.printStackTrace()
                 toast.postValue(e.message)

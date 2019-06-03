@@ -1,6 +1,8 @@
 package com.zia.page.usersite
 
+import android.annotation.SuppressLint
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,7 +30,7 @@ class CustomSiteAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     fun mergeRules(rules: List<XpathSiteRule>) {
-        val result = MergeUtil.mergeListNoRepeat(this.rules, rules) {
+        val result = MergeUtil.mergeListByReplace(this.rules, rules) {
             it.baseUrl
         }
         resetRules(result)
@@ -61,13 +63,14 @@ class CustomSiteAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         return rules.size
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val rule = rules[position]
         holder.itemView.item_site_author.text = rule.author
-        holder.itemView.item_site_classify.text = rule.siteClassify
-        holder.itemView.item_site_siteName.text = rule.siteName
+        holder.itemView.item_site_classify.text = "分类：${rule.siteClassify}"
+        holder.itemView.item_site_siteName.text = "作者：${rule.siteName}"
         try {
-            holder.itemView.item_site_time.text = simpleDateFormat.format(rule.ruleUpdateTime)
+            holder.itemView.item_site_time.text = simpleDateFormat.format(Date(rule.ruleUpdateTime.toLong()))
         } catch (e: Exception) {
             holder.itemView.item_site_time.text = ""
         }

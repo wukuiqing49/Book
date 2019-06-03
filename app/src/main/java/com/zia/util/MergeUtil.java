@@ -10,12 +10,7 @@ import java.util.Set;
  */
 public class MergeUtil {
     /**
-     * 使用set的快速去重算法
-     *
-     * @param list1
-     * @param list2
-     * @param <T>
-     * @return
+     * 合并两个集合，去掉重复的
      */
     public static <T> List<T> mergeListNoRepeat(List<T> list1, List<T> list2, WrapId<T> wrapId) {
         List<T> result = new ArrayList<>(list1.size() + list2.size());
@@ -36,6 +31,28 @@ public class MergeUtil {
         }
 
         for (T t : moreList) {
+            if (!set.contains(wrapId.getId(t))){
+                result.add(t);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * 合并两个集合，如果有重复的，更新新值
+     */
+    public static <T> List<T> mergeListByReplace(List<T> oldList, List<T> newList, WrapId<T> wrapId) {
+        List<T> result = new ArrayList<>(oldList.size() + newList.size());
+
+        Set<String> set = new HashSet<>(newList.size());
+
+        for (T t : newList) {
+            set.add(wrapId.getId(t));
+            result.add(t);
+        }
+
+        for (T t : oldList) {
             if (!set.contains(wrapId.getId(t))){
                 result.add(t);
             }

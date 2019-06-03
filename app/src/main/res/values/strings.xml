@@ -35,5 +35,5 @@
     <string name="font_style">字体</string>
     <string name="custom_site">自定义站点</string>
     <string name="custom_switch_all">全部开启</string>
-    <string name="custom_siteManage">站点管理</string>
+    <string name="custom_siteManage">全部开/关</string>
 </resources>
