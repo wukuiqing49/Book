@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                             xmlns:app="http://schemas.android.com/apk/res-auto"
+                                             xmlns:tools="http://schemas.android.com/tools"
+                                             android:layout_width="match_parent"
+                                             android:layout_height="wrap_content">
+    <android.support.v7.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:id="@+id/custom_edit_view_title"
+            android:textColor="@color/textColor"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="16dp" android:layout_marginTop="16dp" android:text="获取在线解析"/>
+
+    <android.support.v7.widget.AppCompatEditText android:layout_width="match_parent"
+                                                 android:layout_height="wrap_content"
+                                                 android:hint="默认zzzia源"
+                                                 app:layout_constraintTop_toBottomOf="@+id/custom_edit_view_title"
+                                                 app:layout_constraintStart_toStartOf="parent"
+                                                 app:layout_constraintEnd_toEndOf="parent"
+                                                 android:layout_marginTop="16dp" android:layout_marginStart="16dp"
+                                                 android:layout_marginEnd="16dp" android:id="@+id/custom_edit_view_et"
+                                                 app:layout_constraintBottom_toBottomOf="parent"
+                                                 android:layout_marginBottom="16dp"/>
+<!--    <TextView-->
+<!--            android:text="确定"-->
+<!--            android:textSize="22sp"-->
+<!--            android:textColor="@color/textColor"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:id="@+id/custom_edit_view_confirm" app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintTop_toBottomOf="@+id/custom_edit_view_et" android:layout_marginTop="16dp"-->
+<!--            android:layout_marginEnd="16dp" app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            android:layout_marginBottom="8dp"/>-->
+<!--    <TextView-->
+<!--            android:text="取消"-->
+<!--            android:textSize="22sp"-->
+<!--            android:textColor="@color/textColor"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:id="@+id/custom_edit_view_cancel" app:layout_constraintEnd_toStartOf="@+id/custom_edit_view_confirm"-->
+<!--            app:layout_constraintTop_toTopOf="@+id/custom_edit_view_confirm" android:layout_marginEnd="16dp"/>-->
+</android.support.constraint.ConstraintLayout>

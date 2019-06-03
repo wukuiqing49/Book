@@ -20,6 +20,7 @@ import com.zia.page.blame.BlameActivity
 import com.zia.page.main.MainViewModel
 import com.zia.page.main.TYPE_APP
 import com.zia.page.main.TYPE_FIX
+import com.zia.page.usersite.CustomSiteActivity
 import com.zia.util.QQUtil
 import com.zia.util.ToastUtil
 import com.zia.util.Version
@@ -90,6 +91,10 @@ class SettingFragment : BaseFragment() {
                 clipboard.primaryClip = data
                 ToastUtil.onInfo("无法唤起QQ...\n已复制29527219到粘贴板，麻烦手动加入")
             }
+        }
+
+        setting_customSite.setOnClickListener {
+            startActivity(Intent(context, CustomSiteActivity::class.java))
         }
     }
 

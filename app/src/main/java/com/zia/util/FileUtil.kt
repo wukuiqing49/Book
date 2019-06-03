@@ -5,7 +5,9 @@ import android.net.Uri
 import android.os.Build
 import android.support.v4.content.FileProvider
 import android.util.Log
-import java.io.File
+import com.zia.App
+import java.io.*
+
 
 /**
  * Created by zia on 2018/10/13.
@@ -23,4 +25,32 @@ object FileUtil {
             uri
         }
     }
+
+    fun writeFile(filePath: String, str: String) {
+        val file = File(filePath)
+        if (!file.exists()) {
+            file.createNewFile()
+        }
+        val out = BufferedWriter(OutputStreamWriter(FileOutputStream(file)))
+        out.write(str)
+        out.flush()
+    }
+
+    fun getString(filePath: String): String {
+        val file = File(filePath)
+        if (!file.exists()) {
+            file.createNewFile()
+        }
+        val inputStream = BufferedReader(InputStreamReader(FileInputStream(file), "UTF-8"))
+        var str = ""
+        val sb = StringBuilder()
+        while (true) {
+            str = inputStream.readLine() ?: break
+            sb.append(str)
+        }
+        inputStream.close()
+        return sb.toString()
+    }
+
+    val rulePath: String = App.getContext().filesDir.path + File.separator + "easybookRules.json"
 }

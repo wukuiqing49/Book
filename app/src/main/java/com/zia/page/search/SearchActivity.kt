@@ -25,20 +25,6 @@ class SearchActivity : BaseActivity() {
     private val searchFragment = SearchResultFragment()
     private val recommendFragment = RecommendFragment()
 
-//    private val dialog by lazy {
-//        val dialog = ProgressDialog(this)
-//        dialog.setCancelable(true)
-//        dialog.progress = 0
-//        dialog.setTitle("正在搜索")
-//        dialog.setMessage("")
-//        dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
-//        dialog.show()
-//        dialog.setOnCancelListener {
-//            viewModel.shutDown()
-//        }
-//        dialog
-//    }
-
     private var searchKey: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
