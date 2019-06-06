@@ -88,9 +88,9 @@ public class PageLoader {
     //上一章的页面列表缓存
     private WeakReference<List<TxtPage>> mWeakPrePageList;
     //当前章节的页面列表
-    private List<TxtPage> mCurPageList;
+    private List<TxtPage> mCurPageList = new ArrayList<>();
     //下一章的页面列表缓存
-    private List<TxtPage> mNextPageList;
+    private List<TxtPage> mNextPageList = new ArrayList<>();
     //上一章的记录
     private int mLastChapter = 0;
     //当前章
@@ -404,7 +404,7 @@ public class PageLoader {
         if (!isBookOpen) {
             isBookOpen = true;
             mCurPage = getCurPage(page);
-            if (mPageChangeListener != null) {
+            if (mPageChangeListener != null && mCurPage != null) {
                 mPageChangeListener.onChapterChange(mCurChapterPos);
             }
         } else {
@@ -850,6 +850,9 @@ public class PageLoader {
     TxtPage getCurPage(int pos) {
         if (mPageChangeListener != null) {
             mPageChangeListener.onPageChange(pos);
+        }
+        if (mCurPageList.size() <= pos) {
+            return null;
         }
         return mCurPageList.get(pos);
     }

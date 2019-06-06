@@ -89,7 +89,9 @@ class BookViewModel(private val book: Book) : ProgressViewModel() {
                                             sb.append(StringAdapter.space).append(it).append("\n")
                                         }
                                     }
-                                    sb.delete(sb.length - 1, sb.length)
+                                    if (sb.lastIndexOf("\n") != -1) {
+                                        sb.delete(sb.lastIndexOf("\n"), sb.length)
+                                    }
                                     book.introduce = sb.toString()
                                     onCatalogUpdate.postValue(p0.last().chapterName)
                                     freshHistory()
