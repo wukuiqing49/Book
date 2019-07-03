@@ -1,9 +1,13 @@
 package com.zia.widget.reader;
 
 import android.content.Context;
-import android.graphics.*;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.text.TextPaint;
-import android.util.Log;
+
 import com.zia.App;
 import com.zia.widget.reader.utils.ScreenUtils;
 import com.zia.widget.reader.utils.StringUtils;
@@ -30,8 +34,13 @@ public class PageLoader {
     public static final int STATUS_PARSE = 5;    //正在解析 (一般用于本地数据加载)
     public static final int STATUS_PARSE_ERROR = 6; //本地文件解析错误(暂未被使用)
 
-    static final int DEFAULT_MARGIN_HEIGHT = 24;
+    static final int DEFAULT_MARGIN_HEIGHT = 16;
     static final int DEFAULT_MARGIN_WIDTH = 16;
+    static final int DEFAULT_CONTENT_MARGIN_TOP = 15;
+    static final int DEFAULT_CONTENT_MARGIN_BOTTOM = 2;
+
+    public static int contentMarginTop;
+    public static int contentMarginBottom;
 
     //默认的显示参数配置
     private static final int DEFAULT_INTERVAL = 12;
@@ -137,6 +146,8 @@ public class PageLoader {
         mMarginHeight = ScreenUtils.dpToPx(mContext, DEFAULT_MARGIN_HEIGHT);
         mIntervalSize = ScreenUtils.dpToPx(mContext, DEFAULT_INTERVAL);
         mParagraphSize = ScreenUtils.dpToPx(mContext, DEFAULT_PARAGRAPH_INTERVAL);
+        contentMarginTop = ScreenUtils.dpToPx(mContext, DEFAULT_CONTENT_MARGIN_TOP);
+        contentMarginBottom = ScreenUtils.dpToPx(mContext, DEFAULT_CONTENT_MARGIN_BOTTOM);
     }
 
     private void initPaint() {
@@ -603,25 +614,74 @@ public class PageLoader {
             float pivotY = (mDisplayHeight - textHeight) / 2;
             canvas.drawText(tip, pivotX, pivotY, mTextPaint);
         } else {
-            float top;
-            if (mPageMode == PageView.PAGE_MODE_SCROLL) {
-                top = -mTextPaint.getFontMetrics().top;
-            } else {
-                top = mMarginHeight - mTextPaint.getFontMetrics().top;
+            int y = mMarginHeight + hairHeight + contentMarginTop;
+
+            if (mCurPage.getPosition() == 0) {
+                final float contentTextSize = mTextPaint.getTextSize();
+                final float titleTextSize = contentTextSize * PageProperty.titleRatio;
+                mTextPaint.setUnderlineText(true);
+                mTextPaint.setTextSize(titleTextSize);
+                //画标题
+                Paint.FontMetrics fontMetrics = mTextPaint.getFontMetrics();
+                float t = (Math.abs(fontMetrics.ascent) - fontMetrics.descent) / 2;
+                canvas.drawText(getAdapter().getSectionName(mCurChapterPos), mMarginWidth,
+                        y + contentMarginTop + t, mTextPaint);
+                y = (int) (y + titleTextSize + mIntervalSize + (int) t);
+
+                mTextPaint.setTextSize(contentTextSize);
+                mTextPaint.setUnderlineText(false);
             }
 
-            top += hairHeight;
-
-            int interval = mIntervalSize + (int) mTextPaint.getTextSize();
-            for (int i = 0; i < mCurPage.lines.size(); ++i) {
-                String str = mCurPage.lines.get(i);
-                canvas.drawText(str, mMarginWidth, top, mTextPaint);
-                if (str.endsWith("\n") || str.endsWith("\r\n")) {
-                    top += (interval + mParagraphSize);
+            final int space = (int) (mTextPaint.getTextSize() + mIntervalSize);
+            final int ascent = (int) mTextPaint.getFontMetrics().ascent;
+            //正文
+            for (String line : mCurPage.lines) {
+                if (line.equals("\n")) {
+                    y += mParagraphSize;
                 } else {
-                    top += interval;
+                    canvas.drawText(line, mMarginWidth, y - ascent, mTextPaint);
+                    y = y + space;
                 }
             }
+//            float top;
+//            if (mPageMode == PageView.PAGE_MODE_SCROLL) {
+//                top = -mTextPaint.getFontMetrics().top;
+//            } else {
+//                top = mMarginHeight - mTextPaint.getFontMetrics().top;
+//            }
+//
+//            top += hairHeight;
+//
+//            int interval = mIntervalSize + (int) mTextPaint.getTextSize();
+//
+//            //如果是第一章，加一个标题
+//            if (mCurPage.getPosition() == 0) {
+//            final float contentTextSize = mTextPaint.getTextSize();
+//                Typeface typeface = mTextPaint.getTypeface();
+//                mTextPaint.setTypeface(Typeface.DEFAULT_BOLD);
+//                mTextPaint.setUnderlineText(true);
+//                mTextPaint.setTextSize(contentTextSize * PageProperty.titleRatio);
+//                String title = getAdapter().getSectionName(mCurChapterPos);
+//                Paint.FontMetrics fontMetrics = mTextPaint.getFontMetrics();
+//                top += mIntervalSize;
+//                float t = (Math.abs(fontMetrics.ascent) - fontMetrics.descent) / 2;
+//                canvas.drawText(title, mMarginWidth, top + t, mTextPaint);
+//                top = top + mTextPaint.getTextSize() + mIntervalSize + (int) t;
+//                mTextPaint.setTextSize(contentTextSize);
+////                mTextPaint.setTypeface(typeface);
+//                mTextPaint.setUnderlineText(false);
+//
+//            }
+//
+//            for (int i = 0; i < mCurPage.lines.size(); ++i) {
+//                String str = mCurPage.lines.get(i);
+//                canvas.drawText(str, mMarginWidth, top - mTextPaint.getFontMetrics().ascent, mTextPaint);
+//                if (str.endsWith("\n") || str.endsWith("\r\n")) {
+//                    top += (interval + mParagraphSize);
+//                } else {
+//                    top += interval;
+//                }
+//            }
         }
     }
 
@@ -776,18 +836,19 @@ public class PageLoader {
         }
 
         int nextChapter = mCurChapterPos + 1;
-        Log.e(TAG, "nextChapter: " + nextChapter);
         //如果存在下一章预加载章节。
-        if (mNextPageList != null) {
+        if (mNextPageList != null && mNextPageList.size() != 0) {
             mCurPageList = mNextPageList;
             mNextPageList = null;
         } else {
+            PageProperty pageProperty = new PageProperty(mTextPaint, mVisibleWidth,
+                    mVisibleHeight, mIntervalSize, mParagraphSize);
             //这个PageList可能为 null，可能会造成问题。
-            int pageCount = mAdapter.getPageCount(nextChapter, new PageProperty(mTextPaint, mVisibleWidth, mVisibleHeight, mIntervalSize, mParagraphSize));
+            int pageCount = mAdapter.getPageCount(nextChapter, pageProperty);
             if (pageCount > 0) {
                 List<TxtPage> txtPages = new ArrayList<>();
                 for (int i = 0; i < pageCount; i++) {
-                    txtPages.add(new TxtPage(i, mAdapter.getPageLines(nextChapter, i, new PageProperty(mTextPaint, mVisibleWidth, mVisibleHeight, mIntervalSize, mParagraphSize))));
+                    txtPages.add(new TxtPage(i, mAdapter.getPageLines(nextChapter, i, pageProperty)));
                 }
                 mCurPageList = txtPages;
             }

@@ -28,6 +28,12 @@ import com.zia.widget.reader.anim.SlidePageAnim;
  * 原作者的GitHub Project Path:(https://github.com/PeachBlossom/treader)
  * 绘制页面显示内容的类
  */
+
+
+ /**
+  * Created by zzzia on 2019-07-03.
+  * 这个库原版有挺多问题，有大改动，任何问题可以进Q群29527219讨论
+  */
 public class PageView extends View {
 
     public final static int PAGE_MODE_SIMULATION = 0;
@@ -89,6 +95,8 @@ public class PageView extends View {
     private PageLoader mPageLoader;
     private PageLoaderAdapter mAdapter;
     private int mTextSize = 48;
+
+
     private int mTextColor = 0xFF212121;
     private int mPageBackground = 0xFFCEC29C;
 

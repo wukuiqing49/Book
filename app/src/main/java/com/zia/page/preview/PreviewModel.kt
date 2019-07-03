@@ -1,6 +1,7 @@
 package com.zia.page.preview
 
 import android.arch.lifecycle.MutableLiveData
+import android.util.Log
 import com.zia.database.AppDatabase
 import com.zia.database.bean.BookCache
 import com.zia.easybookmodule.bean.Chapter
@@ -75,21 +76,16 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
 
         override fun getSectionName(section: Int): String {
             val name = getCache(section).chapterName
-            if (name.indexOf(" ") > 0) {
-                return name.substring(name.indexOf(" "))
+            if (name.lastIndexOf(" ") > 0) {
+                return name.substring(name.lastIndexOf(" ") + 1)
             }
             return name
         }
 
     }
 
-    private var currentCache: BookCache? = null
-
     //查找缓存、下载、重新显示
     fun getCache(section: Int): BookCache {
-        if (currentCache != null && currentCache?.index == section) {
-            return currentCache!!
-        }
         //从数据库中读取当前章节数据
         val bookCache = cacheDao.getBookCache(bookName, siteName, section)
 

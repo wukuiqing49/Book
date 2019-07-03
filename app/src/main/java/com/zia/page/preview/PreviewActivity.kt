@@ -27,6 +27,7 @@ import com.zia.util.notchtools.core.NotchProperty
 import com.zia.util.notchtools.core.OnNotchCallBack
 import com.zia.util.threadPool.DefaultExecutorSupplier
 import com.zia.widget.reader.OnPageChangeListener
+import com.zia.widget.reader.PageLoader.STATUS_FINISH
 import com.zia.widget.reader.PageLoader.STATUS_LOADING
 import com.zia.widget.reader.PageView
 import kotlinx.android.synthetic.main.activity_preview.*
@@ -164,6 +165,7 @@ class PreviewActivity : BaseActivity() {
 
         viewModel.requestLoadPage.observe(this, Observer {
             if (it != null) {
+                readerView.pageLoader.mStatus = STATUS_FINISH
                 readerView.openSection(it)
             }
         })
@@ -404,7 +406,6 @@ class PreviewActivity : BaseActivity() {
         preview_freshChapter.setOnClickListener {
             readerView.pageLoader.mStatus = STATUS_LOADING
             readerView.drawCurPage(false)
-            Log.e("PreviewActivity", "section:${readerView.pageLoader.mCurChapterPos}")
             viewModel.forceLoadFromNet(readerView.pageLoader.mCurChapterPos)
         }
 

@@ -43,6 +43,7 @@ public final class PageProperty {
      */
     public final int paragraphSize;
 
+    public final static float titleRatio = 1.4f;
 
     @Override
     public boolean equals(Object obj) {
