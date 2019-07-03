@@ -13,7 +13,14 @@ import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-import com.zia.widget.reader.anim.*;
+
+import com.zia.widget.reader.anim.CoverPageAnim;
+import com.zia.widget.reader.anim.HorizonPageAnim;
+import com.zia.widget.reader.anim.NonePageAnim;
+import com.zia.widget.reader.anim.PageAnimation;
+import com.zia.widget.reader.anim.ScrollPageAnim;
+import com.zia.widget.reader.anim.SimulationPageAnim;
+import com.zia.widget.reader.anim.SlidePageAnim;
 
 
 /**
@@ -91,6 +98,7 @@ public class PageView extends View {
     public int getSection() {
         return mStartSection;
     }
+
 
     public PageLoader getPageLoader() {
         return mPageLoader;
@@ -311,13 +319,13 @@ public class PageView extends View {
             case MotionEvent.ACTION_MOVE:
                 moveX = x;
                 moveY = y;
-                if (Math.abs(moveX - downX) > scaledTouchSlop  || !mCenterRect.contains(x, y)) {
+                if (Math.abs(moveX - downX) > scaledTouchSlop || !mCenterRect.contains(x, y)) {
                     mPageAnim.onTouchEvent(event);
                 }
                 break;
             case MotionEvent.ACTION_UP:
 
-                if ((moveX==0&&moveY==0)||(Math.abs(moveX - downX) < scaledTouchSlop) ) {
+                if ((moveX == 0 && moveY == 0) || (Math.abs(moveX - downX) < scaledTouchSlop)) {
                     //是否点击了中间
                     if (mCenterRect.contains(x, y)) {
                         if (mTouchListener != null) {
@@ -327,6 +335,9 @@ public class PageView extends View {
                         downY = 0;
                         return true;
                     }
+                }
+                if (mTouchListener != null) {
+                    mTouchListener.clickAny();
                 }
                 mPageAnim.onTouchEvent(event);
                 downX = 0;
@@ -415,7 +426,7 @@ public class PageView extends View {
     public void openSection(int section, int page) {
         mStartSection = section;
         if (isPrepare) {
-            Log.e(TAG, "openSection:  page:"+page );
+            Log.e(TAG, "section:" + section + "  page:" + page);
             mPageLoader.openChapter(section, page);
         }
     }
@@ -432,6 +443,8 @@ public class PageView extends View {
         void center();
 
         void cancel();
+
+        void clickAny();
     }
 
     public void setTextSize(int sizePx) {

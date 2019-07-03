@@ -109,9 +109,9 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
     }
 
     //仅同步下载
-    fun loadSingleContent(section: Int): BookCache {
+    fun loadSingleContent(section: Int, forceNetLoad: Boolean = false): BookCache {
         val cache = cacheDao.getBookCache(bookName, siteName, section)
-        if (cache.contents.size != 0) {
+        if (cache.contents.size != 0 && !forceNetLoad) {
             //有缓存或者没有该章节，跳过
             return cache
         }
@@ -125,9 +125,17 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            toast.postValue("第${section}章解析错误")
+            toast.postValue("第${section + 1}章解析错误")
         }
         return cache
+    }
+
+    fun forceLoadFromNet(section: Int) {
+        DefaultExecutorSupplier.getInstance().forBackgroundTasks().execute {
+            if (loadSingleContent(section, true).contents.isNotEmpty()) {
+                requestLoadPage.postValue(section)
+            }
+        }
     }
 
 
@@ -148,7 +156,10 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
             }
             if (needDownload) {
                 disposable?.dispose()
-                val book = AppDatabase.getAppDatabase().netBookDao().getNetBook(bookName, siteName)?.parseBook()
+                val book = AppDatabase.getAppDatabase().netBookDao().getNetBook(
+                    bookName,
+                    siteName
+                )?.parseBook()
                     ?: return@execute
                 disposable = EasyBook.downloadPart(book, from, to).setThreadCount(30)
                     .subscribe(object :
@@ -157,7 +168,8 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
                             //将下载的数据存入数据库
                             DefaultExecutorSupplier.getInstance().forBackgroundTasks().execute {
                                 p0.forEach { chapter ->
-                                    val cache = cacheDao.getBookCache(bookName, siteName, chapter.index)
+                                    val cache =
+                                        cacheDao.getBookCache(bookName, siteName, chapter.index)
                                     cache.contents = chapter.contents
                                     cacheDao.insert(cache)
                                 }

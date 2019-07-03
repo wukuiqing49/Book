@@ -15,7 +15,7 @@
 
     <android.support.v7.widget.AppCompatEditText android:layout_width="match_parent"
                                                  android:layout_height="wrap_content"
-                                                 android:hint="默认zzzia源"
+                                                 android:hint="默认Github源"
                                                  app:layout_constraintTop_toBottomOf="@+id/custom_edit_view_title"
                                                  app:layout_constraintStart_toStartOf="parent"
                                                  app:layout_constraintEnd_toEndOf="parent"

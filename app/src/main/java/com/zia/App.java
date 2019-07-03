@@ -2,6 +2,7 @@ package com.zia;
 
 import android.content.Context;
 import android.support.multidex.MultiDexApplication;
+
 import com.facebook.stetho.Stetho;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -20,6 +21,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -56,8 +58,10 @@ public class App extends MultiDexApplication {
         //添加自定义书源到easybook单例中
         try {
             List<XpathSiteRule> rules = getXpathRuleFromFile(FileUtil.INSTANCE.getRulePath());
-            for (XpathSiteRule rule : rules) {
-                SiteCollection.getInstance().addSite(new CustomXpathSite(rule));
+            if (rules != null) {
+                for (XpathSiteRule rule : rules) {
+                    SiteCollection.getInstance().addSite(new CustomXpathSite(rule));
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -65,7 +69,7 @@ public class App extends MultiDexApplication {
     }
 
     private List<XpathSiteRule> getXpathRuleFromFile(String filePath) throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(filePath), "UTF-8"));
+        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(filePath), StandardCharsets.UTF_8));
         String str;
         StringBuilder sb = new StringBuilder();
         while ((str = in.readLine()) != null) {

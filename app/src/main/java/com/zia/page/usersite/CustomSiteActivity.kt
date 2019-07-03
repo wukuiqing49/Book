@@ -42,7 +42,8 @@ class CustomSiteActivity : BaseActivity() {
             .setPositiveButton("确定") { dialog, which ->
                 var url = et.text.toString()
                 if (url.isBlank()) {
-                    url = "http://zzzia.net/easybook.json"
+//                    url = "http://zzzia.net/easybook.json"
+                    url = "https://raw.githubusercontent.com/Zzzia/EasyBook/master/easybook.json"
                 }
                 dialog.dismiss()
                 viewModel.getRulesFromNet(url)

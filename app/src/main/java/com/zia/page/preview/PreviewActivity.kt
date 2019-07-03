@@ -27,6 +27,7 @@ import com.zia.util.notchtools.core.NotchProperty
 import com.zia.util.notchtools.core.OnNotchCallBack
 import com.zia.util.threadPool.DefaultExecutorSupplier
 import com.zia.widget.reader.OnPageChangeListener
+import com.zia.widget.reader.PageLoader.STATUS_LOADING
 import com.zia.widget.reader.PageView
 import kotlinx.android.synthetic.main.activity_preview.*
 import java.util.concurrent.ArrayBlockingQueue
@@ -76,7 +77,8 @@ class PreviewActivity : BaseActivity() {
         setTextSize(defaultSharedPreferences.getInt(textSizeSP, defaultTextSize))
         setTvTheme(defaultSharedPreferences.getInt(themeSP, theme_white))
 
-        viewModel = ViewModelProviders.of(this, PreviewModelFactory(bookName, siteName)).get(PreviewModel::class.java)
+        viewModel = ViewModelProviders.of(this, PreviewModelFactory(bookName, siteName))
+            .get(PreviewModel::class.java)
 
         //设置控件属性
         initView()
@@ -213,7 +215,8 @@ class PreviewActivity : BaseActivity() {
 
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 pool.execute {
-                    val name = AppDatabase.getAppDatabase().bookCacheDao().getChapterName(progress, bookName, siteName)
+                    val name = AppDatabase.getAppDatabase().bookCacheDao()
+                        .getChapterName(progress, bookName, siteName)
                     runOnUiThread {
                         preview_tv_sb_catalog.text = name
                     }
@@ -266,6 +269,15 @@ class PreviewActivity : BaseActivity() {
         })
 
         readerView.setTouchListener(object : PageView.TouchListener {
+            override fun clickAny() {
+                if (!showControl) {
+                    preview_control_top.slideUpOut()
+                    preview_control_bottom.slideDownOut()
+                    hideSecondControl()
+                    showControl = !showControl
+                }
+            }
+
             override fun center() {
                 if (showControl) {
                     preview_control_top.slideDownIn()
@@ -389,8 +401,11 @@ class PreviewActivity : BaseActivity() {
             }
         }
 
-        preview_bookRack.setOnClickListener {
-            goCatalog()
+        preview_freshChapter.setOnClickListener {
+            readerView.pageLoader.mStatus = STATUS_LOADING
+            readerView.drawCurPage(false)
+            Log.e("PreviewActivity", "section:${readerView.pageLoader.mCurChapterPos}")
+            viewModel.forceLoadFromNet(readerView.pageLoader.mCurChapterPos)
         }
 
         preview_control_catalog.setOnClickListener {
@@ -399,34 +414,36 @@ class PreviewActivity : BaseActivity() {
 
         preview_control_download.setOnClickListener {
             val items = arrayOf("后50章", "后100章", "后200章", "全部")
-            downloadDialog = AlertDialog.Builder(this).setTitle("选择缓存章节").setItems(items) { dialog, which ->
-                val cur = BookMarkUtil.getMarkPosition(bookName, siteName)
-                val size = viewModel.readerAdapter.size
-                when (which) {
-                    0 -> {
-                        val to = if (cur + 50 < size - 1) cur + 50 else size - 1
-                        viewModel.download(cur, to)
+            downloadDialog =
+                AlertDialog.Builder(this).setTitle("选择缓存章节").setItems(items) { dialog, which ->
+                    val cur = BookMarkUtil.getMarkPosition(bookName, siteName)
+                    val size = viewModel.readerAdapter.size
+                    when (which) {
+                        0 -> {
+                            val to = if (cur + 50 < size - 1) cur + 50 else size - 1
+                            viewModel.download(cur, to)
+                        }
+                        1 -> {
+                            val to = if (cur + 100 < size - 1) cur + 100 else size - 1
+                            viewModel.download(cur, to)
+                        }
+                        2 -> {
+                            val to = if (cur + 200 < size - 1) cur + 200 else size - 1
+                            viewModel.download(cur, to)
+                        }
+                        else -> {
+                            viewModel.download(0, size - 1)
+                        }
                     }
-                    1 -> {
-                        val to = if (cur + 100 < size - 1) cur + 100 else size - 1
-                        viewModel.download(cur, to)
-                    }
-                    2 -> {
-                        val to = if (cur + 200 < size - 1) cur + 200 else size - 1
-                        viewModel.download(cur, to)
-                    }
-                    else -> {
-                        viewModel.download(0, size - 1)
-                    }
-                }
-                downloadDialog?.hide()
-            }.create()
+                    downloadDialog?.hide()
+                }.create()
             downloadDialog?.show()
         }
     }
 
     private fun goCatalog() {
-        val netBook: NetBook? = AppDatabase.getAppDatabase().netBookDao().getNetBook(bookName, siteName)
+        val netBook: NetBook? =
+            AppDatabase.getAppDatabase().netBookDao().getNetBook(bookName, siteName)
         //还没有添加到书架，说明现在在
         if (netBook == null) {
             onBackPressed()
@@ -481,7 +498,7 @@ class PreviewActivity : BaseActivity() {
     private fun fixWindow() {
         NotchTools.getFullScreenTools().fullScreenUseStatus(this, object : OnNotchCallBack {
             override fun onNotchPropertyCallback(notchProperty: NotchProperty?) {
-                if (notchProperty != null && notchProperty.isNotch){
+                if (notchProperty != null && notchProperty.isNotch) {
                     preview_control_top.post {
                         preview_control_top.setPadding(0, notchProperty.marginTop, 0, 0)
                     }

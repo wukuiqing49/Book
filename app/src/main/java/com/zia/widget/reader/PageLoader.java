@@ -55,7 +55,7 @@ public class PageLoader {
     //绘制小说内容的画笔
     private TextPaint mTextPaint;
     //当前的状态
-    protected int mStatus = STATUS_LOADING;
+    public int mStatus = STATUS_LOADING;
 
     //刘海高度
     private int hairHeight = 0;
@@ -94,7 +94,7 @@ public class PageLoader {
     //上一章的记录
     private int mLastChapter = 0;
     //当前章
-    protected int mCurChapterPos = 0;
+    public int mCurChapterPos = 0;
     //书本是否打开
     protected boolean isBookOpen = false;
 

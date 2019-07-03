@@ -54,13 +54,13 @@
                 android:layout_gravity="center_vertical"/>
 
         <ImageView
-                android:id="@+id/preview_bookRack"
+                android:id="@+id/preview_freshChapter"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:padding="10dp"
                 android:tint="@color/textWhite"
                 android:layout_gravity="end|center_vertical"
-                android:src="@drawable/ic_detail"/>
+                android:src="@drawable/ic_refresh"/>
     </com.zia.widget.SlideLayout>
 
 
