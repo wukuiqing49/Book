@@ -153,7 +153,7 @@ public class PageLoader {
     private void initPaint() {
         //绘制提示的画笔
         mTipPaint = new Paint();
-        mTipPaint.setColor(mPageView.getTextColor());
+//        mTipPaint.setColor(mPageView.getTextColor());
         mTipPaint.setTextAlign(Paint.Align.LEFT);//绘制的起始点
         mTipPaint.setTextSize(ScreenUtils.spToPx(mContext, DEFAULT_TIP_SIZE));//Tip默认的字体大小
         mTipPaint.setAlpha(200);
@@ -176,7 +176,7 @@ public class PageLoader {
         mBatteryPaint.setAntiAlias(true);
         mBatteryPaint.setDither(true);
         mBatteryPaint.setAlpha(200);
-        mBatteryPaint.setColor(mPageView.getTextColor());
+//        mBatteryPaint.setColor(mPageView.getTextColor());
 
     }
 
@@ -449,15 +449,19 @@ public class PageLoader {
     public void drawBackground(Bitmap bitmap, boolean isUpdate) {
         Canvas canvas = new Canvas(bitmap);
 
-        //需要注意的是:绘制text的y的起始点是text的基准线的位置，而不是从text的头部的位置
-        float tipTop = tipMarginHeight - mTipPaint.getFontMetrics().top;
-        int left = mMarginWidth;
-        if (hasFixedHair) {
-            left += (mMarginWidth / 2);
-        }
         if (!isUpdate) {
+            //需要注意的是:绘制text的y的起始点是text的基准线的位置，而不是从text的头部的位置
+            float tipTop = tipMarginHeight - mTipPaint.getFontMetrics().top;
+            int left = mMarginWidth;
+            if (hasFixedHair) {
+                left += (mMarginWidth / 2);
+            }
             /****绘制背景****/
-            canvas.drawColor(mPageView.getPageBackground());
+            if (mPageView.getBackGround() != null) {
+                canvas.drawBitmap(mPageView.getBackGround(), 0, 0, mBgPaint);
+            } else {
+                canvas.drawColor(mPageView.getPageBackground());
+            }
 
             /*****初始化标题的参数********/
             //根据状态不一样，数据不一样
@@ -989,5 +993,11 @@ public class PageLoader {
         mPageView.setBgColor(color);
     }
 
+    public Paint getBatteryPaint() {
+        return mBatteryPaint;
+    }
 
+    public Paint getTipPaint() {
+        return mTipPaint;
+    }
 }

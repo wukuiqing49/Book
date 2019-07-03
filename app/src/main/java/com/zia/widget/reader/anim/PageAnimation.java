@@ -97,6 +97,8 @@ public abstract class PageAnimation {
      */
     public abstract boolean onTouchEvent(MotionEvent event);
 
+    public void onDetachFromWindow(){}
+
     /**
      * 绘制图形
      * @param canvas

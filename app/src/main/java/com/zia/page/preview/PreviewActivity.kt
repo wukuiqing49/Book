@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
-import android.graphics.Color
+import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
@@ -30,6 +30,7 @@ import com.zia.widget.reader.OnPageChangeListener
 import com.zia.widget.reader.PageLoader.STATUS_FINISH
 import com.zia.widget.reader.PageLoader.STATUS_LOADING
 import com.zia.widget.reader.PageView
+import com.zia.widget.reader.utils.ScreenUtils
 import kotlinx.android.synthetic.main.activity_preview.*
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
@@ -76,7 +77,9 @@ class PreviewActivity : BaseActivity() {
         init()
 
         setTextSize(defaultSharedPreferences.getInt(textSizeSP, defaultTextSize))
-        setTvTheme(defaultSharedPreferences.getInt(themeSP, theme_white))
+        readerView.post {
+            setTvTheme(defaultSharedPreferences.getInt(themeSP, theme_white))
+        }
 
         viewModel = ViewModelProviders.of(this, PreviewModelFactory(bookName, siteName))
             .get(PreviewModel::class.java)
@@ -559,20 +562,58 @@ class PreviewActivity : BaseActivity() {
         super.onDestroy()
     }
 
+    private val whiteBg by lazy {
+        getBitmap(resources.getColor(R.color.preview_theme_white))
+    }
+
+    private val greenBg by lazy {
+        getBitmap(resources.getColor(R.color.preview_theme_green))
+    }
+
+    private fun getBitmap(color: Int): Bitmap {
+        val noiseReg = BitmapFactory.decodeResource(resources, R.drawable.bg_paper)
+        val shader = BitmapShader(noiseReg, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
+        val matrix = Matrix()
+        shader.setLocalMatrix(matrix)
+        val paint = Paint()
+        paint.shader = shader
+        paint.alpha = 120
+        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SCREEN)
+        paint.color = color
+
+        val appSize = ScreenUtils.getAppSize(this)
+        val bitmap = Bitmap.createBitmap(appSize[0], appSize[1], Bitmap.Config.ARGB_4444)
+        val canvas = Canvas(bitmap)
+        canvas.drawColor(color)
+        canvas.drawPaint(paint)
+        noiseReg.recycle()
+        return bitmap
+    }
+
     private fun setTvTheme(themeId: Int) {
         when (themeId) {
             theme_white -> {
                 readerView.pageBackground = resources.getColor(R.color.preview_theme_white)
 //                readerView.pageBackground = Color.parseColor("#E5DECF")
-                readerView.textColor = resources.getColor(R.color.textBlack)
+                readerView.textColor = Color.argb(255, 91, 60, 30)
+                //顺序不能变，先textcolor，后paintColor，否则会被覆盖
+                readerView.pageLoader.batteryPaint.color = Color.argb(255, 173, 134, 97)
+                readerView.pageLoader.tipPaint.color = Color.argb(255, 173, 134, 97)
+                readerView.backGround = whiteBg
             }
             theme_dark -> {
                 readerView.pageBackground = resources.getColor(R.color.preview_theme_dark)
-                readerView.textColor = Color.parseColor("#7F7D7F")
+                readerView.textColor = Color.argb(255, 77, 89, 106)
+                readerView.pageLoader.batteryPaint.color = Color.argb(255, 45, 53, 66)
+                readerView.pageLoader.tipPaint.color = Color.argb(255, 45, 53, 66)
+                readerView.backGround = null
             }
             theme_green -> {
                 readerView.pageBackground = resources.getColor(R.color.preview_theme_green)
-                readerView.textColor = resources.getColor(R.color.textBlack)
+                readerView.textColor = Color.argb(255, 28, 67, 38)
+                readerView.pageLoader.batteryPaint.color = Color.argb(255, 162, 198, 155)
+                readerView.pageLoader.tipPaint.color = Color.argb(255, 162, 198, 155)
+                readerView.backGround = greenBg
             }
             theme_paper -> {
                 readerView.pageBackground = Color.parseColor("#E5DECF")

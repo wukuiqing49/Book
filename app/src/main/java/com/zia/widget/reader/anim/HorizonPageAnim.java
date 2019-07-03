@@ -43,6 +43,19 @@ public abstract class HorizonPageAnim extends PageAnimation{
         mNextBitmap = Bitmap.createBitmap(mViewWidth, mViewHeight, Bitmap.Config.RGB_565);
     }
 
+    @Override
+    public void onDetachFromWindow() {
+        super.onDetachFromWindow();
+        if (mCurBitmap != null){
+            mCurBitmap.recycle();
+            mCurBitmap = null;
+        }
+        if (mNextBitmap != null){
+            mNextBitmap.recycle();
+            mNextBitmap = null;
+        }
+    }
+
     /**
      * 转换页面，在显示下一章的时候，必须首先调用此方法
      */
@@ -212,6 +225,7 @@ public abstract class HorizonPageAnim extends PageAnimation{
             drawMove(canvas);
         } else {
             if (isCancel){
+                mNextBitmap.recycle();
                 mNextBitmap = mCurBitmap.copy(Bitmap.Config.RGB_565, true);
             }
             drawStatic(canvas);

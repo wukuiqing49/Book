@@ -52,6 +52,8 @@ public class PageView extends View {
     private int moveY = 0;
     //初始化参数
     private int mBgColor = 0xFFCEC29C;
+    private Bitmap mBgBitmap = null;
+
     private int mPageMode = PAGE_MODE_COVER;
 
     //是否允许点击
@@ -155,6 +157,11 @@ public class PageView extends View {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        if (mBgBitmap != null){
+            mBgBitmap.recycle();
+            mBgBitmap = null;
+        }
+        mPageAnim.onDetachFromWindow();
         getContext().unregisterReceiver(mReceiver);
     }
 
@@ -166,7 +173,7 @@ public class PageView extends View {
         //重置图片的大小,由于w,h可能比原始的Bitmap更大，所以如果使用Bitmap.setWidth/Height()是会报错的。
         //所以最终还是创建Bitmap的方式。这种方式比较消耗性能，暂时没有找到更好的方法。
         if (mCenterRect == null) {
-            mCenterRect = new RectF(mViewWidth * 1 / 5, 0,
+            mCenterRect = new RectF(mViewWidth / 5, 0,
                     mViewWidth * 4 / 5, mViewHeight);
         }
         setPageMode(mPageMode);
@@ -479,6 +486,10 @@ public class PageView extends View {
         }
     }
 
+    public void setTipColor(){
+
+    }
+
     public int getTextColor() {
         return mTextColor;
     }
@@ -495,6 +506,14 @@ public class PageView extends View {
 
     public int getPageBackground() {
         return mPageBackground;
+    }
+
+    public Bitmap getBackGround(){
+        return mBgBitmap;
+    }
+
+    public void setBackGround(Bitmap backGround){
+        mBgBitmap = backGround;
     }
 
     public int getPageMode() {
