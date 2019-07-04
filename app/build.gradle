@@ -8,11 +8,11 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.zia.bookdownloader"
-        minSdkVersion 20
+        minSdkVersion 19
         targetSdkVersion 27
         renderscriptSupportModeEnabled true
-        versionCode 20
-        versionName "1.6.0"
+        versionCode 21
+        versionName "1.6.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         javaCompileOptions {
             annotationProcessorOptions {

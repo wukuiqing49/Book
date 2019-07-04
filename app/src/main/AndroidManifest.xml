@@ -32,7 +32,7 @@
                 android:value="a7581ce042"/> <!-- 配置APP版本号 -->
         <meta-data
                 android:name="BUGLY_APP_VERSION"
-                android:value="20"/> <!-- 配置APP渠道号 -->
+                android:value="21"/> <!-- 配置APP渠道号 -->
         <meta-data
                 android:name="BUGLY_APP_CHANNEL"
                 android:value="release"/> <!-- 配置Bugly调试模式（true或者false） -->

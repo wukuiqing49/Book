@@ -1,6 +1,7 @@
 package com.zia.page.preview
 
 import android.annotation.SuppressLint
+import android.app.ProgressDialog
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
@@ -15,6 +16,7 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.widget.SeekBar
+import com.zia.App
 import com.zia.bookdownloader.R
 import com.zia.database.AppDatabase
 import com.zia.database.bean.NetBook
@@ -32,6 +34,7 @@ import com.zia.widget.reader.PageLoader.STATUS_LOADING
 import com.zia.widget.reader.PageView
 import com.zia.widget.reader.utils.ScreenUtils
 import kotlinx.android.synthetic.main.activity_preview.*
+import java.io.File
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
@@ -66,6 +69,15 @@ class PreviewActivity : BaseActivity() {
         pool
     }
 
+    private val dialog by lazy {
+        val dialog = ProgressDialog(this@PreviewActivity)
+        dialog.setCancelable(true)
+        dialog.progress = 0
+        dialog.setTitle("正在下载")
+        dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
+        dialog
+    }
+
     private var downloadDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,9 +89,9 @@ class PreviewActivity : BaseActivity() {
         init()
 
         setTextSize(defaultSharedPreferences.getInt(textSizeSP, defaultTextSize))
-        readerView.post {
-            setTvTheme(defaultSharedPreferences.getInt(themeSP, theme_white))
-        }
+
+        //设置背景、文字颜色、字体
+        setTvTheme(defaultSharedPreferences.getInt(themeSP, theme_white))
 
         viewModel = ViewModelProviders.of(this, PreviewModelFactory(bookName, siteName))
             .get(PreviewModel::class.java)
@@ -181,6 +193,36 @@ class PreviewActivity : BaseActivity() {
                 preview_tv_download_progress.visibility = View.VISIBLE
                 preview_tv_download_progress.text = it
             }
+        })
+
+        viewModel.file.observe(this, Observer {
+            dialog.hide()
+            if (it == null) {
+                return@Observer
+            }
+            Log.e("PreviewActivity", "font saved : ${it.path}")
+            defaultSharedPreferences.editor {
+                putString("fontPath", it.path)
+            }
+            readerView.pageLoader.textPaint.typeface = Typeface.createFromFile(it.path)
+            readerView.openSection(
+                readerView.pageLoader.mCurChapterPos,
+                readerView.pageLoader.pagePos
+            )
+        })
+
+        viewModel.dialogMessage.observe(this, Observer {
+            if (!dialog.isShowing) {
+                dialog.show()
+            }
+            dialog.setProgressNumberFormat(it)
+        })
+
+        viewModel.dialogProgress.observe(this, Observer {
+            if (!dialog.isShowing) {
+                dialog.show()
+            }
+            dialog.progress = it ?: 0
         })
 
         preview_light_sb.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -387,6 +429,61 @@ class PreviewActivity : BaseActivity() {
             useAnimMode(PageView.PAGE_MODE_NONE)
         }
 
+        preview_text_style.setOnClickListener {
+            val items = arrayOf(
+                "思源黑体 (17.3M)", "思源宋体 (11.2M)", "小米兰亭 (3.7M)", "字体管家细圆体 (4.4M)",
+                "浪漫雅圆 (9.4M)", "汉仪润圆 (5.5M)", "索尼楷书 (15.6M)"
+            )
+            downloadDialog = AlertDialog.Builder(this@PreviewActivity)
+                .setTitle("选择字体")
+                .setItems(items) { dialog, which ->
+                    val url = "http://qiniu.zzzia.net/"
+                    val fontName: String
+                    when (which) {
+                        0 -> {
+                            fontName = "NotoSansCJKsc.otf"
+                        }
+                        1 -> {
+                            fontName = "NotoSerifSC.otf"
+                        }
+                        2 -> {
+                            fontName = "xiaomilanting.ttf"
+                        }
+                        3 -> {
+                            fontName = "zitiguanjia.ttf"
+                        }
+                        4 -> {
+                            fontName = "langmanyayuan.ttf"
+                        }
+                        5 -> {
+                            fontName = "hanyirunyuan.ttf"
+                        }
+                        else -> {
+                            fontName = "suonikaishu.ttf"
+                        }
+                    }
+                    //查看是否已经下载过了
+                    val file = File(FileUtil.fontDirPath + File.separator + fontName)
+                    Log.d("PreviewActivity", "font filePath:${file.path}")
+                    if (file.exists()) {
+                        viewModel.file.postValue(file)
+                        return@setItems
+                    }
+                    //提示是否下载
+                    downloadDialog = AlertDialog.Builder(this@PreviewActivity)
+                        .setTitle("是否下载字体")
+                        .setPositiveButton("下载") { _, _ ->
+                            this.dialog.show()
+                            viewModel.downloadFile(url + fontName, FileUtil.fontDirPath, fontName)
+                        }
+                        .setNegativeButton("取消") { _, _ -> downloadDialog?.dismiss() }
+                        .create()
+                    downloadDialog!!.show()
+                }
+                .create()
+            downloadDialog!!.show()
+        }
+
         preview_light_system.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.System.canWrite(this@PreviewActivity)) {
                 //是否有Settings写入权限
@@ -571,56 +668,84 @@ class PreviewActivity : BaseActivity() {
     }
 
     private fun getBitmap(color: Int): Bitmap {
-        val noiseReg = BitmapFactory.decodeResource(resources, R.drawable.bg_paper)
-        val shader = BitmapShader(noiseReg, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
+        val appSize = ScreenUtils.getAppSize(this)
+
+        val argb = IntArray(appSize[0] * appSize[1])
+
+        val noiseReg = BitmapFactory.decodeResource(
+            resources, R.drawable.bg_paper, BitmapFactory
+                .Options()
+        )
+        noiseReg.getPixels(argb, 0, noiseReg.width, 0, 0, noiseReg.width, noiseReg.height)
+        val alpha = 140 * 255 / 100
+
+        for (i in 0 until argb.size) {
+            argb[i] = (alpha.shl(24)) or (argb[i] and 0x00FFFFFF)
+        }
+        val alphaNoiseReg =
+            Bitmap.createBitmap(argb, noiseReg.width, noiseReg.height, Bitmap.Config.ARGB_8888)
+        noiseReg.recycle()
+
+        val shader = BitmapShader(alphaNoiseReg, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
         val matrix = Matrix()
         shader.setLocalMatrix(matrix)
-        val paint = Paint()
-        paint.shader = shader
-        paint.alpha = 120
-        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SCREEN)
-        paint.color = color
 
-        val appSize = ScreenUtils.getAppSize(this)
-        val bitmap = Bitmap.createBitmap(appSize[0], appSize[1], Bitmap.Config.ARGB_4444)
+        val bitmap = Bitmap.createBitmap(appSize[0], appSize[1], Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         canvas.drawColor(color)
+
+        val paint = Paint()
+        paint.shader = shader
+        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SCREEN)
+        paint.color = color
         canvas.drawPaint(paint)
-        noiseReg.recycle()
+//        canvas.drawBitmap(noiseReg, 0f, 0f, paint)
+        alphaNoiseReg.recycle()
         return bitmap
     }
 
     private fun setTvTheme(themeId: Int) {
-        when (themeId) {
-            theme_white -> {
-                readerView.pageBackground = resources.getColor(R.color.preview_theme_white)
-//                readerView.pageBackground = Color.parseColor("#E5DECF")
-                readerView.textColor = Color.argb(255, 91, 60, 30)
-                //顺序不能变，先textcolor，后paintColor，否则会被覆盖
-                readerView.pageLoader.batteryPaint.color = Color.argb(255, 173, 134, 97)
-                readerView.pageLoader.tipPaint.color = Color.argb(255, 173, 134, 97)
-                readerView.backGround = whiteBg
-            }
-            theme_dark -> {
-                readerView.pageBackground = resources.getColor(R.color.preview_theme_dark)
-                readerView.textColor = Color.argb(255, 77, 89, 106)
-                readerView.pageLoader.batteryPaint.color = Color.argb(255, 45, 53, 66)
-                readerView.pageLoader.tipPaint.color = Color.argb(255, 45, 53, 66)
-                readerView.backGround = null
-            }
-            theme_green -> {
-                readerView.pageBackground = resources.getColor(R.color.preview_theme_green)
-                readerView.textColor = Color.argb(255, 28, 67, 38)
-                readerView.pageLoader.batteryPaint.color = Color.argb(255, 162, 198, 155)
-                readerView.pageLoader.tipPaint.color = Color.argb(255, 162, 198, 155)
-                readerView.backGround = greenBg
-            }
-            theme_paper -> {
-                readerView.pageBackground = Color.parseColor("#E5DECF")
-                readerView.textColor = resources.getColor(R.color.textBlack)
-            }
-        }
         readerView.post {
+            when (themeId) {
+                theme_white -> {
+                    readerView.pageBackground = resources.getColor(R.color.preview_theme_white)
+//                readerView.pageBackground = Color.parseColor("#E5DECF")
+                    readerView.textColor = Color.argb(255, 91, 60, 30)
+                    //顺序不能变，先textcolor，后paintColor，否则会被覆盖
+                    readerView.pageLoader.batteryPaint.color = Color.argb(255, 173, 134, 97)
+                    readerView.pageLoader.tipPaint.color = Color.argb(255, 173, 134, 97)
+                    readerView.backGround = whiteBg
+                }
+                theme_dark -> {
+                    readerView.pageBackground = resources.getColor(R.color.preview_theme_dark)
+                    readerView.textColor = Color.argb(255, 77, 89, 106)
+                    readerView.pageLoader.batteryPaint.color = Color.argb(255, 45, 53, 66)
+                    readerView.pageLoader.tipPaint.color = Color.argb(255, 45, 53, 66)
+                    readerView.backGround = null
+                }
+                theme_green -> {
+                    readerView.pageBackground = resources.getColor(R.color.preview_theme_green)
+                    readerView.textColor = Color.argb(255, 28, 67, 38)
+                    readerView.pageLoader.batteryPaint.color = Color.argb(255, 162, 198, 155)
+                    readerView.pageLoader.tipPaint.color = Color.argb(255, 162, 198, 155)
+                    readerView.backGround = greenBg
+                }
+                theme_paper -> {
+                    readerView.pageBackground = Color.parseColor("#E5DECF")
+                    readerView.textColor = resources.getColor(R.color.textBlack)
+                }
+            }
+
+            val fontPath = defaultSharedPreferences.getString("fontPath", "")
+            if (fontPath != null && fontPath.isNotEmpty()) {
+                //我认为有可能用户清除缓存后，加载了不存在的文件会报错
+                try {
+                    readerView.pageLoader.textPaint.typeface = Typeface.createFromFile(fontPath)
+                } catch (e: java.lang.Exception) {
+                    e.printStackTrace()
+                    ToastUtil.onError(e.message)
+                }
+            }
             readerView.drawCurPage(false)
         }
     }

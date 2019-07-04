@@ -53,4 +53,5 @@ object FileUtil {
     }
 
     val rulePath: String = App.getContext().filesDir.path + File.separator + "easybookRules.json"
+    val fontDirPath: String = App.getContext().filesDir.path + File.separator + "font"
 }

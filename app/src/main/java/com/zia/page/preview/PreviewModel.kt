@@ -10,22 +10,26 @@ import com.zia.easybookmodule.engine.Site
 import com.zia.easybookmodule.net.NetUtil
 import com.zia.easybookmodule.rx.Disposable
 import com.zia.easybookmodule.rx.Subscriber
-import com.zia.page.base.BaseViewModel
+import com.zia.page.base.ProgressViewModel
 import com.zia.util.BookMarkUtil
 import com.zia.util.BookUtil
 import com.zia.util.defaultSharedPreferences
+import com.zia.util.downlaodUtil.DownloadRunnable
 import com.zia.util.editor
 import com.zia.util.threadPool.DefaultExecutorSupplier
 import com.zia.widget.reader.StringAdapter
+import java.io.File
 
 
 /**
  * Created by zia on 2018/11/20.
  */
-class PreviewModel(private val bookName: String, private val siteName: String) : BaseViewModel() {
+class PreviewModel(private val bookName: String, private val siteName: String) :
+    ProgressViewModel() {
 
     val requestLoadPage = MutableLiveData<Int>()
     val downloadProgress = MutableLiveData<String>()
+    val file = MutableLiveData<File>()
 
     @Volatile
     var readerAdapter = ReadAdapter()
@@ -192,6 +196,30 @@ class PreviewModel(private val bookName: String, private val siteName: String) :
                 toast.postValue("已全部缓存")
             }
         }
+    }
+
+    fun downloadFile(url: String, savePath: String, fileName: String) {
+        Log.e("PreviewModel", "savePath:$savePath")
+        val downloadRunnable = DownloadRunnable(url, savePath, fileName) { ratio, part, total ->
+            if (ratio == 100F) {
+                dialogProgress.postValue(100)
+                file.postValue(File(savePath + File.separator + fileName))
+                toast.postValue("下载完成")
+                return@DownloadRunnable
+            }
+            dialogProgress.postValue(ratio.toInt())
+            dialogMessage.postValue(
+                String.format(
+                    "%.2fm / %.2fm",
+                    part / 1024f / 1024f,
+                    total / 1024f / 1024f
+                )
+            )
+        }
+        DefaultExecutorSupplier
+            .getInstance()
+            .forBackgroundTasks()
+            .execute(downloadRunnable)
     }
 
     fun saveBookMark(section: Int) {

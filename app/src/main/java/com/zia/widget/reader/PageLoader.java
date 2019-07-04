@@ -44,7 +44,7 @@ public class PageLoader {
 
     //默认的显示参数配置
     private static final int DEFAULT_INTERVAL = 12;
-    private static final int DEFAULT_PARAGRAPH_INTERVAL = 10;
+    private static final int DEFAULT_PARAGRAPH_INTERVAL = 12;
 
     private static final int DEFAULT_TIP_SIZE = 12;
 
@@ -995,6 +995,10 @@ public class PageLoader {
 
     public Paint getBatteryPaint() {
         return mBatteryPaint;
+    }
+
+    public TextPaint getTextPaint() {
+        return mTextPaint;
     }
 
     public Paint getTipPaint() {
