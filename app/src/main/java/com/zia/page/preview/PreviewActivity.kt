@@ -668,7 +668,7 @@ class PreviewActivity : BaseActivity() {
     }
 
     private fun getBitmap(color: Int): Bitmap {
-        val appSize = ScreenUtils.getAppSize(this)
+        val appSize = ScreenUtils.getScreenSize(this)
 
         val argb = IntArray(appSize[0] * appSize[1])
 
