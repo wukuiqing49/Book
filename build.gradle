@@ -1,16 +1,26 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-
 buildscript {
-    ext.kotlin_version = '1.3.21'
+    ext.kotlin_version = '1.3.31'
+    ext.plugin_version = '1.0.6.11-alpha7-test'
     repositories {
-        google()
+        maven { url "/Users/jiangzilai/StudioProjects/ByteX/gradle_plugins" }
         jcenter()
+        google()
         maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.2'
+        classpath 'com.android.tools.build:gradle:3.4.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.tencent.mm:AndResGuard-gradle-plugin:1.2.17'
 
+        classpath "com.bytedance.android.byteX:base-plugin:${plugin_version}"
+
+        classpath "com.bytedance.android.byteX:access-inline-plugin:${plugin_version}"
+        classpath "com.bytedance.android.byteX:getter_setter-inline-plugin:${plugin_version}"
+        classpath "com.bytedance.android.byteX:shrink-r-plugin:${plugin_version}"
+        classpath "com.bytedance.android.byteX:field_assign_opt_plugin:${plugin_version}"
+//        classpath "com.bytedance.android.const_inline_plugin:${plugin_version}"
+        classpath "com.bytedance.android.byteX:method_call_opt_plugin:${plugin_version}"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -18,8 +28,8 @@ buildscript {
 
 allprojects {
     repositories {
-        google()
         jcenter()
+        google()
         maven { url 'https://jitpack.io' }
     }
 }

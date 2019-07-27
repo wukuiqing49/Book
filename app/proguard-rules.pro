@@ -22,12 +22,14 @@
 
 #-------------------------------------------定制化区域----------------------------------------------
 #---------------------------------1.实体类---------------------------------
+-keep class * implements java.io.Serializable { *;}
 -keep class com.zia.database.** { *; }
 -keep class com.zia.event.** { *; }
 #-keep class com.zia.util.**
 -keep class com.zia.page.bookstore.detail.** { *; }
 
 -keep class com.zia.bookdownloader.bean.** { *; }
+#-keep class com.zia.bookdownloader.** { *; }
 -keep class nl.siegmann.** { *; }
 -keep class org.jsoup.** { *; }
 -keep class org.slf4j.** { *; }

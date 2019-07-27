@@ -4,6 +4,8 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+apply from: 'resguard.gradle'
+
 android {
     compileSdkVersion 28
     defaultConfig {
@@ -11,15 +13,21 @@ android {
         minSdkVersion 19
         targetSdkVersion 27
         renderscriptSupportModeEnabled true
-        versionCode 21
-        versionName "1.6.1"
+        versionCode 22
+        versionName "1.6.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
             }
         }
+
+        ndk {
+            abiFilter "armeabi-v7a"
+        }
+
         multiDexEnabled true
+        resConfigs "zh"
     }
     signingConfigs {
         release {
@@ -79,7 +87,7 @@ dependencies {
     //EasyBook
     //由于使用热修复，直接引入jar至libs会方便一些
     implementation 'com.github.Zzzia:EasyBook:2.50'
-    implementation 'com.squareup.okhttp3:okhttp:3.11.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.0.1'
     //viewModel & lifeCycle
     implementation 'android.arch.lifecycle:extensions:1.1.1'
     //leakCanary

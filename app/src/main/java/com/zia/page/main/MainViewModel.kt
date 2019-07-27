@@ -45,7 +45,7 @@ class MainViewModel : ProgressViewModel() {
                     .build()
                 val appResponse = NetUtil.okHttpClient.newCall(appVersionRequest).execute()
                 val gson = Gson()
-                val appVersionString = appResponse.body()?.string()
+                val appVersionString = appResponse.body?.string()
                 Log.e(javaClass.simpleName, appVersionString)
                 val appVersion = gson.fromJson<Config>(appVersionString, Config::class.java).version
                 val fixVersionRequest = Request.Builder()
@@ -53,7 +53,7 @@ class MainViewModel : ProgressViewModel() {
                     .post(FormBody.Builder().add("key", "easybookfix").build())
                     .build()
                 val fixResponse = NetUtil.okHttpClient.newCall(fixVersionRequest).execute()
-                val fixVersion = gson.fromJson<Config>(fixResponse.body()?.string(), Config::class.java).version
+                val fixVersion = gson.fromJson<Config>(fixResponse.body?.string(), Config::class.java).version
                 defaultSharedPreferences().editor {
                     putInt("appVersion", appVersion)
                     putInt("fixVersion", fixVersion)
@@ -81,7 +81,7 @@ class MainViewModel : ProgressViewModel() {
             }
 
             override fun onResponse(call: Call, response: Response) {
-                val json = response.body()?.string()
+                val json = response.body?.string()
                 if (json == null) {
                     Log.e(javaClass.simpleName, "json == null")
                     toast.postValue("更新版本好像出了点问题...")
