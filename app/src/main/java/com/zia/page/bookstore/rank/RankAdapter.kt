@@ -2,7 +2,7 @@ package com.zia.page.bookstore.rank
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,7 +18,7 @@ import kotlinx.android.synthetic.main.item_rank.view.*
  * Created by zia on 2019/4/17.
  * 排行榜，分页
  */
-class RankAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class RankAdapter : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
 
     private val list = ArrayList<RankBook>()
     private val TYPE_NORMAL = 200
@@ -43,7 +43,7 @@ class RankAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         notifyDataSetChanged()
     }
 
-    override fun onCreateViewHolder(p0: ViewGroup, type: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(p0: ViewGroup, type: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
         return when (type) {
             TYPE_NORMAL -> {
                 val view = LayoutInflater.from(p0.context).inflate(R.layout.item_rank, p0, false)
@@ -74,7 +74,7 @@ class RankAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     @SuppressLint("SetTextI18n")
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
         when (getItemViewType(position)) {
             TYPE_NORMAL -> {
                 val rankBook = list[position]
@@ -124,8 +124,8 @@ class RankAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
-    class RankItemHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
-    class LoadingHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class RankItemHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView)
+    class LoadingHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
         fun showLoading() {
             itemView.item_loading_tv.visibility = View.INVISIBLE
             itemView.item_loading_view.visibility = View.VISIBLE

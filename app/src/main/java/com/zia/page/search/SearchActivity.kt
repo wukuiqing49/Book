@@ -1,9 +1,9 @@
 package com.zia.page.search
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.KeyEvent
@@ -151,19 +151,19 @@ class SearchActivity : BaseActivity() {
 //        updateDialog("")
 //    }
 
-    private fun replaceFragment(fragment: Fragment) {
+    private fun replaceFragment(fragment: androidx.fragment.app.Fragment) {
         val transaction = supportFragmentManager.beginTransaction()
         transaction.replace(R.id.search_fragmentLayout, fragment)
         transaction.commit()
     }
 
-    private fun addFragment(fragment: Fragment) {
+    private fun addFragment(fragment: androidx.fragment.app.Fragment) {
         val transaction = supportFragmentManager.beginTransaction()
         transaction.add(R.id.search_fragmentLayout, fragment)
         transaction.commit()
     }
 
-    private fun hideFragment(fragment: Fragment) {
+    private fun hideFragment(fragment: androidx.fragment.app.Fragment) {
         val transaction = supportFragmentManager.beginTransaction()
         transaction.hide(fragment)
         transaction.commit()

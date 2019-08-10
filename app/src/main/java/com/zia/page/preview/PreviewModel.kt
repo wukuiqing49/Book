@@ -1,6 +1,6 @@
 package com.zia.page.preview
 
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.MutableLiveData
 import android.util.Log
 import com.zia.database.AppDatabase
 import com.zia.database.bean.BookCache

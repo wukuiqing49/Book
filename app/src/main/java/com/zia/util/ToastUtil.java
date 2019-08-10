@@ -1,6 +1,6 @@
 package com.zia.util;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.widget.Toast;
 import com.zia.App;
 import com.zia.toastex.ToastEx;

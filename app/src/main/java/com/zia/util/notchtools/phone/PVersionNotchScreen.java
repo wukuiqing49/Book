@@ -1,7 +1,7 @@
 package com.zia.util.notchtools.phone;
 
 import android.app.Activity;
-import android.support.annotation.RequiresApi;
+import androidx.annotation.RequiresApi;
 import android.view.DisplayCutout;
 import android.view.Window;
 import android.view.WindowInsets;

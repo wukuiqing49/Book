@@ -1,6 +1,6 @@
 package com.zia.page.bookstore.rank
 
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.MutableLiveData
 import com.zia.easybookmodule.bean.rank.Rank
 import com.zia.easybookmodule.bean.rank.RankInfo
 import com.zia.easybookmodule.engine.EasyBook

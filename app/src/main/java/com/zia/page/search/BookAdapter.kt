@@ -1,8 +1,8 @@
 package com.zia.page.search
 
 import android.annotation.SuppressLint
-import android.support.v7.util.DiffUtil
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,7 +19,7 @@ import kotlin.collections.ArrayList
  * Created by zia on 2018/11/1.
  */
 class BookAdapter(private val bookSelectListener: BookSelectListener) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
 
     private var books = ArrayList<Book>()
 
@@ -69,7 +69,7 @@ class BookAdapter(private val bookSelectListener: BookSelectListener) :
         notifyDataSetChanged()
     }
 
-    override fun onCreateViewHolder(p0: ViewGroup, p1: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(p0: ViewGroup, p1: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
         val view = LayoutInflater.from(p0.context).inflate(R.layout.item_book, p0, false)
         return BookHolder(view)
     }
@@ -79,7 +79,7 @@ class BookAdapter(private val bookSelectListener: BookSelectListener) :
     }
 
     @SuppressLint("SetTextI18n")
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is BookHolder -> {
                 val book = books[position]
@@ -113,7 +113,7 @@ class BookAdapter(private val bookSelectListener: BookSelectListener) :
         }
     }
 
-    class BookHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+    class BookHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView)
 
     interface BookSelectListener {
         fun onBookSelect(itemView: View, book: Book)

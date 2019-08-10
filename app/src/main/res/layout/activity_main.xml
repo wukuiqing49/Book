@@ -13,7 +13,7 @@
             android:layout_height="0dp"
             android:layout_weight="1"/>
 
-    <android.support.design.widget.BottomNavigationView
+    <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/main_nav"
             app:menu="@menu/navi"
             android:background="@color/white"

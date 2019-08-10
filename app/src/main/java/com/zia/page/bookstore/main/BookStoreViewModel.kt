@@ -1,6 +1,6 @@
 package com.zia.page.bookstore.main
 
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.MutableLiveData
 import com.google.gson.Gson
 import com.zia.easybookmodule.bean.rank.HottestRank
 import com.zia.easybookmodule.engine.EasyBook

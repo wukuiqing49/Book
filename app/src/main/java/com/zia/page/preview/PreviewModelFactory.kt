@@ -1,7 +1,7 @@
 package com.zia.page.preview
 
-import android.arch.lifecycle.ViewModel
-import android.arch.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 
 /**
  * Created by zia on 2018/12/1.

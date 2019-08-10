@@ -2,17 +2,17 @@ package com.zia.page.book
 
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
-import android.support.v7.app.AlertDialog
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.appcompat.app.AlertDialog
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.util.Log
 import android.view.View
 import com.bumptech.glide.Glide
@@ -138,15 +138,15 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
         adapter = CatalogPagingAdapter(this)
         catalogRv.adapter = adapter
 
-        val layoutManager = LinearLayoutManager(this)
+        val layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
         catalogRv.layoutManager = layoutManager
 
         val paint = Paint()
         paint.color = ColorConstants.GREY
         val padding = DisplayUtil.dip2px(this, 8f).toFloat()
 
-        catalogRv.addItemDecoration(object : RecyclerView.ItemDecoration() {
-            override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
+        catalogRv.addItemDecoration(object : androidx.recyclerview.widget.RecyclerView.ItemDecoration() {
+            override fun onDraw(c: Canvas, parent: androidx.recyclerview.widget.RecyclerView, state: androidx.recyclerview.widget.RecyclerView.State) {
                 if (parent.layoutManager != null) {
                     for (i in 0 until parent.childCount - 1) {
                         val child = parent.getChildAt(i)

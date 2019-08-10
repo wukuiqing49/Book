@@ -1,8 +1,8 @@
 package com.zia.util
 
 import android.content.Context
-import android.support.annotation.DrawableRes
-import android.support.annotation.RawRes
+import androidx.annotation.DrawableRes
+import androidx.annotation.RawRes
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions

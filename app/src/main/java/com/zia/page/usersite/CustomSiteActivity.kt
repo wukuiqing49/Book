@@ -1,11 +1,11 @@
 package com.zia.page.usersite
 
 import android.app.ProgressDialog
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
-import android.support.v7.app.AlertDialog
-import android.support.v7.widget.LinearLayoutManager
+import androidx.appcompat.app.AlertDialog
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.widget.EditText
 import com.zia.bookdownloader.R
@@ -61,7 +61,7 @@ class CustomSiteActivity : BaseActivity() {
         viewModel = ViewModelProviders.of(this).get(CustomViewModel::class.java)
 
         adapter = CustomSiteAdapter()
-        custom_rv.layoutManager = LinearLayoutManager(this)
+        custom_rv.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
         custom_rv.adapter = adapter
 
         initObservers()

@@ -1,15 +1,15 @@
 package com.zia.page.bookrack
 
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.support.v7.app.AlertDialog
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.appcompat.app.AlertDialog
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -59,7 +59,7 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
         initObservers()
 
         bookRackAdapter = BookRackAdapter(bookRack_rv, this)
-        bookRack_rv.layoutManager = LinearLayoutManager(context)
+        bookRack_rv.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
         bookRack_rv.adapter = bookRackAdapter
 
         bookRack_sl.setOnRefreshListener { pullBooks() }
@@ -89,7 +89,7 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
      * 点击追更书籍
      */
     override fun onNetBookSelected(
-        viewHolder: RecyclerView.ViewHolder,
+        viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder,
         netBook: NetBook,
         position: Int
     ) {
@@ -132,7 +132,7 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
     /**
      * 调用第三方阅读器打开书籍
      */
-    override fun onLocalBookSelected(viewHolder: RecyclerView.ViewHolder, localBook: LocalBook, position: Int) {
+    override fun onLocalBookSelected(viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder, localBook: LocalBook, position: Int) {
         val index = localBook.filePath.indexOf("book")
         ToastUtil.onInfo("位置：${localBook.filePath.substring(index)}")
         val file = File(localBook.filePath)
@@ -153,7 +153,7 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
     /**
      * 长按追更书籍
      */
-    override fun onNetBookPressed(viewHolder: RecyclerView.ViewHolder, netBook: NetBook, position: Int) {
+    override fun onNetBookPressed(viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder, netBook: NetBook, position: Int) {
         if (context == null) return
         AlertDialog.Builder(context!!)
             .setTitle("是否删除${netBook.bookName}")
@@ -170,7 +170,7 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
     /**
      * 长按本地书籍
      */
-    override fun onLocalBookPressed(viewHolder: RecyclerView.ViewHolder, localBook: LocalBook, position: Int) {
+    override fun onLocalBookPressed(viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder, localBook: LocalBook, position: Int) {
         if (context == null) return
         AlertDialog.Builder(context!!)
             .setTitle("是否删除${localBook.bookName}")

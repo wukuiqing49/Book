@@ -5,7 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.provider.Settings;
-import android.support.annotation.RequiresApi;
+import androidx.annotation.RequiresApi;
 import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;

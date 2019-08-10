@@ -5,8 +5,8 @@ import android.app.ActivityOptions
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.util.Pair
 import android.view.LayoutInflater
 import android.view.View
@@ -27,7 +27,7 @@ import kotlinx.android.synthetic.main.item_book.view.*
 class SearchResultFragment : BaseFragment(), BookAdapter.BookSelectListener {
 
 
-    var searchRv: RecyclerView? = null
+    var searchRv: androidx.recyclerview.widget.RecyclerView? = null
     var bookAdapter: BookAdapter? = null
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -35,7 +35,7 @@ class SearchResultFragment : BaseFragment(), BookAdapter.BookSelectListener {
 
         searchRv = searchResult_Rv
         bookAdapter = BookAdapter(this)
-        searchResult_Rv.layoutManager = LinearLayoutManager(context)
+        searchResult_Rv.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
         searchResult_Rv.adapter = bookAdapter
     }
 

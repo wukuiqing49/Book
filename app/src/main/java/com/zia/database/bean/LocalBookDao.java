@@ -1,6 +1,6 @@
 package com.zia.database.bean;
 
-import android.arch.persistence.room.*;
+import androidx.room.*;
 
 import java.util.List;
 

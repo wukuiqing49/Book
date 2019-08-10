@@ -1,6 +1,6 @@
 package com.zia.page.search
 
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.MutableLiveData
 import com.zia.easybookmodule.bean.Book
 import com.zia.easybookmodule.engine.EasyBook
 import com.zia.easybookmodule.rx.Disposable

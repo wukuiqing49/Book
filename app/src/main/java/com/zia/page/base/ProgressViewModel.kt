@@ -1,6 +1,6 @@
 package com.zia.page.base
 
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.MutableLiveData
 
 /**
  * Created by zia on 2018/11/20.

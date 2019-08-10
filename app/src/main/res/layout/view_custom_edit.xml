@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                             xmlns:app="http://schemas.android.com/apk/res-auto"
-                                             xmlns:tools="http://schemas.android.com/tools"
-                                             android:layout_width="match_parent"
-                                             android:layout_height="wrap_content">
-    <android.support.v7.widget.AppCompatTextView
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                   xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                   xmlns:tools="http://schemas.android.com/tools"
+                                                   android:layout_width="match_parent"
+                                                   android:layout_height="wrap_content">
+    <androidx.appcompat.widget.AppCompatTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" android:id="@+id/custom_edit_view_title"
             android:textColor="@color/textColor"
@@ -13,7 +13,7 @@
             app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"
             android:layout_marginStart="16dp" android:layout_marginTop="16dp" android:text="获取在线解析"/>
 
-    <android.support.v7.widget.AppCompatEditText android:layout_width="match_parent"
+    <androidx.appcompat.widget.AppCompatEditText android:layout_width="match_parent"
                                                  android:layout_height="wrap_content"
                                                  android:hint="默认Github源"
                                                  app:layout_constraintTop_toBottomOf="@+id/custom_edit_view_title"
@@ -41,4 +41,4 @@
 <!--            android:layout_height="wrap_content"-->
 <!--            android:id="@+id/custom_edit_view_cancel" app:layout_constraintEnd_toStartOf="@+id/custom_edit_view_confirm"-->
 <!--            app:layout_constraintTop_toTopOf="@+id/custom_edit_view_confirm" android:layout_marginEnd="16dp"/>-->
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

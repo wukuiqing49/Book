@@ -1,8 +1,8 @@
 package com.zia.page.bookstore.main
 
 import android.content.Intent
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,7 +23,7 @@ import java.util.*
 /**
  * Created by zia on 2019/4/16.
  */
-class BookStoreAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class BookStoreAdapter : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
 
     private val rankList = ArrayList<HottestRankClassify>()
     private val rankInfoList = ArrayList<RankInfo>()
@@ -58,15 +58,16 @@ class BookStoreAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         notifyItemRangeChanged(getExtraItemCount(), itemCount)
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
         when (getItemViewType(position)) {
             TYPE_CLASSIFY -> {
                 if (holder.itemView.item_bookstore_classify_rv.adapter == null) {
                     val classifyAdapter = ClassifyAdapter()
                     holder.itemView.item_bookstore_classify_rv.adapter = classifyAdapter
-                    holder.itemView.item_bookstore_classify_rv.layoutManager = LinearLayoutManager(
-                        holder.itemView.context, RecyclerView.HORIZONTAL, false
-                    )
+                    holder.itemView.item_bookstore_classify_rv.layoutManager =
+                        androidx.recyclerview.widget.LinearLayoutManager(
+                            holder.itemView.context, androidx.recyclerview.widget.RecyclerView.HORIZONTAL, false
+                        )
                     classifyAdapter.fresh(rankInfoList)
                 }
             }
@@ -112,7 +113,7 @@ class BookStoreAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
-    override fun onCreateViewHolder(p0: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(p0: ViewGroup, viewType: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
         when (viewType) {
             TYPE_CLASSIFY -> {
                 val view = LayoutInflater.from(p0.context).inflate(R.layout.item_bookstore_classify, p0, false)
@@ -180,12 +181,12 @@ class BookStoreAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     companion object {
-        private class ClassifyHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {}
+        private class ClassifyHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {}
 
-        private class TitleHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {}
+        private class TitleHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {}
 
-        private class FirstHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {}
-        private class NormalHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {}
+        private class FirstHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {}
+        private class NormalHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {}
     }
 
 }

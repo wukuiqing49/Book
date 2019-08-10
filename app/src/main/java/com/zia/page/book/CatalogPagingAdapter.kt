@@ -1,7 +1,7 @@
 package com.zia.page.book
 
-import android.arch.paging.PagedListAdapter
-import android.support.v7.util.DiffUtil
+import androidx.paging.PagedListAdapter
+import androidx.recyclerview.widget.DiffUtil
 import android.view.View
 import android.view.ViewGroup
 import com.zia.database.bean.BookCache

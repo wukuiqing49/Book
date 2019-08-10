@@ -1,15 +1,15 @@
 package com.zia.page.bookstore.rank
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 import android.os.Bundle
-import android.support.v7.widget.DefaultItemAnimator
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.util.Log
 import android.view.View
 import com.zia.App
@@ -62,11 +62,16 @@ class RankActivity : BaseActivity() {
 
     private fun initRv() {
         rank_rv.adapter = adapter
-        rank_rv.layoutManager = LinearLayoutManager(this)
-        rank_rv.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
-        rank_rv.itemAnimator = DefaultItemAnimator()
-        rank_rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+        rank_rv.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
+        rank_rv.addItemDecoration(
+            androidx.recyclerview.widget.DividerItemDecoration(
+                this,
+                androidx.recyclerview.widget.DividerItemDecoration.VERTICAL
+            )
+        )
+        rank_rv.itemAnimator = androidx.recyclerview.widget.DefaultItemAnimator()
+        rank_rv.addOnScrollListener(object : androidx.recyclerview.widget.RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: androidx.recyclerview.widget.RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (recyclerView.computeVerticalScrollExtent() + recyclerView.computeVerticalScrollOffset() >= recyclerView.computeVerticalScrollRange()) {
                     viewModel.loadMore(config)
@@ -87,14 +92,18 @@ class RankActivity : BaseActivity() {
             }
         }
         rank_classify_rv.adapter = classifyAdapter
-        rank_classify_rv.layoutManager = LinearLayoutManager(this, RecyclerView.HORIZONTAL, false)
-        rank_classify_rv.addItemDecoration(object : RecyclerView.ItemDecoration() {
+        rank_classify_rv.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(
+            this,
+            androidx.recyclerview.widget.RecyclerView.HORIZONTAL,
+            false
+        )
+        rank_classify_rv.addItemDecoration(object : androidx.recyclerview.widget.RecyclerView.ItemDecoration() {
 
             private val paint = Paint()
             private val f2 = DisplayUtil.dip2px(App.getContext(), 2F)
             private val f5 = DisplayUtil.dip2px(App.getContext(), 5F)
 
-            override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
+            override fun onDraw(c: Canvas, parent: androidx.recyclerview.widget.RecyclerView, state: androidx.recyclerview.widget.RecyclerView.State) {
                 paint.color = ColorConstants.GREY
                 if (parent.layoutManager != null) {
                     for (i in 0 until parent.childCount - 1) {
@@ -105,7 +114,7 @@ class RankActivity : BaseActivity() {
                 }
             }
 
-            override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
+            override fun getItemOffsets(outRect: Rect, view: View, parent: androidx.recyclerview.widget.RecyclerView, state: androidx.recyclerview.widget.RecyclerView.State) {
                 outRect.set(f5, 0, f5, 0)
             }
         })

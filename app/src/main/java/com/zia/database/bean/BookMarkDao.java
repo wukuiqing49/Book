@@ -1,6 +1,6 @@
 package com.zia.database.bean;
 
-import android.arch.persistence.room.*;
+import androidx.room.*;
 
 /**
  * Created by zia on 2018/11/4.

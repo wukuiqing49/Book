@@ -1,7 +1,7 @@
 package com.zia.page.bookstore.main
 
 import android.content.Intent
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +14,7 @@ import kotlinx.android.synthetic.main.item_classify_detail.view.*
 /**
  * Created by zia on 2019/4/16.
  */
-class ClassifyAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class ClassifyAdapter : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
 
     private val rankInfoList = ArrayList<RankInfo>()
     private var hasInit = false
@@ -28,7 +28,7 @@ class ClassifyAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
-    override fun onCreateViewHolder(p0: ViewGroup, type: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(p0: ViewGroup, type: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
         val view = LayoutInflater.from(p0.context).inflate(R.layout.item_classify_detail, p0, false)
         return ClassifyDetailHolder(view)
     }
@@ -37,7 +37,7 @@ class ClassifyAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         return rankInfoList.size
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
         val rankInfo = rankInfoList[position]
         holder.itemView.item_classify_detail_tv.text = rankInfo.rankName
         holder.itemView.item_classify_detail_tv.setOnClickListener {
@@ -49,5 +49,5 @@ class ClassifyAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
-    private class ClassifyDetailHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {}
+    private class ClassifyDetailHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {}
 }

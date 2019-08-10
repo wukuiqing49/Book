@@ -1,7 +1,7 @@
 package com.zia.page.usersite
 
 import android.annotation.SuppressLint
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -17,7 +17,7 @@ import kotlin.collections.ArrayList
 /**
  * Created by zia on 2019-06-02.
  */
-class CustomSiteAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class CustomSiteAdapter : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
 
     private val rules = ArrayList<XpathSiteRule>()
     private val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
@@ -54,7 +54,7 @@ class CustomSiteAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         return rules
     }
 
-    override fun onCreateViewHolder(p0: ViewGroup, p1: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(p0: ViewGroup, p1: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
         val view = LayoutInflater.from(p0.context).inflate(R.layout.item_custom_site, p0, false)
         return CustomSiteHolder(view)
     }
@@ -64,7 +64,7 @@ class CustomSiteAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     @SuppressLint("SetTextI18n")
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
         val rule = rules[position]
         holder.itemView.item_site_author.text = rule.author
         holder.itemView.item_site_classify.text = "分类：${rule.siteClassify}"
@@ -80,7 +80,7 @@ class CustomSiteAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
 
-    inner class CustomSiteHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class CustomSiteHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
         init {
             itemView.item_site_switch.setOnCheckedChangeListener { _, isChecked ->
                 if (rules[adapterPosition].isEnable != isChecked) {

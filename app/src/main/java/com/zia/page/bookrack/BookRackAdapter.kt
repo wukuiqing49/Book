@@ -2,7 +2,7 @@ package com.zia.page.bookrack
 
 import android.annotation.SuppressLint
 import android.graphics.Color
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,8 +17,8 @@ import kotlinx.android.synthetic.main.item_text.view.*
 /**
  * Created by zia on 2018/11/2.
  */
-class BookRackAdapter(private val recyclerView: RecyclerView, private val onBookRackSelect: OnBookRackSelect) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class BookRackAdapter(private val recyclerView: androidx.recyclerview.widget.RecyclerView, private val onBookRackSelect: OnBookRackSelect) :
+    androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
 
     public var netBookList: List<NetBook>? = null
     private var localBookList: List<LocalBook>? = null
@@ -29,10 +29,10 @@ class BookRackAdapter(private val recyclerView: RecyclerView, private val onBook
     private val TYPE_NET = 1004
 
     interface OnBookRackSelect {
-        fun onNetBookSelected(viewHolder: RecyclerView.ViewHolder, netBook: NetBook, position: Int)
-        fun onNetBookPressed(viewHolder: RecyclerView.ViewHolder, netBook: NetBook, position: Int)
-        fun onLocalBookSelected(viewHolder: RecyclerView.ViewHolder, localBook: LocalBook, position: Int)
-        fun onLocalBookPressed(viewHolder: RecyclerView.ViewHolder, localBook: LocalBook, position: Int)
+        fun onNetBookSelected(viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder, netBook: NetBook, position: Int)
+        fun onNetBookPressed(viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder, netBook: NetBook, position: Int)
+        fun onLocalBookSelected(viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder, localBook: LocalBook, position: Int)
+        fun onLocalBookPressed(viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder, localBook: LocalBook, position: Int)
     }
 
     fun freshNetBooks(netBookList: List<NetBook>) {
@@ -45,7 +45,7 @@ class BookRackAdapter(private val recyclerView: RecyclerView, private val onBook
         recyclerView.post { notifyDataSetChanged() }
     }
 
-    override fun onCreateViewHolder(p0: ViewGroup, viewtype: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(p0: ViewGroup, viewtype: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
         if (viewtype == TYPE_TEXT_LOCAL || viewtype == TYPE_TEXT_NET) {
             val view = LayoutInflater.from(p0.context).inflate(R.layout.item_text, p0, false)
             return TextHolder(view)
@@ -79,7 +79,7 @@ class BookRackAdapter(private val recyclerView: RecyclerView, private val onBook
     }
 
     @SuppressLint("SetTextI18n", "ResourceType")
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
         when (getItemViewType(position)) {
             TYPE_TEXT_NET -> {
                 if (netBookList == null || netBookList!!.isEmpty()) {
@@ -158,6 +158,6 @@ class BookRackAdapter(private val recyclerView: RecyclerView, private val onBook
         return index
     }
 
-    class BookHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
-    class TextHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+    class BookHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView)
+    class TextHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView)
 }

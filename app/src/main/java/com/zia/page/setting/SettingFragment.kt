@@ -3,18 +3,15 @@ package com.zia.page.setting
 
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.zia.bookdownloader.R
 import com.zia.easybookmodule.engine.EasyBook
-import com.zia.page.base.BaseActivity
 import com.zia.page.base.BaseFragment
 import com.zia.page.blame.BlameActivity
 import com.zia.page.main.MainViewModel
@@ -86,10 +83,7 @@ class SettingFragment : BaseFragment() {
 
         setting_joinQQ.setOnClickListener {
             if (!QQUtil.joinQQGroup("-yIvYqsrr3nJg2RVF2GWO1zhYf5QNvwO", context)) {
-                val clipboard = activity?.getSystemService(BaseActivity.CLIPBOARD_SERVICE) as ClipboardManager
-                val data = ClipData.newPlainText("QQ Group", "29527219")
-                clipboard.primaryClip = data
-                ToastUtil.onInfo("无法唤起QQ...\n已复制29527219到粘贴板，麻烦手动加入")
+                ToastUtil.onInfo("无法唤起QQ...\n群号29527219，请手动加入")
             }
         }
 

@@ -7,15 +7,15 @@ apply plugin: 'kotlin-android-extensions'
 apply from: 'resguard.gradle'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     defaultConfig {
         applicationId "com.zia.bookdownloader"
         minSdkVersion 19
-        targetSdkVersion 28
+        targetSdkVersion 29
         renderscriptSupportModeEnabled true
         versionCode 22
         versionName "1.6.2"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
@@ -23,7 +23,7 @@ android {
         }
 
         ndk {
-            abiFilters "armeabi-v7a", "armeabi", "arm64-v8a"
+            abiFilters "armeabi-v7a", "arm64-v8a"
         }
 
         multiDexEnabled true
@@ -51,21 +51,21 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
-    implementation 'com.android.support:support-v4:28.0.0'
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    implementation 'com.android.support:recyclerview-v7:28.0.0'
-    implementation 'com.android.support:cardview-v7:28.0.0'
-    implementation 'com.android.support:design:28.0.0'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0'
     //ui
     implementation 'com.jaeger.statusbarutil:library:1.5.1'
     //paging
-    implementation 'android.arch.paging:runtime:1.0.1'
+    implementation 'androidx.paging:paging-runtime:2.1.0'
     //64k
-    implementation 'com.android.support:multidex:1.0.3'
+    implementation 'androidx.multidex:multidex:2.0.1'
     //image
     implementation 'com.github.bumptech.glide:glide:4.8.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
@@ -76,8 +76,8 @@ dependencies {
     //eventBus
     implementation 'org.greenrobot:eventbus:3.1.1'
     //persistent
-    implementation 'android.arch.persistence.room:runtime:1.1.1'
-    annotationProcessor "android.arch.persistence.room:compiler:1.1.1"
+    implementation 'androidx.room:room-runtime:2.1.0'
+    annotationProcessor 'androidx.room:room-compiler:2.1.0'
     implementation 'com.facebook.stetho:stetho:1.5.0'
     //bugly
     implementation 'com.tencent.bugly:crashreport_upgrade:1.3.5'
@@ -89,7 +89,7 @@ dependencies {
     implementation 'com.github.Zzzia:EasyBook:2.50'
     implementation 'com.squareup.okhttp3:okhttp:4.0.1'
     //viewModel & lifeCycle
-    implementation 'android.arch.lifecycle:extensions:1.1.1'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
     //leakCanary
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.3'
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.3'
