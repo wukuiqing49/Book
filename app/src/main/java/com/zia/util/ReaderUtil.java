@@ -56,7 +56,6 @@ public class ReaderUtil {
 
         String type = "*/*";
         String fName = file.getName();
-        Log.e("ReaderUtil", "getMIMEType: " + fName);
         //获取后缀名前的分隔符"."在fName中的位置。
         int dotIndex = fName.lastIndexOf(".");
         if (dotIndex < 0) {
@@ -65,11 +64,18 @@ public class ReaderUtil {
         /* 获取文件的后缀名 */
         String end = fName.substring(dotIndex).toLowerCase();
         Log.e("ReaderUtil", "getMIMEType: " + end);
-        if (end.equals("")) return type;
+        return getMIMEType(end);
+    }
+
+    public static String getMIMEType(String suffix) {
+        String type = "*/*";
+        if (suffix.equals("")) return type;
         //在MIME和文件类型的匹配表中找到对应的MIME类型。
-        for (int i = 0; i < MIME_MapTable.length; i++) { //MIME_MapTable??在这里你一定有疑问，这个MIME_MapTable是什么？
-            if (end.equals(MIME_MapTable[i][0]))
-                type = MIME_MapTable[i][1];
+        for (String[] strings : MIME_MapTable) { //MIME_MapTable??在这里你一定有疑问，这个MIME_MapTable是什么？
+            if (suffix.equals(strings[0])) {
+                type = strings[1];
+                break;
+            }
         }
         return type;
     }

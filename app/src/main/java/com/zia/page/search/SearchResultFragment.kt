@@ -43,13 +43,14 @@ class SearchResultFragment : BaseFragment(), BookAdapter.BookSelectListener {
         val intent = Intent(context, BookActivity::class.java)
         intent.putExtra("book", book)
         intent.putExtra("scroll", false)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val p = arrayListOf<Pair<View, String>>(Pair.create(itemView.item_book_image, "book_image"))
-            val options = ActivityOptions.makeSceneTransitionAnimation(activity, *Java2Kotlin.getPairs(p))
-            startActivity(intent, options.toBundle())
-        } else {
-            startActivity(intent)
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            val p = arrayListOf<Pair<View, String>>(Pair.create(itemView.item_book_image, "book_image"))
+//            val options = ActivityOptions.makeSceneTransitionAnimation(activity, *Java2Kotlin.getPairs(p))
+//            startActivity(intent, options.toBundle())
+//        } else {
+//            startActivity(intent)
+//        }
+        startActivity(intent)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

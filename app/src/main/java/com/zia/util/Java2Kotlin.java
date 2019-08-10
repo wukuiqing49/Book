@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class Java2Kotlin {
     public static Pair<View, String>[] getPairs(List<Pair<View, String>> list) {
-        Pair<View, String> pair[] = new Pair[list.size()];
+        Pair<View, String>[] pair = new Pair[list.size()];
         for (int i = 0; i < list.size(); i++) {
             pair[i] = list.get(i);
         }

@@ -52,6 +52,7 @@ object FileUtil {
         return sb.toString()
     }
 
-    val rulePath: String = App.getContext().filesDir.path + File.separator + "easybookRules.json"
-    val fontDirPath: String = App.getContext().filesDir.path + File.separator + "font"
+    val fileDirPath: String = App.getContext().filesDir.path
+    val rulePath: String = fileDirPath + File.separator + "easybookRules.json"
+    val fontDirPath: String = fileDirPath + File.separator + "font"
 }

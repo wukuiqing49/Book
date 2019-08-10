@@ -3,19 +3,22 @@ package com.zia.util;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import androidx.renderscript.Allocation;
-import androidx.renderscript.Element;
-import androidx.renderscript.RenderScript;
-import androidx.renderscript.ScriptIntrinsicBlur;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlur;
 
 /**
  * Created by zia on 2018/12/1.
  */
 public class BlurUtil {
-    public static Bitmap blurBitmap(Context context, Bitmap bitmap) {
+    public static Bitmap blurBitmap(Context context, Bitmap bm) {
+        Bitmap bitmap = scaleBitmap(bm, 0.3f);
+//        bm.recycle();
         //用需要创建高斯模糊bitmap创建一个空的bitmap
         Bitmap outBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         // 初始化Renderscript，该类提供了RenderScript context，创建其他RS类之前必须先创建这个类，其控制RenderScript的初始化，资源管理及释放
@@ -65,4 +68,14 @@ public class BlurUtil {
         drawable.draw(canvas);
         return bitmap;
     }
+
+    public static Bitmap scaleBitmap(Bitmap bitmap, float ratio) {
+        Matrix matrix = new Matrix();
+        // 计算宽高缩放率
+        // 缩放图片动作
+        matrix.postScale(ratio, ratio);
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
+                bitmap.getHeight(), matrix, true);
+    }
+
 }

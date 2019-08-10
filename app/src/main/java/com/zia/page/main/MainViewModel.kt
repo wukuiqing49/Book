@@ -1,6 +1,5 @@
 package com.zia.page.main
 
-import androidx.lifecycle.MutableLiveData
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ShortcutInfo
@@ -8,6 +7,7 @@ import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Environment
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import com.google.gson.Gson
 import com.zia.bookdownloader.R
 import com.zia.database.bean.Config
@@ -53,7 +53,8 @@ class MainViewModel : ProgressViewModel() {
                     .post(FormBody.Builder().add("key", "easybookfix").build())
                     .build()
                 val fixResponse = NetUtil.okHttpClient.newCall(fixVersionRequest).execute()
-                val fixVersion = gson.fromJson<Config>(fixResponse.body?.string(), Config::class.java).version
+                val fixVersion =
+                    gson.fromJson<Config>(fixResponse.body?.string(), Config::class.java).version
                 defaultSharedPreferences().editor {
                     putInt("appVersion", appVersion)
                     putInt("fixVersion", fixVersion)
@@ -100,7 +101,11 @@ class MainViewModel : ProgressViewModel() {
     }
 
     fun download(url: String, fileName: String, type: String) {
-        val savePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+        val savePath = if (Build.VERSION.SDK_INT >= 29) {
+            FileUtil.fileDirPath
+        } else {
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+        }
         Log.e(javaClass.simpleName, "savePath:$savePath")
         val downloadRunnable = DownloadRunnable(url, savePath, fileName) { ratio, part, total ->
             if (ratio == 100F) {

@@ -1,22 +1,19 @@
 package com.zia.page.bookrack
 
 
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.zia.bookdownloader.R
 import com.zia.database.bean.LocalBook
 import com.zia.database.bean.NetBook
-import com.zia.event.FreshEvent
 import com.zia.page.base.BaseFragment
 import com.zia.page.preview.PreviewActivity
 import com.zia.util.ReaderUtil
@@ -24,9 +21,6 @@ import com.zia.util.ToastUtil
 import kotlinx.android.synthetic.main.fragment_book_rack.*
 import kotlinx.android.synthetic.main.item_book.view.*
 import kotlinx.android.synthetic.main.toolbar.*
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
-import org.greenrobot.eventbus.ThreadMode
 import java.io.File
 
 
@@ -64,8 +58,6 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
 
         bookRack_sl.setOnRefreshListener { pullBooks() }
         bookRack_sl.setColorSchemeColors(resources.getColor(R.color.colorAccent))
-
-        freshBookRack()
     }
 
     private fun initObservers() {
@@ -95,7 +87,8 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
     ) {
         //更新检查记录
         if (netBook.lastCheckCount < netBook.currentCheckCount) {
-            viewHolder.itemView.item_book_lastUpdateTime.background = resources.getDrawable(R.drawable.bg_blank)
+            viewHolder.itemView.item_book_lastUpdateTime.background =
+                resources.getDrawable(R.drawable.bg_blank)
             viewHolder.itemView.item_book_lastUpdateTime.text = netBook.lastUpdateTime
             netBook.lastCheckCount = netBook.currentCheckCount
         }
@@ -132,7 +125,11 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
     /**
      * 调用第三方阅读器打开书籍
      */
-    override fun onLocalBookSelected(viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder, localBook: LocalBook, position: Int) {
+    override fun onLocalBookSelected(
+        viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder,
+        localBook: LocalBook,
+        position: Int
+    ) {
         val index = localBook.filePath.indexOf("book")
         ToastUtil.onInfo("位置：${localBook.filePath.substring(index)}")
         val file = File(localBook.filePath)
@@ -153,7 +150,11 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
     /**
      * 长按追更书籍
      */
-    override fun onNetBookPressed(viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder, netBook: NetBook, position: Int) {
+    override fun onNetBookPressed(
+        viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder,
+        netBook: NetBook,
+        position: Int
+    ) {
         if (context == null) return
         AlertDialog.Builder(context!!)
             .setTitle("是否删除${netBook.bookName}")
@@ -170,7 +171,11 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
     /**
      * 长按本地书籍
      */
-    override fun onLocalBookPressed(viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder, localBook: LocalBook, position: Int) {
+    override fun onLocalBookPressed(
+        viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder,
+        localBook: LocalBook,
+        position: Int
+    ) {
         if (context == null) return
         AlertDialog.Builder(context!!)
             .setTitle("是否删除${localBook.bookName}")
@@ -183,24 +188,9 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
             .show()
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public fun onBookSave(event: FreshEvent) {
-        freshBookRack()
-    }
-
     private fun freshBookRack() {
         viewModel.freshNetBooks()
         viewModel.freshLocalBooks()
-    }
-
-    override fun onStart() {
-        super.onStart()
-        EventBus.getDefault().register(this)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        EventBus.getDefault().unregister(this)
     }
 
     //第一次加载时刷新
@@ -211,6 +201,7 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
 
     override fun onResume() {
         super.onResume()
+        freshBookRack()
         if (needRefresh) {
             bookRack_rv.post {
                 pullBooks()
@@ -221,7 +212,11 @@ class BookRackFragment : BaseFragment(), BookRackAdapter.OnBookRackSelect {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_book_rack, container, false)
     }
 }

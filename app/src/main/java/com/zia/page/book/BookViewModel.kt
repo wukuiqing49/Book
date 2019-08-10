@@ -1,14 +1,14 @@
 package com.zia.page.book
 
-import androidx.lifecycle.MutableLiveData
-import androidx.paging.LivePagedListBuilder
-import androidx.paging.PagedList
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Environment
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
+import androidx.paging.LivePagedListBuilder
+import androidx.paging.PagedList
 import com.zia.App
 import com.zia.database.AppDatabase
 import com.zia.database.bean.BookCache
@@ -21,13 +21,12 @@ import com.zia.easybookmodule.bean.Type
 import com.zia.easybookmodule.engine.EasyBook
 import com.zia.easybookmodule.rx.Disposable
 import com.zia.easybookmodule.rx.Subscriber
-import com.zia.event.FreshEvent
 import com.zia.page.base.ProgressViewModel
 import com.zia.util.BookMarkUtil
+import com.zia.util.FileUtil
 import com.zia.util.ShortcutsUtil
 import com.zia.util.threadPool.DefaultExecutorSupplier
 import com.zia.widget.reader.StringAdapter
-import org.greenrobot.eventbus.EventBus
 import java.io.File
 
 /**
@@ -119,13 +118,14 @@ class BookViewModel(private val book: Book) : ProgressViewModel() {
         DefaultExecutorSupplier.getInstance()
             .forLightWeightBackgroundTasks()
             .execute {
-                val netBook = AppDatabase.getAppDatabase().netBookDao().getNetBook(book.bookName, book.site.siteName)
+                val netBook = AppDatabase.getAppDatabase().netBookDao()
+                    .getNetBook(book.bookName, book.site.siteName)
                 if (netBook == null) {
                     val size =
-                        AppDatabase.getAppDatabase().bookCacheDao().getBookCacheSize(book.bookName, book.siteName)
+                        AppDatabase.getAppDatabase().bookCacheDao()
+                            .getBookCacheSize(book.bookName, book.siteName)
                     AppDatabase.getAppDatabase().netBookDao().insert(NetBook(book, size))
                     toast.postValue("添加书架成功")
-                    EventBus.getDefault().post(FreshEvent())
                 } else {
                     toast.postValue("已经添加过了")
                 }
@@ -147,9 +147,14 @@ class BookViewModel(private val book: Book) : ProgressViewModel() {
     }
 
     fun downloadBook(type: Type) {
+        val path = if (Build.VERSION.SDK_INT >= 29) {
+            FileUtil.fileDirPath
+        } else {
+            Environment.getExternalStorageDirectory().path + File.separator + "book"
+        }
         downloadDisposable = EasyBook.download(book)
             .setType(type)
-            .setSavePath(Environment.getExternalStorageDirectory().path + File.separator + "book")
+            .setSavePath(path)
             .subscribe(object : Subscriber<File> {
                 override fun onFinish(p0: File) {
                     savedFile.postValue(p0)
@@ -158,9 +163,9 @@ class BookViewModel(private val book: Book) : ProgressViewModel() {
                         .forLightWeightBackgroundTasks()
                         .execute {
                             val localBook = LocalBook(p0.path, book)
-                            AppDatabase.getAppDatabase().localBookDao().delete(localBook.bookName, localBook.siteName)
+                            AppDatabase.getAppDatabase().localBookDao()
+                                .delete(localBook.bookName, localBook.siteName)
                             AppDatabase.getAppDatabase().localBookDao().insert(localBook)
-                            EventBus.getDefault().post(FreshEvent())
                         }
                 }
 
