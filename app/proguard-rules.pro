@@ -30,9 +30,9 @@
 
 -keep class com.zia.bookdownloader.bean.** { *; }
 #-keep class com.zia.bookdownloader.** { *; }
--keep class nl.siegmann.** { *; }
--keep class org.jsoup.** { *; }
--keep class org.slf4j.** { *; }
+#-keep class nl.siegmann.** { *; }
+#-keep class org.jsoup.** { *; }
+#-keep class org.slf4j.** { *; }
 
 
 #statusbarsutil

@@ -16,7 +16,6 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.widget.SeekBar
-import com.zia.App
 import com.zia.bookdownloader.R
 import com.zia.database.AppDatabase
 import com.zia.database.bean.NetBook
@@ -32,7 +31,6 @@ import com.zia.widget.reader.OnPageChangeListener
 import com.zia.widget.reader.PageLoader.STATUS_FINISH
 import com.zia.widget.reader.PageLoader.STATUS_LOADING
 import com.zia.widget.reader.PageView
-import com.zia.widget.reader.utils.ScreenUtils
 import kotlinx.android.synthetic.main.activity_preview.*
 import java.io.File
 import java.util.concurrent.ArrayBlockingQueue
@@ -668,39 +666,48 @@ class PreviewActivity : BaseActivity() {
     }
 
     private fun getBitmap(color: Int): Bitmap {
-        val appSize = ScreenUtils.getScreenSize(this)
 
-        val argb = IntArray(appSize[0] * appSize[1])
+        val width = preview_bg.width
+        val height = preview_bg.height
+        Log.d("previewActivity", "width:$width  height:$height")
 
-        val noiseReg = BitmapFactory.decodeResource(
-            resources, R.drawable.bg_paper, BitmapFactory
-                .Options()
-        )
-        noiseReg.getPixels(argb, 0, noiseReg.width, 0, 0, noiseReg.width, noiseReg.height)
-        val alpha = 140 * 255 / 100
 
-        for (i in 0 until argb.size) {
-            argb[i] = (alpha.shl(24)) or (argb[i] and 0x00FFFFFF)
-        }
-        val alphaNoiseReg =
-            Bitmap.createBitmap(argb, noiseReg.width, noiseReg.height, Bitmap.Config.ARGB_8888)
-        noiseReg.recycle()
-
-        val shader = BitmapShader(alphaNoiseReg, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
-        val matrix = Matrix()
-        shader.setLocalMatrix(matrix)
-
-        val bitmap = Bitmap.createBitmap(appSize[0], appSize[1], Bitmap.Config.ARGB_8888)
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         canvas.drawColor(color)
 
-        val paint = Paint()
-        paint.shader = shader
-        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SCREEN)
-        paint.color = color
-        canvas.drawPaint(paint)
-//        canvas.drawBitmap(noiseReg, 0f, 0f, paint)
-        alphaNoiseReg.recycle()
+        var alphaNoiseReg: Bitmap? = null
+        try {
+            val argb = IntArray(width * height)
+
+            val noiseReg = BitmapFactory.decodeResource(
+                resources, R.drawable.bg_paper, BitmapFactory
+                    .Options()
+            )
+            noiseReg.getPixels(argb, 0, noiseReg.width, 0, 0, noiseReg.width, noiseReg.height)
+            val alpha = 140 * 255 / 100
+
+            for (i in 0 until argb.size) {
+                argb[i] = (alpha.shl(24)) or (argb[i] and 0x00FFFFFF)
+            }
+            alphaNoiseReg =
+                Bitmap.createBitmap(argb, noiseReg.width, noiseReg.height, Bitmap.Config.ARGB_8888)
+            noiseReg.recycle()
+
+            val shader = BitmapShader(alphaNoiseReg!!, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT)
+            val matrix = Matrix()
+            shader.setLocalMatrix(matrix)
+            val paint = Paint()
+            paint.shader = shader
+            paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SCREEN)
+            paint.color = color
+            canvas.drawPaint(paint)
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        } finally {
+            alphaNoiseReg?.recycle()
+        }
+
         return bitmap
     }
 

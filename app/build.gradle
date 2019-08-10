@@ -11,7 +11,7 @@ android {
     defaultConfig {
         applicationId "com.zia.bookdownloader"
         minSdkVersion 19
-        targetSdkVersion 27
+        targetSdkVersion 28
         renderscriptSupportModeEnabled true
         versionCode 22
         versionName "1.6.2"
@@ -23,7 +23,7 @@ android {
         }
 
         ndk {
-            abiFilter "armeabi-v7a"
+            abiFilters "armeabi-v7a", "armeabi", "arm64-v8a"
         }
 
         multiDexEnabled true

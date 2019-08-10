@@ -2,7 +2,6 @@ package com.zia;
 
 import android.content.Context;
 import android.support.multidex.MultiDexApplication;
-
 import com.facebook.stetho.Stetho;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -17,10 +16,7 @@ import com.zia.toastex.ToastEx;
 import com.zia.util.FileUtil;
 import com.zia.util.threadPool.DefaultExecutorSupplier;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -69,6 +65,10 @@ public class App extends MultiDexApplication {
     }
 
     private List<XpathSiteRule> getXpathRuleFromFile(String filePath) throws IOException {
+        File ruleFile = new File(filePath);
+        if (!ruleFile.exists()) {
+            return null;
+        }
         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(filePath), StandardCharsets.UTF_8));
         String str;
         StringBuilder sb = new StringBuilder();
