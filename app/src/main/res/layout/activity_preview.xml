@@ -118,16 +118,17 @@
                     app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent"/>
 
             <ImageView
-                    android:layout_width="0dp"
+                    android:id="@+id/preview_control_catalog"
+                    android:layout_width="wrap_content"
                     android:layout_height="68dp"
-                    android:src="@drawable/ic_catalog"
                     android:layout_gravity="center"
-                    android:tint="@color/white"
+                    android:layout_marginTop="8dp"
                     android:paddingTop="12dp"
                     android:paddingBottom="30dp"
+                    android:src="@drawable/ic_catalog"
+                    android:tint="@color/white"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/preview_previous"
-                    android:id="@+id/preview_control_catalog" android:layout_marginTop="8dp"/>
+                    app:layout_constraintTop_toBottomOf="@+id/preview_previous" />
 
             <ImageView
                     android:id="@+id/preview_control_download"
@@ -142,18 +143,19 @@
                     app:layout_constraintBottom_toBottomOf="@+id/preview_control_catalog"
                     app:layout_constraintStart_toEndOf="@+id/preview_control_catalog"
                     app:layout_constraintEnd_toStartOf="@+id/preview_control_setting"/>
+
             <ImageView
-                    android:id="@+id/preview_control_setting" android:layout_width="0dp"
+                    android:id="@+id/preview_control_setting"
+                    android:layout_width="wrap_content"
                     android:layout_height="0dp"
-                    android:src="@drawable/ic_setting"
                     android:layout_gravity="center"
-                    android:tint="@color/white"
                     android:paddingTop="12dp"
                     android:paddingBottom="30dp"
+                    android:src="@drawable/ic_setting"
+                    android:tint="@color/white"
                     app:layout_constraintBottom_toBottomOf="@+id/preview_control_catalog"
-                    app:layout_constraintTop_toTopOf="@+id/preview_control_catalog"
-                    app:layout_constraintStart_toEndOf="@+id/preview_control_download"
-                    app:layout_constraintEnd_toEndOf="parent"/>
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/preview_control_catalog" />
             <TextView
                     android:text="@string/catalog"
                     android:textSize="12sp"

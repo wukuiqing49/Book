@@ -24,7 +24,7 @@
 #---------------------------------1.实体类---------------------------------
 -keep class * implements java.io.Serializable { *;}
 -keep class com.zia.database.** { *; }
--keep class com.zia.event.** { *; }
+#-keep class com.zia.event.** { *; }
 #-keep class com.zia.util.**
 -keep class com.zia.page.bookstore.detail.** { *; }
 
@@ -46,18 +46,6 @@
 #-keep class com.tbruyelle.**
 
 
-#eventBus
--keepattributes *Annotation*
--keepclassmembers class * {
-    @org.greenrobot.eventbus.Subscribe <methods>;
-}
--keep enum org.greenrobot.eventbus.ThreadMode { *; }
-# Only required if you use AsyncExecutor
--keepclassmembers class * extends org.greenrobot.eventbus.util.ThrowableFailureEvent {
-    <init>(java.lang.Throwable);
-}
-
-
 #bugly
 -dontwarn com.tencent.bugly.**
 -keep public class com.tencent.bugly.**{*;}
@@ -69,8 +57,6 @@
 
 #leakCanary
 -keep class com.squareup.leakcanary.**
-
-
 
 # OkHttp
 # JSR 305 annotations are for embedding nullability information.
@@ -89,7 +75,7 @@
 -keepattributes Signature
 
 # For using GSON @Expose annotation
--keepattributes *Annotation*
+#-keepattributes *Annotation*
 
 # Gson specific classes
 -dontwarn sun.misc.**
@@ -124,7 +110,7 @@
 
 #-------------------------------------------基本不用动区域--------------------------------------------
 #---------------------------------基本指令区----------------------------------
--optimizationpasses 5       # 指定代码的压缩级别
+-optimizationpasses 10       # 指定代码的压缩级别
 -dontusemixedcaseclassnames     # 是否使用大小写混合
 -dontskipnonpubliclibraryclasses        # 指定不去忽略非公共的库类
 -dontskipnonpubliclibraryclassmembers       # 指定不去忽略包可见的库类的成员

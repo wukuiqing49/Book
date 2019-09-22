@@ -1,0 +1,8 @@
+apply plugin: 'com.ss.android.ugc.plugin.aabResGuard'
+aabResGuard {
+    keepRoot = true
+    mergeDuplicatedRes = true
+    whiteList = []
+    mappingFile = file("$rootDir/resmapping.txt")
+    resourcesTxtPath = file("$rootDir/app/build/outputs/mapping/release/resources.txt")
+}
