@@ -1,7 +1,8 @@
 package com.zia;
 
+import android.app.Application;
 import android.content.Context;
-import androidx.multidex.MultiDexApplication;
+//import androidx.multidex.MultiDexApplication;
 import com.facebook.stetho.Stetho;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -23,7 +24,8 @@ import java.util.List;
 /**
  * Created by zia on 2018/11/2.
  */
-public class App extends MultiDexApplication {
+//public class App extends MultiDexApplication {
+public class App extends Application {
 
     private static Context context;
 

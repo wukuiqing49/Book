@@ -10,7 +10,7 @@ project.afterEvaluate { project ->
                     def apk = output.outputFile
                     println apk.path
                     if (apk.name.endsWith(".apk")) {
-                        //如果需要，自己配一下redex环境把
+                        //如果需要，自己配一下redex环境
                         println "redex ${apk.path}"
                         println "redex ${apk.path} -o ${apk.path.replace(".apk", ".apk")}".execute().text
                     }
