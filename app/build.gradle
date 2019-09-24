@@ -7,11 +7,12 @@ apply plugin: 'kotlin-android-extensions'
 apply from: 'resguard.gradle'
 apply from: 'redex.gradle'
 
+
 android {
     compileSdkVersion 29
     defaultConfig {
         applicationId "com.zia.bookdownloader"
-        minSdkVersion 16
+        minSdkVersion 19
         targetSdkVersion 29
         renderscriptTargetApi 17
         renderscriptSupportModeEnabled false
@@ -122,7 +123,7 @@ dependencies {
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.3'
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.3'
     // Optional, if you use support library fragments:
-    compileOnly 'com.squareup.leakcanary:leakcanary-support-fragment:1.6.3'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-support-fragment:1.6.3'
     //LabelsView
     implementation 'com.github.donkingliang:LabelsView:1.4.7'
 }
