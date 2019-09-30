@@ -15,7 +15,7 @@ andResGuard {
             // for your icon
             "R.drawable.icon",
             // for fabric
-            "R.string.com.crashlytics.*",
+            "R.drawable.ic_book_cover_default",
             // for google-services
             "R.string.google_app_id",
             "R.string.gcm_defaultSenderId",

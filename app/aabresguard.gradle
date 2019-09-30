@@ -2,7 +2,7 @@ apply plugin: 'com.ss.android.ugc.plugin.aabResGuard'
 aabResGuard {
     keepRoot = true
     mergeDuplicatedRes = true
-    whiteList = []
+    whiteList = ["R.drawable.ic_book_cover_default"]
     mappingFile = file("$rootDir/resmapping.txt")
     resourcesTxtPath = file("$rootDir/app/build/outputs/mapping/release/resources.txt")
 }

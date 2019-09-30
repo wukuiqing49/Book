@@ -441,7 +441,7 @@ public class PageLoader {
             drawContent(bitmap);
         }
         //更新绘制
-        mPageView.invalidate();
+        mPageView.postInvalidate();
     }
 
     private int tipMarginHeight = ScreenUtils.dpToPx(App.getContext(), 3);
@@ -479,7 +479,11 @@ public class PageLoader {
             float y = mDisplayHeight - mTipPaint.getFontMetrics().bottom - tipMarginHeight;
             //只有finish的时候采用页码
             if (mStatus == STATUS_FINISH) {
-                String percent = (mCurPage.position + 1) + "/" + mCurPageList.size();
+                int cur = 1;
+                if (mCurPage != null) {
+                    cur = mCurPage.position + 1;
+                }
+                String percent = cur + "/" + mCurPageList.size();
 
                 canvas.drawText(percent, left, y, mTipPaint);
             }

@@ -54,7 +54,8 @@ class BookViewModel(private val book: Book) : ProgressViewModel() {
         DefaultExecutorSupplier.getInstance()
             .forBackgroundTasks()
             .execute {
-                if (!forcePull && dao.getBookCacheSize(book.bookName, book.siteName) != 0) {
+                val oldSize = dao.getBookCacheSize(book.bookName, book.siteName)
+                if (!forcePull && oldSize != 0) {
                     Log.e("BookViewModel", "from sql cache")
                     onCatalogUpdate.postValue(null)
                     freshHistory()
@@ -65,11 +66,15 @@ class BookViewModel(private val book: Book) : ProgressViewModel() {
                 catalogDisposable = EasyBook.getCatalog(book)
                     .subscribe(object : Subscriber<List<Catalog>> {
                         override fun onFinish(p0: List<Catalog>) {
+                            if (p0.isEmpty()){
+                                error.postValue(Exception("没有解析到章节"))
+                                return
+                            }
                             DefaultExecutorSupplier.getInstance()
                                 .forBackgroundTasks()
                                 .execute {
-                                    //把章节存入数据，这个要先做，避免点的太快空指针
-                                    for (i in catalogStrings.value!!.size until p0.size) {
+                                    //把章节存入数据库，这个要先做，后面阅读界面是通过数据库读取小说的
+                                    for (i in oldSize until p0.size) {
                                         dao.insert(
                                             BookCache(
                                                 book.siteName,
@@ -81,6 +86,7 @@ class BookViewModel(private val book: Book) : ProgressViewModel() {
                                             )
                                         )
                                     }
+                                    //格式化小说简介
                                     val lines = book.introduce.split(12288.toChar())
                                     val sb = StringBuilder()
                                     lines.forEach {

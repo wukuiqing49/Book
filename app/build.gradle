@@ -7,6 +7,7 @@ apply plugin: 'kotlin-android-extensions'
 apply from: 'resguard.gradle'
 apply from: 'redex.gradle'
 
+//apply plugin: 'ArscShrinker'
 
 android {
     compileSdkVersion 29
@@ -30,21 +31,22 @@ android {
         }
 
 //        multiDexEnabled false
-        resConfigs "zh-rCN"
+        resConfigs "zh-rCN", "xxhdpi", "ldltr", "desk"
     }
-    splits {
-        // Configures multiple APKs based on screen density.
-        density {
-            // Configures multiple APKs based on screen density.
-            enable true
-            reset()
-            // Specifies a list of screen densities Gradle should not create multiple APKs for.
-            include "xxhdpi"
-
-            // Specifies a list of compatible screen size settings for the manifest.
-//            compatibleScreens 'normal'
-        }
-    }
+//    splits {
+//        // Configures multiple APKs based on screen density.
+//        density {
+//            // Configures multiple APKs based on screen density.
+//            enable true
+//            reset()
+//            // Specifies a list of screen densities Gradle should not create multiple APKs for.
+//            exclude "ldltr", "watch"
+//            include "xxhdpi"
+//
+//            // Specifies a list of compatible screen size settings for the manifest.
+////            compatibleScreens 'normal'
+//        }
+//    }
     signingConfigs {
         release {
             storeFile file('/Users/jiangzilai/myKey')

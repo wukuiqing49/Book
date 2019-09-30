@@ -14,6 +14,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 
+import com.zia.util.ToastUtil;
 import com.zia.widget.reader.anim.CoverPageAnim;
 import com.zia.widget.reader.anim.HorizonPageAnim;
 import com.zia.widget.reader.anim.NonePageAnim;
@@ -30,10 +31,10 @@ import com.zia.widget.reader.anim.SlidePageAnim;
  */
 
 
- /**
-  * Created by zzzia on 2019-07-03.
-  * 这个库原版有挺多问题，有大改动，任何问题可以进Q群29527219讨论
-  */
+/**
+ * Created by zzzia on 2019-07-03.
+ * 这个库原版有挺多问题，有大改动，任何问题可以进Q群29527219讨论
+ */
 public class PageView extends View {
 
     public final static int PAGE_MODE_SIMULATION = 0;
@@ -157,7 +158,7 @@ public class PageView extends View {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (mBgBitmap != null){
+        if (mBgBitmap != null) {
             mBgBitmap.recycle();
             mBgBitmap = null;
         }
@@ -403,7 +404,12 @@ public class PageView extends View {
         if (mPageAnim instanceof HorizonPageAnim) {
             ((HorizonPageAnim) mPageAnim).changePage();
         }
-        mPageLoader.onDraw(getNextPage(), false);
+        Bitmap bitmap = getNextPage();
+        if (bitmap != null) {
+            mPageLoader.onDraw(bitmap, false);
+        } else {
+            ToastUtil.onError("无法加载下一章");
+        }
     }
 
     /**
@@ -486,7 +492,7 @@ public class PageView extends View {
         }
     }
 
-    public void setTipColor(){
+    public void setTipColor() {
 
     }
 
@@ -508,11 +514,11 @@ public class PageView extends View {
         return mPageBackground;
     }
 
-    public Bitmap getBackGround(){
+    public Bitmap getBackGround() {
         return mBgBitmap;
     }
 
-    public void setBackGround(Bitmap backGround){
+    public void setBackGround(Bitmap backGround) {
         mBgBitmap = backGround;
     }
 
