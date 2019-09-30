@@ -13,7 +13,7 @@
 * 解析起点小说网排行榜，一键搜索
 * 书籍追更，书架小说自动拉取最新章节
 * 并发搜索下载，支持生成EPUB和TXT格式，下载速度5M/s，配合kindlegen快速导入kindle
-* 支持Android10，分屏，桌面快捷入口，音量翻页，主题设置等功能
+* 支持Android10，分屏，桌面快捷入口，音量翻页，字体背景设置等功能
 
 [Android下载](http://qiniu.zzzia.net/book_latest.apk)
 
