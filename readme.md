@@ -6,26 +6,30 @@
 
 使用ViewModel+LifeCycle+Room+Paging等热门框架，集成了热修复功能
 
-* 实现了10+个小说站点的解析，几乎能搜索到所有热门小说。
+***大小仅2.3M的小说阅读器***
+
+* 实现了近20个小说站点的解析，几乎能搜索到所有热门小说。
+* 支持能过滤广告的在线自定义书源
 * 解析起点小说网排行榜，一键搜索
-* 书籍追更，收藏小说自动更新最新章节
-* 并发搜索下载，支持生成EPUB和TXT格式，下载速度5M/s，快速导入kindle阅读。
+* 书籍追更，书架小说自动拉取最新章节
+* 并发搜索下载，支持生成EPUB和TXT格式，下载速度5M/s，配合kindlegen快速导入kindle
+* 支持Android10，分屏，桌面快捷入口，音量翻页，主题设置等功能
 
 [Android下载](http://qiniu.zzzia.net/book_latest.apk)
 
-<img src="https://github.com/Zzzia/Book/blob/master/screenshot/1.jpg"
-width="280"><img
-src="https://github.com/Zzzia/Book/blob/master/screenshot/2.jpg"
-width="280"><img
-src="https://github.com/Zzzia/Book/blob/master/screenshot/3.jpg"
-width="280"><img
-src="https://github.com/Zzzia/Book/blob/master/screenshot/4.jpg"
-width="280">
+<img src="https://github.com/Zzzia/Book/blob/master/screenshot/1.png" width="280"><img src="https://github.com/Zzzia/Book/blob/master/screenshot/2.png" width="280"><img src="https://github.com/Zzzia/Book/blob/master/screenshot/3.png" width="280">
+
+<img src="https://github.com/Zzzia/Book/blob/master/screenshot/4.png" width="280"><img src="https://github.com/Zzzia/Book/blob/master/screenshot/5.png" width="280"><img src="https://github.com/Zzzia/Book/blob/master/screenshot/6.png" width="280">
 
 
 
 
 ~~~
+v1.6.3
+修复了部分闪退bug
+新增了几个书源
+APK大小降低到2.3M
+
 v1.6.2
 升级AndroidX，兼容Android Q系统
 目录页性能优化
