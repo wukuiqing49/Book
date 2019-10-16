@@ -5,7 +5,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 apply from: 'resguard.gradle'
-apply from: 'redex.gradle'
+//apply from: 'redex.gradle'
 
 //apply plugin: 'ArscShrinker'
 
@@ -75,6 +75,10 @@ android {
         abi {
             enableSplit = true
         }
+    }
+    packagingOptions {
+        exclude "**/kotlin/**"
+        exclude "**/okhttp3/**"
     }
 }
 
