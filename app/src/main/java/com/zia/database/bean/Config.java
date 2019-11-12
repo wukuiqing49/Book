@@ -1,9 +1,11 @@
 package com.zia.database.bean;
 
+import java.io.Serializable;
+
 /**
  * Created By zia on 2018/10/13.
  */
-public class Config {
+public class Config implements Serializable {
     public String key;
     public int version;
     public String url;
