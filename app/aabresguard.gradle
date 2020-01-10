@@ -1,8 +1,18 @@
-apply plugin: 'com.ss.android.ugc.plugin.aabResGuard'
+apply plugin: "com.bytedance.android.aabResGuard"
 aabResGuard {
-    keepRoot = true
-    mergeDuplicatedRes = true
-    whiteList = ["R.drawable.ic_book_cover_default"]
-    mappingFile = file("$rootDir/resmapping.txt")
-    resourcesTxtPath = file("$rootDir/app/build/outputs/mapping/release/resources.txt")
+    mappingFile = null // Mapping file used for incremental obfuscation
+    whiteList = [ // White list rules
+                  "*.R.raw.*",
+                  "*.R.drawable.icon",
+                  "R.drawable.ic_book_cover_default"
+    ]
+    obfuscatedBundleFileName = "duplicated-app.aab" // Obfuscated file name, must end with '.aab'
+    mergeDuplicatedRes = true // Whether to allow the merge of duplicate resources
+    enableFilterFiles = false // Whether to allow filter files
+    filterList = [ // file filter rules
+                   "*/arm64-v8a/*",
+                   "META-INF/*"
+    ]
+    enableFilterStrings = true
+    languageWhiteList = ["zh"]
 }

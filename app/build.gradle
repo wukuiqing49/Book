@@ -4,7 +4,8 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
-apply from: 'resguard.gradle'
+apply from: 'aabresguard.gradle'
+apply from: 'bytex.gradle'
 //apply from: 'redex.gradle'
 
 //apply plugin: 'ArscShrinker'

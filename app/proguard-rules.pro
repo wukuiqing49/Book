@@ -30,6 +30,7 @@
 -keepattributes *Annotation*,InnerClasses
 -keepattributes Signature
 -keepattributes SourceFile,LineNumberTable
+-allowaccessmodification
 
 # json
 -keep class com.alibaba.fastjson.** { *; }
