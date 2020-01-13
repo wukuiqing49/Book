@@ -26,7 +26,7 @@ buildscript {
         classpath "com.bytedance.android.byteX:field-assign-opt-plugin:${plugin_version}"
         classpath "com.bytedance.android.byteX:const-inline-plugin:${plugin_version}"
         classpath "com.bytedance.android.byteX:shrink-r-plugin:${plugin_version}"
-//        classpath "com.bytedance.android.byteX:getter_setter-inline-plugin:${plugin_version}"
+        classpath "com.bytedance.android.byteX:getter-setter-inline-plugin:${plugin_version}"
 
         // private plugin
 //        classpath "com.bytedance.android.arscShrinker:ArscShrinker:0.0.1-alpha10"

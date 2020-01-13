@@ -2,19 +2,17 @@ package com.zia.page.book
 
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import android.util.Log
 import android.view.View
+import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
@@ -75,7 +73,8 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
 
         initRv()
 
-        viewModel = ViewModelProviders.of(this, BookViewModelFactory(book)).get(BookViewModel::class.java)
+        viewModel =
+            ViewModelProviders.of(this, BookViewModelFactory(book)).get(BookViewModel::class.java)
         initObservers()
 
         book_sl.setOnRefreshListener { viewModel.loadCatalog(true) }
@@ -117,7 +116,10 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
                 canAddFav = false
                 viewModel.insertBookIntoBookRack()
                 Glide.with(this).load(book.imageUrl).into(object : SimpleTarget<Drawable>() {
-                    override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
+                    override fun onResourceReady(
+                        resource: Drawable,
+                        transition: Transition<in Drawable>?
+                    ) {
                         viewModel.addShortcut(resource)
                     }
                 })
@@ -145,8 +147,13 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
         paint.color = ColorConstants.GREY
         val padding = DisplayUtil.dip2px(this, 8f).toFloat()
 
-        catalogRv.addItemDecoration(object : androidx.recyclerview.widget.RecyclerView.ItemDecoration() {
-            override fun onDraw(c: Canvas, parent: androidx.recyclerview.widget.RecyclerView, state: androidx.recyclerview.widget.RecyclerView.State) {
+        catalogRv.addItemDecoration(object :
+            androidx.recyclerview.widget.RecyclerView.ItemDecoration() {
+            override fun onDraw(
+                c: Canvas,
+                parent: androidx.recyclerview.widget.RecyclerView,
+                state: androidx.recyclerview.widget.RecyclerView.State
+            ) {
                 if (parent.layoutManager != null) {
                     for (i in 0 until parent.childCount - 1) {
                         val child = parent.getChildAt(i)
@@ -173,9 +180,13 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
 
         //加载完毕的监听
         viewModel.onCatalogUpdate.observe(this, Observer {
-            book_loading.startAnimation(AnimationUtil.getHideAlphaAnimation(500, endListener = Runnable {
-                book_loading.visibility = View.GONE
-            }))
+            book_loading.startAnimation(
+                AnimationUtil.getHideAlphaAnimation(
+                    500,
+                    endListener = Runnable {
+                        book_loading.visibility = View.GONE
+                    })
+            )
             book_sl.isRefreshing = false
             if (it != null) {
                 book_lastUpdateChapter.text = it
@@ -256,7 +267,7 @@ class BookActivity : BaseActivity(), CatalogPagingAdapter.CatalogSelectListener 
         updateDialog(0)
         updateDialog("")
         //在viewModel中进行了数据库插入和通知bookRackFragment刷新界面
-        viewModel.downloadBook(type)
+        viewModel.downloadBook(this, type)
     }
 
     override fun onCatalogSelect(itemView: View, position: Int) {

@@ -1,5 +1,6 @@
 package com.zia.page.book
 
+import android.content.Context
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
@@ -23,7 +24,6 @@ import com.zia.easybookmodule.rx.Disposable
 import com.zia.easybookmodule.rx.Subscriber
 import com.zia.page.base.ProgressViewModel
 import com.zia.util.BookMarkUtil
-import com.zia.util.FileUtil
 import com.zia.util.ShortcutsUtil
 import com.zia.util.threadPool.DefaultExecutorSupplier
 import com.zia.widget.reader.StringAdapter
@@ -66,7 +66,7 @@ class BookViewModel(private val book: Book) : ProgressViewModel() {
                 catalogDisposable = EasyBook.getCatalog(book)
                     .subscribe(object : Subscriber<List<Catalog>> {
                         override fun onFinish(p0: List<Catalog>) {
-                            if (p0.isEmpty()){
+                            if (p0.isEmpty()) {
                                 error.postValue(Exception("没有解析到章节"))
                                 return
                             }
@@ -152,9 +152,9 @@ class BookViewModel(private val book: Book) : ProgressViewModel() {
         }
     }
 
-    fun downloadBook(type: Type) {
+    fun downloadBook(context: Context, type: Type) {
         val path = if (Build.VERSION.SDK_INT >= 29) {
-            FileUtil.fileDirPath
+            context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)?.path + File.separator + "book"
         } else {
             Environment.getExternalStorageDirectory().path + File.separator + "book"
         }
