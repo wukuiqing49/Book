@@ -65,6 +65,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
+        debug{
+            ndk {
+                abiFilters "armeabi-v7a","x86"
+            }
+        }
     }
     bundle {
         language {

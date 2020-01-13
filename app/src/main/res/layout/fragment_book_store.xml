@@ -47,7 +47,8 @@
 
     <ImageView
             android:transitionName="transition_search"
-            android:src="@drawable/ic_search_black"
+            android:src="@drawable/ic_search"
+            android:tint="@color/alpha_black"
             android:layout_width="20dp"
             android:layout_height="0dp" tools:src="@tools:sample/avatars" android:id="@+id/bookstore_search_icon"
             app:layout_constraintStart_toStartOf="@+id/bg_searchEt"
@@ -55,7 +56,7 @@
             android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toBottomOf="@+id/bg_searchEt"
             app:layout_constraintTop_toTopOf="@+id/bg_searchEt"
-            android:layout_marginTop="8dp" tools:srcCompat="@drawable/ic_search_black"/>
+            android:layout_marginTop="8dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
             android:layout_width="0dp"
